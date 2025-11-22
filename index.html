@@ -1,11 +1,703 @@
 <!DOCTYPE html>
-<html>
+<html lang="de">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Unteriglinger Schützenverein</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.6;
+      color: #333;
+    }
+
+    /* Header & Navigation */
+    header {
+      background: linear-gradient(135deg, #1a472a 0%, #2d5a3d 100%);
+      color: white;
+      padding: 0;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    }
+
+    .header-top {
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo h1 {
+      font-size: 1.8rem;
+      font-weight: bold;
+    }
+
+    nav {
+      background: rgba(0,0,0,0.2);
+    }
+
+    nav ul {
+      list-style: none;
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    nav ul li {
+      position: relative;
+    }
+
+    nav ul li a {
+      display: block;
+      color: white;
+      text-decoration: none;
+      padding: 1rem 1.5rem;
+      transition: background 0.3s;
+    }
+
+    nav ul li a:hover {
+      background: rgba(255,255,255,0.1);
+    }
+
+    /* Dropdown Menu */
+    nav ul li ul {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      background: #2d5a3d;
+      min-width: 200px;
+      flex-direction: column;
+    }
+
+    nav ul li:hover ul {
+      display: flex;
+    }
+
+    nav ul li ul li a {
+      padding: 0.8rem 1.5rem;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    /* Hero Section */
+    .hero {
+      background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), 
+                  url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600"><rect fill="%23234d32" width="1200" height="600"/><circle cx="600" cy="300" r="200" fill="%232d5a3d" opacity="0.3"/><circle cx="400" cy="200" r="150" fill="%231a472a" opacity="0.2"/></svg>');
+      background-size: cover;
+      background-position: center;
+      color: white;
+      text-align: center;
+      padding: 8rem 2rem;
+    }
+
+    .hero h2 {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    }
+
+    .hero p {
+      font-size: 1.3rem;
+      max-width: 800px;
+      margin: 0 auto;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+    }
+
+    /* Main Content */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 3rem 2rem;
+    }
+
+    .content-section {
+      display: none;
+    }
+
+    .content-section.active {
+      display: block;
+      animation: fadeIn 0.5s;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    h2 {
+      color: #1a472a;
+      font-size: 2.5rem;
+      margin-bottom: 1.5rem;
+      border-bottom: 3px solid #2d5a3d;
+      padding-bottom: 0.5rem;
+    }
+
+    h3 {
+      color: #2d5a3d;
+      font-size: 1.8rem;
+      margin: 2rem 0 1rem;
+    }
+
+    p {
+      margin-bottom: 1rem;
+      text-align: justify;
+    }
+
+    /* Cards */
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      margin: 2rem 0;
+    }
+
+    .card {
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      overflow: hidden;
+      transition: transform 0.3s;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+    }
+
+    .card-image {
+      width: 100%;
+      height: 200px;
+      background: linear-gradient(135deg, #2d5a3d 0%, #1a472a 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 3rem;
+    }
+
+    .card-content {
+      padding: 1.5rem;
+    }
+
+    .card-content h3 {
+      margin-top: 0;
+      font-size: 1.5rem;
+    }
+
+    /* Timeline */
+    .timeline {
+      position: relative;
+      padding: 2rem 0;
+    }
+
+    .timeline-item {
+      padding: 1.5rem;
+      background: #f4f4f4;
+      margin-bottom: 2rem;
+      border-left: 4px solid #2d5a3d;
+      border-radius: 4px;
+    }
+
+    .timeline-item h4 {
+      color: #1a472a;
+      margin-bottom: 0.5rem;
+    }
+
+    /* Gallery */
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 1rem;
+      margin: 2rem 0;
+    }
+
+    .gallery-item {
+      aspect-ratio: 1;
+      background: linear-gradient(135deg, #e0e0e0 0%, #c0c0c0 100%);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #666;
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: transform 0.3s;
+    }
+
+    .gallery-item:hover {
+      transform: scale(1.05);
+    }
+
+    /* Events */
+    .event {
+      background: white;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      border-left: 5px solid #2d5a3d;
+    }
+
+    .event-date {
+      color: #2d5a3d;
+      font-weight: bold;
+      font-size: 1.1rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .event h4 {
+      color: #1a472a;
+      margin-bottom: 0.5rem;
+    }
+
+    /* Contact Form */
+    .contact-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      margin-top: 2rem;
+    }
+
+    .contact-info {
+      background: #f9f9f9;
+      padding: 2rem;
+      border-radius: 8px;
+    }
+
+    .contact-info h3 {
+      margin-top: 0;
+    }
+
+    .contact-item {
+      margin-bottom: 1.5rem;
+    }
+
+    .contact-item strong {
+      color: #1a472a;
+      display: block;
+      margin-bottom: 0.3rem;
+    }
+
+    .map-placeholder {
+      width: 100%;
+      height: 300px;
+      background: linear-gradient(135deg, #e0e0e0 0%, #c0c0c0 100%);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #666;
+      margin-top: 1rem;
+    }
+
+    /* Footer */
+    footer {
+      background: #1a472a;
+      color: white;
+      text-align: center;
+      padding: 2rem;
+      margin-top: 4rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .hero h2 {
+        font-size: 2rem;
+      }
+
+      .hero p {
+        font-size: 1rem;
+      }
+
+      nav ul {
+        flex-direction: column;
+      }
+
+      nav ul li ul {
+        position: static;
+      }
+
+      .contact-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .header-top {
+        flex-direction: column;
+        text-align: center;
+      }
+    }
+  </style>
 </head>
 <body>
-  <h1>Willkommen beim Unteriglinger Schützenverein!</h1>
-  <p>Dies ist unsere neue Vereins-Homepage.</p>
+  <header>
+    <div class="header-top">
+      <div class="logo">
+        <h1>🎯 Unteriglinger Schützenverein</h1>
+      </div>
+    </div>
+    <nav>
+      <ul>
+        <li><a href="#" onclick="showSection('startseite')">Startseite</a></li>
+        <li><a href="#" onclick="showSection('ueber-uns')">Über uns</a></li>
+        <li>
+          <a href="#" onclick="showSection('vereinsleben')">Vereinsleben</a>
+          <ul>
+            <li><a href="#" onclick="showSection('chronik')">Chronik / Geschichte</a></li>
+            <li><a href="#" onclick="showSection('galerie')">Bildergalerie</a></li>
+          </ul>
+        </li>
+        <li>
+          <a href="#" onclick="showSection('veranstaltungen')">Veranstaltungen</a>
+          <ul>
+            <li><a href="#" onclick="showSection('kommende-events')">Kommende Events</a></li>
+            <li><a href="#" onclick="showSection('vergangene-events')">Vergangene Events</a></li>
+          </ul>
+        </li>
+        <li><a href="#" onclick="showSection('sport')">Sport / Schießstände</a></li>
+        <li><a href="#" onclick="showSection('mitgliedschaft')">Mitgliedschaft</a></li>
+        <li><a href="#" onclick="showSection('kontakt')">Kontakt / Anfahrt</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- Startseite -->
+  <section id="startseite" class="content-section active">
+    <div class="hero">
+      <h2>Willkommen beim Unteriglinger Schützenverein</h2>
+      <p>Tradition trifft Präzision – Seit Generationen vereint durch Leidenschaft für den Schießsport</p>
+    </div>
+    <div class="container">
+      <div class="card-grid">
+        <div class="card">
+          <div class="card-image">📜</div>
+          <div class="card-content">
+            <h3>Unsere Geschichte</h3>
+            <p>Erfahren Sie mehr über die traditionsreiche Geschichte unseres Vereins und wie wir uns über die Jahre entwickelt haben.</p>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-image">🎯</div>
+          <div class="card-content">
+            <h3>Sportangebot</h3>
+            <p>Von Luftgewehr bis Luftpistole – entdecken Sie unsere vielfältigen Disziplinen und modernen Schießstände.</p>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-image">👥</div>
+          <div class="card-content">
+            <h3>Gemeinschaft</h3>
+            <p>Werden Sie Teil unserer Vereinsfamilie und erleben Sie Kameradschaft und gemeinsame Erfolge.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Über uns -->
+  <section id="ueber-uns" class="content-section">
+    <div class="container">
+      <h2>Über uns</h2>
+      <p>Der Unteriglinger Schützenverein ist mehr als nur ein Sportverein – wir sind eine Gemeinschaft, die Tradition und Moderne verbindet. Seit unserer Gründung stehen wir für Präzision, Fairness und Kameradschaft.</p>
+      
+      <h3>Unsere Philosophie</h3>
+      <p>Wir fördern den Schießsport in all seinen Facetten und legen besonderen Wert auf die Jugendarbeit. Bei uns steht nicht nur der sportliche Erfolg im Vordergrund, sondern auch das Miteinander und die Pflege unserer Traditionen.</p>
+      
+      <h3>Der Vorstand</h3>
+      <div class="card-grid">
+        <div class="card">
+          <div class="card-content">
+            <h3>1. Vorsitzender</h3>
+            <p><strong>Name:</strong> [Vorname Nachname]</p>
+            <p><strong>E-Mail:</strong> vorsitzender@schuetzenverein-unteriglingen.de</p>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-content">
+            <h3>2. Vorsitzender</h3>
+            <p><strong>Name:</strong> [Vorname Nachname]</p>
+            <p><strong>E-Mail:</strong> stellvertreter@schuetzenverein-unteriglingen.de</p>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-content">
+            <h3>Kassenwart</h3>
+            <p><strong>Name:</strong> [Vorname Nachname]</p>
+            <p><strong>E-Mail:</strong> kasse@schuetzenverein-unteriglingen.de</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Chronik -->
+  <section id="chronik" class="content-section">
+    <div class="container">
+      <h2>Chronik / Geschichte</h2>
+      <p>Unsere Vereinsgeschichte ist geprägt von Tradition, Zusammenhalt und sportlichen Erfolgen. Hier finden Sie die wichtigsten Meilensteine unserer Entwicklung.</p>
+      
+      <div class="timeline">
+        <div class="timeline-item">
+          <h4>Gründungsjahr [Jahr]</h4>
+          <p>Der Unteriglinger Schützenverein wurde von engagierten Sportschützen gegründet. Von Anfang an stand die Förderung des Schießsports und die Pflege der Kameradschaft im Mittelpunkt.</p>
+        </div>
+        <div class="timeline-item">
+          <h4>[Jahr] - Erster eigener Schießstand</h4>
+          <p>Nach Jahren der Planung konnte der Verein seinen ersten eigenen Schießstand einweihen. Dies markierte einen wichtigen Meilenstein in der Vereinsgeschichte.</p>
+        </div>
+        <div class="timeline-item">
+          <h4>[Jahr] - Modernisierung</h4>
+          <p>Die Schießstände wurden umfassend modernisiert und mit elektronischen Trefferanzeigen ausgestattet. Der Verein rüstete sich damit für die Zukunft.</p>
+        </div>
+        <div class="timeline-item">
+          <h4>Heute</h4>
+          <p>Der Unteriglinger Schützenverein ist ein moderner Sportverein mit über [Anzahl] Mitgliedern und bietet vielfältige Möglichkeiten für Jung und Alt.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Bildergalerie -->
+  <section id="galerie" class="content-section">
+    <div class="container">
+      <h2>Bildergalerie</h2>
+      <p>Eindrücke aus unserem Vereinsleben – von Trainings über Wettkämpfe bis hin zu geselligen Veranstaltungen.</p>
+      
+      <div class="gallery">
+        <div class="gallery-item">📸 Bild 1</div>
+        <div class="gallery-item">📸 Bild 2</div>
+        <div class="gallery-item">📸 Bild 3</div>
+        <div class="gallery-item">📸 Bild 4</div>
+        <div class="gallery-item">📸 Bild 5</div>
+        <div class="gallery-item">📸 Bild 6</div>
+        <div class="gallery-item">📸 Bild 7</div>
+        <div class="gallery-item">📸 Bild 8</div>
+      </div>
+      <p style="text-align: center; color: #666; margin-top: 2rem;">
+        <em>Hinweis: Platzhalter für Ihre Vereinsfotos. Ersetzen Sie diese durch echte Bilder aus Ihrem Vereinsleben.</em>
+      </p>
+    </div>
+  </section>
+
+  <!-- Kommende Events -->
+  <section id="kommende-events" class="content-section">
+    <div class="container">
+      <h2>Kommende Veranstaltungen</h2>
+      <p>Hier finden Sie alle anstehenden Termine und Events unseres Vereins.</p>
+      
+      <div class="event">
+        <div class="event-date">📅 [Datum, z.B. 15. Dezember 2025]</div>
+        <h4>Weihnachtsschießen</h4>
+        <p><strong>Ort:</strong> Vereinsheim Unteriglingen</p>
+        <p>Unser traditionelles Weihnachtsschießen mit anschließender Feier. Alle Mitglieder und Gäste sind herzlich willkommen!</p>
+      </div>
+      
+      <div class="event">
+        <div class="event-date">📅 [Datum]</div>
+        <h4>Vereinsmeisterschaft</h4>
+        <p><strong>Ort:</strong> Schießstand Unteriglingen</p>
+        <p>Die jährliche Vereinsmeisterschaft in verschiedenen Disziplinen. Melden Sie sich rechtzeitig an!</p>
+      </div>
+      
+      <div class="event">
+        <div class="event-date">📅 [Datum]</div>
+        <h4>Schnuppertraining für Interessierte</h4>
+        <p><strong>Ort:</strong> Schießstand Unteriglingen</p>
+        <p>Sie möchten den Schießsport kennenlernen? Kommen Sie zu unserem Schnuppertraining und probieren Sie es aus!</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Vergangene Events -->
+  <section id="vergangene-events" class="content-section">
+    <div class="container">
+      <h2>Vergangene Veranstaltungen</h2>
+      <p>Rückblick auf unsere bisherigen Events und Highlights.</p>
+      
+      <div class="event">
+        <div class="event-date">📅 [Vergangenes Datum]</div>
+        <h4>Sommerfest 2025</h4>
+        <p>Unser Sommerfest war ein voller Erfolg! Bei strahlendem Sonnenschein feierten wir mit über 100 Gästen, genossen gutes Essen und hatten viel Spaß bei verschiedenen Wettkämpfen.</p>
+      </div>
+      
+      <div class="event">
+        <div class="event-date">📅 [Vergangenes Datum]</div>
+        <h4>Bezirksmeisterschaft</h4>
+        <p>Unsere Mannschaft konnte bei der Bezirksmeisterschaft hervorragende Ergebnisse erzielen. Wir gratulieren allen Teilnehmern zu ihren Leistungen!</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Sport / Schießstände -->
+  <section id="sport" class="content-section">
+    <div class="container">
+      <h2>Sport / Schießstände</h2>
+      <p>Unser Verein bietet moderne Schießstände und vielfältige Disziplinen für alle Altersgruppen und Leistungsstufen.</p>
+      
+      <h3>Unsere Disziplinen</h3>
+      <div class="card-grid">
+        <div class="card">
+          <div class="card-image">🎯</div>
+          <div class="card-content">
+            <h3>Luftgewehr</h3>
+            <p>Klassische Disziplin auf 10 Meter. Für Anfänger und Fortgeschrittene geeignet.</p>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-image">🔫</div>
+          <div class="card-content">
+            <h3>Luftpistole</h3>
+            <p>Präzisionsschießen mit der Luftpistole auf 10 Meter Distanz.</p>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-image">👶</div>
+          <div class="card-content">
+            <h3>Jugendtraining</h3>
+            <p>Spezielles Training für Kinder und Jugendliche ab 12 Jahren.</p>
+          </div>
+        </div>
+      </div>
+      
+      <h3>Unsere Schießstände</h3>
+      <p>Wir verfügen über moderne, gut ausgestattete Schießstände mit elektronischen Trefferanzeigen. Die Anlagen entsprechen allen aktuellen Sicherheitsstandards und bieten optimale Bedingungen für Training und Wettkampf.</p>
+      
+      <h3>Trainingszeiten</h3>
+      <div class="card">
+        <div class="card-content">
+          <p><strong>Montag:</strong> 18:00 - 21:00 Uhr (Allgemeines Training)</p>
+          <p><strong>Mittwoch:</strong> 19:00 - 21:00 Uhr (Jugendtraining)</p>
+          <p><strong>Freitag:</strong> 18:00 - 22:00 Uhr (Allgemeines Training)</p>
+          <p style="margin-top: 1rem;"><strong>Ansprechpartner:</strong> [Name], Tel: [Telefonnummer]</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Mitgliedschaft -->
+  <section id="mitgliedschaft" class="content-section">
+    <div class="container">
+      <h2>Mitgliedschaft</h2>
+      <p>Werden Sie Teil unserer Vereinsfamilie! Wir freuen uns über jedes neue Mitglied, das unsere Leidenschaft für den Schießsport teilt.</p>
+      
+      <h3>Vorteile einer Mitgliedschaft</h3>
+      <ul style="margin-left: 2rem; margin-bottom: 2rem;">
+        <li>Nutzung unserer modernen Schießstände</li>
+        <li>Professionelle Betreuung durch erfahrene Trainer</li>
+        <li>Teilnahme an Wettkämpfen und Meisterschaften</li>
+        <li>Gesellige Veranstaltungen und Vereinsfeste</li>
+        <li>Günstige Mitgliedsbeiträge</li>
+        <li>Kameradschaft und Gemeinschaft</li>
+      </ul>
+      
+      <h3>Beiträge</h3>
+      <div class="card-grid">
+        <div class="card">
+          <div class="card-content">
+            <h3>Erwachsene</h3>
+            <p><strong>[Betrag] € pro Jahr</strong></p>
+            <p>Vollmitgliedschaft mit allen Rechten und Pflichten</p>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-content">
+            <h3>Jugendliche (bis 18 Jahre)</h3>
+            <p><strong>[Betrag] € pro Jahr</strong></p>
+            <p>Ermäßigter Beitrag für junge Sportschützen</p>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-content">
+            <h3>Familienmitgliedschaft</h3>
+            <p><strong>[Betrag] € pro Jahr</strong></p>
+            <p>Sonderkonditionen für Familien</p>
+          </div>
+        </div>
+      </div>
+      
+      <h3>Aufnahme</h3>
+      <p>Interessiert? Kommen Sie einfach zu einem unserer Trainingstage vorbei oder kontaktieren Sie uns. Wir bieten auch Schnuppertraining für Neueinsteiger an!</p>
+      <p><em>Hinweis: Hier können Sie später ein Aufnahmeformular als PDF zum Download bereitstellen.</em></p>
+    </div>
+  </section>
+
+  <!-- Kontakt -->
+  <section id="kontakt" class="content-section">
+    <div class="container">
+      <h2>Kontakt / Anfahrt</h2>
+      
+      <div class="contact-grid">
+        <div>
+          <div class="contact-info">
+            <h3>Kontaktdaten</h3>
+            <div class="contact-item">
+              <strong>Adresse:</strong>
+              Unteriglinger Schützenverein<br>
+              [Straße und Hausnummer]<br>
+              [PLZ] Unteriglingen
+            </div>
+            <div class="contact-item">
+              <strong>E-Mail:</strong>
+              info@schuetzenverein-unteriglingen.de
+            </div>
+            <div class="contact-item">
+              <strong>Telefon:</strong>
+              [Telefonnummer]
+            </div>
+            <div class="contact-item">
+              <strong>Öffnungszeiten Vereinsheim:</strong>
+              Während der Trainingszeiten<br>
+              Montag: 18:00 - 21:00 Uhr<br>
+              Mittwoch: 19:00 - 21:00 Uhr<br>
+              Freitag: 18:00 - 22:00 Uhr
+            </div>
+          </div>
+        </div>
+        
+        <div>
+          <h3>Anfahrt</h3>
+          <p>Unser Vereinsheim befindet sich in zentraler Lage in Unteriglingen. Parkplätze sind direkt vor Ort vorhanden.</p>
+          <div class="map-placeholder">
+            🗺️ Karte<br>
+            <small>(Hier kann später eine Google Maps Einbettung eingefügt werden)</small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>&copy; 2025 Unteriglinger Schützenverein | Alle Rechte vorbehalten</p>
+    <p>
+      <a href="#" style="color: white; margin: 0 1rem;">Impressum</a> | 
+      <a href="#" style="color: white; margin: 0 1rem;">Datenschutz</a>
+    </p>
+  </footer>
+
+  <script>
+    function showSection(sectionId) {
+      // Hide all sections
+      const sections = document.querySelectorAll('.content-section');
+      sections.forEach(section => {
+        section.classList.remove('active');
+      });
+      
+      // Show selected section
+      const targetSection = document.getElementById(sectionId);
+      if (targetSection) {
+        targetSection.classList.add('active');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+      
+      return false;
+    }
+  </script>
 </body>
 </html>
