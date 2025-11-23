@@ -69,6 +69,9 @@
       text-decoration: none;
       padding: 1rem 1.5rem;
       transition: background 0.3s;
+      font-weight: 600;
+      font-size: 1.05rem;
+      letter-spacing: 0.3px;
     }
 
     nav ul li a:hover {
@@ -404,32 +407,33 @@
     @media (max-width: 768px) {
       /* Header */
       .header-top {
-        flex-direction: column;
-        gap: 1rem;
-        padding: 1rem;
+        flex-direction: row;
+        justify-content: space-between;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
       }
 
       .logo {
-        flex-direction: column;
-        text-align: center;
+        flex-direction: row;
+        text-align: left;
         gap: 0.5rem;
       }
 
       .logo img {
-        height: 60px !important;
+        height: 40px !important;
       }
 
       .logo h1 {
-        font-size: 1.3rem;
+        font-size: 0.9rem;
       }
 
       #countdown {
-        padding: 0.6rem 1rem !important;
-        font-size: 0.85rem;
+        display: none !important;
       }
 
-      #countdown-timer {
-        font-size: 0.9rem !important;
+      header {
+        position: sticky;
+        top: 0;
       }
 
       /* Navigation */
