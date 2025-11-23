@@ -429,28 +429,23 @@
         <img src="logo.png" alt="Schützenverein Logo" style="height: 80px; width: auto; margin-right: 1rem;">
         <h1>Unteriglinger Schützenverein</h1>
       </div>
-      <a href="admin-login.html" style="background: rgba(255,255,255,0.2); color: white; padding: 0.8rem 1.5rem; border-radius: 6px; text-decoration: none; transition: background 0.3s; font-weight: 600;">
-        🔐 Vorstand Login
-      </a>
+      <div style="display: flex; align-items: center; gap: 1.5rem;">
+        <div id="countdown" style="background: rgba(76, 175, 80, 0.2); color: white; padding: 0.8rem 1.5rem; border-radius: 6px; font-weight: 600; text-align: center; border: 2px solid rgba(76, 175, 80, 0.5);">
+          <div style="font-size: 0.75rem; opacity: 0.9; margin-bottom: 0.2rem;">⏱️ Nächstes Schießen</div>
+          <div id="countdown-timer" style="font-size: 1.1rem; font-weight: bold;">Lädt...</div>
+        </div>
+        <a href="admin-login.html" style="background: rgba(255,255,255,0.2); color: white; padding: 0.8rem 1.5rem; border-radius: 6px; text-decoration: none; transition: background 0.3s; font-weight: 600;">
+          🔐 Vorstand Login
+        </a>
+      </div>
     </div>
     <nav>
       <ul>
         <li><a href="#" onclick="showSection('startseite')">Startseite</a></li>
         <li><a href="#" onclick="showSection('ueber-uns')">Über uns</a></li>
-        <li>
-          <a href="#" onclick="showSection('vereinsleben')">Vereinsleben</a>
-          <ul>
-            <li><a href="#" onclick="showSection('chronik')">Chronik / Geschichte</a></li>
-            <li><a href="#" onclick="showSection('galerie')">Bildergalerie</a></li>
-          </ul>
-        </li>
-        <li>
-          <a href="#" onclick="showSection('veranstaltungen')">Veranstaltungen</a>
-          <ul>
-            <li><a href="#" onclick="showSection('kommende-events')">Kommende Events</a></li>
-            <li><a href="#" onclick="showSection('vergangene-events')">Vergangene Events</a></li>
-          </ul>
-        </li>
+        <li><a href="#" onclick="showSection('chronik')">Chronik / Geschichte</a></li>
+        <li><a href="#" onclick="showSection('galerie')">Bildergalerie</a></li>
+        <li><a href="#" onclick="showSection('veranstaltungen')">Veranstaltungen</a></li>
         <li><a href="#" onclick="showSection('sport')">Sport / Schießstände</a></li>
         <li><a href="#" onclick="showSection('mitgliedschaft')">Mitgliedschaft</a></li>
         <li><a href="#" onclick="showSection('kontakt')">Kontakt / Anfahrt</a></li>
@@ -529,7 +524,7 @@
   <section id="galerie" class="content-section">
     <div class="container">
       <h2>Bildergalerie</h2>
-      <p>Eindrücke aus unserem Vereinsleben – von Trainings über Wettkämpfe bis hin zu geselligen Veranstaltungen.</p>
+      <p>Eindrücke aus unserem Vereinsleben – von Trainings über Wettkämpfe bis hin zu Geselligen Veranstaltungen.</p>
       
       <div class="gallery">
         <div class="gallery-item">📸 Bild 1</div>
@@ -675,7 +670,7 @@
           <li style="margin-bottom: 0.8rem;">✅ Ihr Schießergebnis zählt in die Wertung des <strong>Königsschießens</strong></li>
           <li style="margin-bottom: 0.8rem;">💰 An jedem Schießabend wird für den besten 10er (letzter Schuss) <strong>1x 10 €</strong> vergeben</li>
           <li style="margin-bottom: 0.8rem;">🎯 Nutzung unserer modernen Schießstände</li>
-          <li style="margin-bottom: 0.8rem;">� TGesellige Veranstaltungen und Vereinsfeste</li>
+          <li style="margin-bottom: 0.8rem;">� Gesellige Veranstaltungen und Vereinsfeste</li>
           <li style="margin-bottom: 0.8rem;">🤝 Kameradschaft und Gemeinschaft</li>
         </ul>
         
@@ -843,6 +838,62 @@
         modal.style.display = 'none';
       }
     }
+
+    // Countdown to next shooting event (Saturday 19:30)
+    function updateCountdown() {
+      const now = new Date();
+      const currentDay = now.getDay(); // 0 = Sunday, 6 = Saturday
+      const currentHour = now.getHours();
+      const currentMinute = now.getMinutes();
+      
+      // Calculate next Saturday 19:30
+      let daysUntilSaturday = (6 - currentDay + 7) % 7;
+      
+      // If today is Saturday
+      if (currentDay === 6) {
+        // If it's before 19:30, target is today
+        if (currentHour < 19 || (currentHour === 19 && currentMinute < 30)) {
+          daysUntilSaturday = 0;
+        } else {
+          // If it's after 19:30, target is next Saturday
+          daysUntilSaturday = 7;
+        }
+      } else if (daysUntilSaturday === 0) {
+        // If today is not Saturday and calculation gives 0, it means next Saturday
+        daysUntilSaturday = 7;
+      }
+      
+      const nextSaturday = new Date(now);
+      nextSaturday.setDate(now.getDate() + daysUntilSaturday);
+      nextSaturday.setHours(19, 30, 0, 0);
+      
+      const diff = nextSaturday - now;
+      
+      if (diff <= 0) {
+        document.getElementById('countdown-timer').textContent = 'Jetzt!';
+        return;
+      }
+      
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+      
+      let countdownText = '';
+      if (days > 0) {
+        countdownText = `${days}T ${hours}h ${minutes}m`;
+      } else if (hours > 0) {
+        countdownText = `${hours}h ${minutes}m ${seconds}s`;
+      } else {
+        countdownText = `${minutes}m ${seconds}s`;
+      }
+      
+      document.getElementById('countdown-timer').textContent = countdownText;
+    }
+    
+    // Update countdown every second
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
   </script>
 
   <script type="module">
@@ -1078,5 +1129,6 @@
   </script>
 </body>
 </html>
+
 
 
