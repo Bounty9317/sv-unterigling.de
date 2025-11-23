@@ -394,30 +394,180 @@
     }
 
     /* Responsive */
+    @media (max-width: 1024px) {
+      .card-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+      }
+    }
+
     @media (max-width: 768px) {
+      /* Header */
+      .header-top {
+        flex-direction: column;
+        gap: 1rem;
+        padding: 1rem;
+      }
+
+      .logo {
+        flex-direction: column;
+        text-align: center;
+        gap: 0.5rem;
+      }
+
+      .logo img {
+        height: 60px !important;
+      }
+
+      .logo h1 {
+        font-size: 1.3rem;
+      }
+
+      #countdown {
+        padding: 0.6rem 1rem !important;
+        font-size: 0.85rem;
+      }
+
+      #countdown-timer {
+        font-size: 0.9rem !important;
+      }
+
+      /* Navigation */
+      nav ul {
+        flex-direction: column;
+        padding: 0;
+      }
+
+      nav ul li {
+        width: 100%;
+      }
+
+      nav ul li a {
+        padding: 0.8rem 1rem;
+        text-align: center;
+      }
+
+      /* Hero */
+      .hero {
+        padding: 4rem 1rem;
+      }
+
       .hero h2 {
-        font-size: 2rem;
+        font-size: 1.8rem;
       }
 
       .hero p {
         font-size: 1rem;
       }
 
-      nav ul {
-        flex-direction: column;
+      /* Container */
+      .container {
+        padding: 2rem 1rem;
       }
 
-      nav ul li ul {
-        position: static;
+      /* Cards */
+      .card-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
       }
 
+      /* Contact Grid */
       .contact-grid {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+      }
+
+      /* Headings */
+      h2 {
+        font-size: 2rem;
+      }
+
+      h3 {
+        font-size: 1.5rem;
+      }
+
+      /* Timeline */
+      .timeline-item {
+        padding: 1rem;
+      }
+
+      /* Events on Veranstaltungen page */
+      #veranstaltungen .card-grid {
         grid-template-columns: 1fr;
       }
 
-      .header-top {
-        flex-direction: column;
-        text-align: center;
+      .opening-times-grid {
+        grid-template-columns: 1fr !important;
+        gap: 1rem !important;
+      }
+
+      /* Modal */
+      .modal-content {
+        margin: 10% 1rem;
+        padding: 1.5rem;
+      }
+
+      .registration-option {
+        padding: 1rem;
+      }
+
+      /* Mitgliedschaft */
+      #mitgliedschaft .card-grid {
+        grid-template-columns: 1fr;
+      }
+
+      /* Gallery */
+      .gallery {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      }
+    }
+
+    @media (max-width: 480px) {
+      /* Extra small screens */
+      .logo h1 {
+        font-size: 1.1rem;
+      }
+
+      .hero h2 {
+        font-size: 1.5rem;
+      }
+
+      .hero p {
+        font-size: 0.9rem;
+      }
+
+      h2 {
+        font-size: 1.8rem;
+      }
+
+      h3 {
+        font-size: 1.3rem;
+      }
+
+      nav ul li a {
+        padding: 0.7rem 0.8rem;
+        font-size: 0.95rem;
+      }
+
+      .card {
+        margin-bottom: 1rem;
+      }
+
+      .event {
+        padding: 1rem;
+      }
+
+      /* Countdown */
+      #countdown {
+        padding: 0.5rem 0.8rem !important;
+      }
+
+      #countdown div:first-child {
+        font-size: 0.7rem !important;
+      }
+
+      #countdown-timer {
+        font-size: 0.85rem !important;
       }
     }
   </style>
@@ -444,7 +594,6 @@
         <li><a href="#" onclick="showSection('startseite')">Startseite</a></li>
         <li><a href="#" onclick="showSection('ueber-uns')">Über uns</a></li>
         <li><a href="#" onclick="showSection('chronik')">Chronik / Geschichte</a></li>
-        <li><a href="#" onclick="showSection('galerie')">Bildergalerie</a></li>
         <li><a href="#" onclick="showSection('veranstaltungen')">Veranstaltungen</a></li>
         <li><a href="#" onclick="showSection('sport')">Sport / Schießstände</a></li>
         <li><a href="#" onclick="showSection('mitgliedschaft')">Mitgliedschaft</a></li>
@@ -520,44 +669,22 @@
     </div>
   </section>
 
-  <!-- Bildergalerie -->
-  <section id="galerie" class="content-section">
-    <div class="container">
-      <h2>Bildergalerie</h2>
-      <p>Eindrücke aus unserem Vereinsleben – von Trainings über Wettkämpfe bis hin zu Geselligen Veranstaltungen.</p>
-      
-      <div class="gallery">
-        <div class="gallery-item">📸 Bild 1</div>
-        <div class="gallery-item">📸 Bild 2</div>
-        <div class="gallery-item">📸 Bild 3</div>
-        <div class="gallery-item">📸 Bild 4</div>
-        <div class="gallery-item">📸 Bild 5</div>
-        <div class="gallery-item">📸 Bild 6</div>
-        <div class="gallery-item">📸 Bild 7</div>
-        <div class="gallery-item">📸 Bild 8</div>
-      </div>
-      <p style="text-align: center; color: #666; margin-top: 2rem;">
-        <em>Hinweis: Platzhalter für Ihre Vereinsfotos. Ersetzen Sie diese durch echte Bilder aus Ihrem Vereinsleben.</em>
-      </p>
-    </div>
-  </section>
-
   <!-- Veranstaltungen -->
   <section id="veranstaltungen" class="content-section">
     <div class="container">
       <h2>Veranstaltungen</h2>
       
       <!-- Öffnungszeiten Kacheln -->
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 3rem;">
+      <div class="opening-times-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 3rem;"></div>
         <div style="background: #2a2a2a; padding: 2rem; border-radius: 8px; border-left: 4px solid #2d5a3d;">
-          <h3 style="color: #4CAF50; margin-top: 0; margin-bottom: 1rem;">📅 Samstag</h3>
+          <h3 style="color: #4CAF50; margin-top: 0; margin-bottom: 1rem;">🎯 Samstag</h3>
           <p style="margin: 0; font-size: 1.1rem;"><strong>Oktober bis März</strong></p>
           <p style="margin: 0.5rem 0; font-size: 1.1rem;">Ab 19:30 - 23:00/24:00 Uhr</p>
           <p style="margin: 0.5rem 0; color: #999; font-size: 0.95rem;">(Schießstand: 19:30 - 21:00 Uhr)</p>
         </div>
         
         <div style="background: #2a2a2a; padding: 2rem; border-radius: 8px; border-left: 4px solid #2d5a3d;">
-          <h3 style="color: #4CAF50; margin-top: 0; margin-bottom: 1rem;">☕ Sonntag</h3>
+          <h3 style="color: #4CAF50; margin-top: 0; margin-bottom: 1rem;">🍺 Sonntag</h3>
           <p style="margin: 0; font-size: 1.1rem;"><strong>Frühshoppen</strong></p>
           <p style="margin: 0.5rem 0; font-size: 1.1rem;">11:00 - 13:00 Uhr</p>
           <p style="margin: 0.5rem 0; color: #999; font-size: 0.95rem;">Gemütliches Beisammensein</p>
