@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sitzungsprotokolle verwalten</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #1a1a1a;
+      color: #e0e0e0;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #1a472a 0%, #2d5a3d 100%);
+      padding: 1.5rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    }
+
+    .header h1 {
+      color: white;
+      font-size: 1.5rem;
+    }
+
+    .back-btn {
+      background: rgba(255,255,255,0.2);
+      color: white;
+      border: none;
+      padding: 0.6rem 1.2rem;
+      border-radius: 6px;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 2rem;
+    }
+
+    .card {
+      background: #2a2a2a;
+      padding: 2rem;
+      border-radius: 8px;
+      margin-bottom: 2rem;
+    }
+
+    h2 {
+      color: #4CAF50;
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    label {
+      display: block;
+      color: #e0e0e0;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    input[type="text"], input[type="date"] {
+      width: 100%;
+      padding: 0.8rem;
+      background: #1a1a1a;
+      border: 2px solid #3a3a3a;
+      border-radius: 6px;
+      color: #e0e0e0;
+      font-size: 1rem;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: #4CAF50;
+    }
+
+    .file-upload {
+      border: 2px dashed #3a3a3a;
+      border-radius: 6px;
+      padding: 2rem;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.3s;
+    }
+
+    .file-upload:hover {
+      border-color: #4CAF50;
+    }
+
+    .file-upload input[type="file"] {
+      display: none;
+    }
+
+    .file-info {
+      color: #4CAF50;
+      margin-top: 1rem;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #1a472a 0%, #2d5a3d 100%);
+      color: white;
+      border: none;
+      padding: 1rem 2rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 600;
+      transition: transform 0.2s;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .success-message {
+      background: #4CAF50;
+      color: white;
+      padding: 1rem;
+      border-radius: 6px;
+      margin-bottom: 1rem;
+      display: none;
+    }
+
+    .protocol-list {
+      margin-top: 3rem;
+    }
+
+    .protocol-item {
+      background: #1a1a1a;
+      padding: 1.5rem;
+      border-radius: 6px;
+      margin-bottom: 1rem;
+      border-left: 4px solid #4CAF50;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .protocol-info h3 {
+      color: #4CAF50;
+      margin-bottom: 0.5rem;
+    }
+
+    .protocol-info p {
+      color: #d0d0d0;
+      font-size: 0.9rem;
+    }
+
+    .protocol-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .btn-download {
+      background: #2d5a3d;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .btn-delete {
+      background: #c62828;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 4px;
+      background: #3a3a3a;
+      border-radius: 2px;
+      margin-top: 1rem;
+      overflow: hidden;
+      display: none;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: #4CAF50;
+      width: 0%;
+      transition: width 0.3s;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>Sitzungsprotokolle verwalten</h1>
+    <a href="admin-dashboard.html" class="back-btn">← Zurück</a>
+  </div>
+
+  <div class="container">
+    <div class="card">
+      <h2>Protokoll hochladen</h2>
+      
+      <div id="success-message" class="success-message">
+        Protokoll erfolgreich hochgeladen!
+      </div>
+
+      <form id="protocol-form">
+        <div class="form-group">
+          <label for="title">Titel *</label>
+          <input type="text" id="title" required placeholder="z.B. Jahreshauptversammlung 2025">
+        </div>
+
+        <div class="form-group">
+          <label for="date">Datum *</label>
+          <input type="date" id="date" required>
+        </div>
+
+        <div class="form-group">
+          <label>Protokoll-Datei (PDF) *</label>
+          <div class="file-upload" onclick="document.getElementById('file-input').click()">
+            <p>📄 Klicken Sie hier oder ziehen Sie eine PDF-Datei hierher</p>
+            <p style="font-size: 0.9rem; color: #999; margin-top: 0.5rem;">Maximal 10 MB</p>
+            <input type="file" id="file-input" accept=".pdf" required>
+            <div id="file-info" class="file-info"></div>
+          </div>
+          <div class="progress-bar" id="progress-bar">
+            <div class="progress-fill" id="progress-fill"></div>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-primary" id="submit-btn">Protokoll hochladen</button>
+      </form>
+    </div>
+
+    <div class="card protocol-list">
+      <h2>Alle Protokolle</h2>
+      <div id="protocols-container">
+        <p style="color: #999;">Lade Protokolle...</p>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+    import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, orderBy, query } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+    import { getStorage, ref, uploadBytesResumable, getDownloadURL, deleteObject } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js';
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyA6hD3scwCcytwkAoNhbNq6-lrYUcl8Fjk",
+      authDomain: "schuetzenverein-12cfa.firebaseapp.com",
+      projectId: "schuetzenverein-12cfa",
+      storageBucket: "schuetzenverein-12cfa.firebasestorage.app",
+      messagingSenderId: "791385091582",
+      appId: "1:791385091582:web:b4c5aae9ddb155f10ee4af"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const storage = getStorage(app);
+
+    let selectedFile = null;
+
+    // Check auth
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        window.location.href = 'admin-login.html';
+      }
+    });
+
+    // File selection
+    document.getElementById('file-input').addEventListener('change', (e) => {
+      selectedFile = e.target.files[0];
+      if (selectedFile) {
+        if (selectedFile.size > 10 * 1024 * 1024) {
+          alert('Datei ist zu groß. Maximal 10 MB erlaubt.');
+          selectedFile = null;
+          return;
+        }
+        document.getElementById('file-info').textContent = `✓ ${selectedFile.name} (${(selectedFile.size / 1024 / 1024).toFixed(2)} MB)`;
+      }
+    });
+
+    // Load protocols
+    async function loadProtocols() {
+      const container = document.getElementById('protocols-container');
+      container.innerHTML = '<p style="color: #999;">Lade Protokolle...</p>';
+
+      try {
+        const q = query(collection(db, 'protocols'), orderBy('date', 'desc'));
+        const querySnapshot = await getDocs(q);
+        
+        if (querySnapshot.empty) {
+          container.innerHTML = '<p style="color: #999;">Noch keine Protokolle vorhanden.</p>';
+          return;
+        }
+
+        container.innerHTML = '';
+        querySnapshot.forEach((docSnap) => {
+          const protocol = docSnap.data();
+          const protocolDiv = document.createElement('div');
+          protocolDiv.className = 'protocol-item';
+          protocolDiv.innerHTML = `
+            <div class="protocol-info">
+              <h3>${protocol.title}</h3>
+              <p>Datum: ${new Date(protocol.date).toLocaleDateString('de-DE')}</p>
+              <p>Hochgeladen: ${new Date(protocol.uploadedAt).toLocaleDateString('de-DE')}</p>
+            </div>
+            <div class="protocol-actions">
+              <a href="${protocol.fileUrl}" target="_blank" class="btn-download">📥 Download</a>
+              <button class="btn-delete" onclick="deleteProtocol('${docSnap.id}', '${protocol.filePath}')">Löschen</button>
+            </div>
+          `;
+          container.appendChild(protocolDiv);
+        });
+      } catch (error) {
+        console.error('Error loading protocols:', error);
+        container.innerHTML = '<p style="color: #c62828;">Fehler beim Laden der Protokolle.</p>';
+      }
+    }
+
+    // Delete protocol
+    window.deleteProtocol = async (protocolId, filePath) => {
+      if (!confirm('Möchten Sie dieses Protokoll wirklich löschen?')) return;
+      
+      try {
+        await deleteDoc(doc(db, 'protocols', protocolId));
+        const fileRef = ref(storage, filePath);
+        await deleteObject(fileRef);
+        loadProtocols();
+      } catch (error) {
+        console.error('Error deleting protocol:', error);
+        alert('Fehler beim Löschen des Protokolls.');
+      }
+    };
+
+    // Upload protocol
+    document.getElementById('protocol-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      if (!selectedFile) {
+        alert('Bitte wählen Sie eine Datei aus.');
+        return;
+      }
+
+      const submitBtn = document.getElementById('submit-btn');
+      const successMsg = document.getElementById('success-message');
+      const progressBar = document.getElementById('progress-bar');
+      const progressFill = document.getElementById('progress-fill');
+      
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Wird hochgeladen...';
+      successMsg.style.display = 'none';
+      progressBar.style.display = 'block';
+
+      try {
+        const fileName = `protocols/${Date.now()}_${selectedFile.name}`;
+        const storageRef = ref(storage, fileName);
+        const uploadTask = uploadBytesResumable(storageRef, selectedFile);
+
+        uploadTask.on('state_changed',
+          (snapshot) => {
+            const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+            progressFill.style.width = progress + '%';
+          },
+          (error) => {
+            console.error('Upload error:', error);
+            alert('Fehler beim Hochladen der Datei.');
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Protokoll hochladen';
+            progressBar.style.display = 'none';
+          },
+          async () => {
+            const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+            
+            await addDoc(collection(db, 'protocols'), {
+              title: document.getElementById('title').value,
+              date: document.getElementById('date').value,
+              fileUrl: downloadURL,
+              filePath: fileName,
+              uploadedAt: new Date().toISOString()
+            });
+
+            successMsg.style.display = 'block';
+            document.getElementById('protocol-form').reset();
+            document.getElementById('file-info').textContent = '';
+            selectedFile = null;
+            loadProtocols();
+            
+            setTimeout(() => {
+              successMsg.style.display = 'none';
+              progressBar.style.display = 'none';
+              progressFill.style.width = '0%';
+            }, 3000);
+
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Protokoll hochladen';
+          }
+        );
+      } catch (error) {
+        console.error('Error uploading protocol:', error);
+        alert('Fehler beim Hochladen des Protokolls.');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Protokoll hochladen';
+        progressBar.style.display = 'none';
+      }
+    });
+
+    // Initial load
+    loadProtocols();
+  </script>
+</body>
+</html>

@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vorstandsbereich - Dashboard</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #1a1a1a;
+      color: #e0e0e0;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #1a472a 0%, #2d5a3d 100%);
+      padding: 1.5rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    }
+
+    .header h1 {
+      color: white;
+      font-size: 1.5rem;
+    }
+
+    .logout-btn {
+      background: rgba(255,255,255,0.2);
+      color: white;
+      border: none;
+      padding: 0.6rem 1.2rem;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .logout-btn:hover {
+      background: rgba(255,255,255,0.3);
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 2rem;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      border-bottom: 2px solid #2a2a2a;
+    }
+
+    .tab {
+      padding: 1rem 2rem;
+      background: transparent;
+      color: #999;
+      border: none;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: all 0.3s;
+      border-bottom: 3px solid transparent;
+    }
+
+    .tab.active {
+      color: #4CAF50;
+      border-bottom-color: #4CAF50;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .card {
+      background: #2a2a2a;
+      padding: 2rem;
+      border-radius: 8px;
+      margin-bottom: 2rem;
+    }
+
+    h2 {
+      color: #4CAF50;
+      margin-bottom: 1.5rem;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #1a472a 0%, #2d5a3d 100%);
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: transform 0.2s;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>Vorstandsbereich - Dashboard</h1>
+    <button class="logout-btn" id="logout-btn">Abmelden</button>
+  </div>
+
+  <div class="container">
+    <div class="tabs">
+      <button class="tab active" onclick="showTab('events')">Veranstaltungen</button>
+      <button class="tab" onclick="showTab('protocols')">Sitzungsprotokolle</button>
+    </div>
+
+    <!-- Events Tab -->
+    <div id="events-tab" class="tab-content active">
+      <div class="card">
+        <h2>Veranstaltungen verwalten</h2>
+        <button class="btn-primary" onclick="window.location.href='admin-events.html'">
+          Neue Veranstaltung erstellen
+        </button>
+      </div>
+    </div>
+
+    <!-- Protocols Tab -->
+    <div id="protocols-tab" class="tab-content">
+      <div class="card">
+        <h2>Sitzungsprotokolle verwalten</h2>
+        <button class="btn-primary" onclick="window.location.href='admin-protocols.html'">
+          Protokoll hochladen
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+    import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+
+    // Firebase Config
+    const firebaseConfig = {
+      apiKey: "AIzaSyA6hD3scwCcytwkAoNhbNq6-lrYUcl8Fjk",
+      authDomain: "schuetzenverein-12cfa.firebaseapp.com",
+      projectId: "schuetzenverein-12cfa",
+      storageBucket: "schuetzenverein-12cfa.firebasestorage.app",
+      messagingSenderId: "791385091582",
+      appId: "1:791385091582:web:b4c5aae9ddb155f10ee4af"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    // Check if user is logged in
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        window.location.href = 'admin-login.html';
+      }
+    });
+
+    // Logout
+    document.getElementById('logout-btn').addEventListener('click', async () => {
+      await signOut(auth);
+      window.location.href = 'admin-login.html';
+    });
+
+    // Tab switching
+    window.showTab = (tabName) => {
+      document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+      
+      event.target.classList.add('active');
+      document.getElementById(tabName + '-tab').classList.add('active');
+    };
+  </script>
+</body>
+</html>
