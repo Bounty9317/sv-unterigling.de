@@ -316,6 +316,83 @@
       margin-top: 4rem;
     }
 
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 2000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.8);
+      animation: fadeIn 0.3s;
+    }
+
+    .modal-content {
+      background: #2a2a2a;
+      margin: 5% auto;
+      padding: 2rem;
+      border-radius: 12px;
+      max-width: 600px;
+      position: relative;
+      animation: slideIn 0.3s;
+    }
+
+    @keyframes slideIn {
+      from { transform: translateY(-50px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .close-modal {
+      position: absolute;
+      right: 1.5rem;
+      top: 1.5rem;
+      font-size: 2rem;
+      color: #999;
+      cursor: pointer;
+      transition: color 0.3s;
+    }
+
+    .close-modal:hover {
+      color: #fff;
+    }
+
+    .registration-option {
+      background: #1a1a1a;
+      padding: 1.5rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      border-left: 4px solid #4CAF50;
+    }
+
+    .registration-option h3 {
+      color: #4CAF50;
+      margin-bottom: 0.5rem;
+      font-size: 1.3rem;
+    }
+
+    .registration-option p {
+      color: #d0d0d0;
+      margin-bottom: 0.5rem;
+    }
+
+    .btn-register {
+      background: linear-gradient(135deg, #1a472a 0%, #2d5a3d 100%);
+      color: white;
+      border: none;
+      padding: 0.6rem 1.2rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      margin-top: 0.5rem;
+      transition: transform 0.2s;
+    }
+
+    .btn-register:hover {
+      transform: translateY(-2px);
+    }
+
     /* Responsive */
     @media (max-width: 768px) {
       .hero h2 {
@@ -699,6 +776,34 @@
     </div>
   </section>
 
+  <!-- Anmeldung Modal -->
+  <div id="registration-modal" class="modal">
+    <div class="modal-content">
+      <span class="close-modal" onclick="closeRegistrationModal()">&times;</span>
+      <h2 style="color: #4CAF50; margin-bottom: 1.5rem;">Anmeldung zur Veranstaltung</h2>
+      
+      <div class="registration-option">
+        <h3>📍 Vor Ort anmelden</h3>
+        <p><strong>Adresse:</strong><br>
+        Unteriglinger Schützenverein<br>
+        [Straße und Hausnummer]<br>
+        [PLZ] Unteriglingen</p>
+        <p><strong>Öffnungszeiten:</strong><br>
+        Samstag: 19:30 - 21:00 Uhr<br>
+        (Ende Oktober bis Ende März)</p>
+      </div>
+
+      <div class="registration-option">
+        <h3>📧 Per E-Mail anmelden</h3>
+        <p>Senden Sie uns eine E-Mail mit Ihrem Namen und der Veranstaltung, für die Sie sich anmelden möchten.</p>
+        <p><strong>E-Mail:</strong> info@schuetzenverein-unteriglingen.de</p>
+        <button class="btn-register" onclick="window.location.href='mailto:info@schuetzenverein-unteriglingen.de?subject=Anmeldung zur Veranstaltung'">
+          E-Mail senden
+        </button>
+      </div>
+    </div>
+  </div>
+
   <footer>
     <p>&copy; 2025 Unteriglinger Schützenverein | Alle Rechte vorbehalten</p>
     <p>
@@ -724,9 +829,25 @@
       
       return false;
     }
+
+    function openRegistrationModal() {
+      document.getElementById('registration-modal').style.display = 'block';
+    }
+
+    function closeRegistrationModal() {
+      document.getElementById('registration-modal').style.display = 'none';
+    }
+
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+      const modal = document.getElementById('registration-modal');
+      if (event.target == modal) {
+        modal.style.display = 'none';
+      }
+    }
   </script>
 
-  <script type="module">
+  <script type="module"></script>
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
     import { getFirestore, collection, getDocs, query, orderBy, where } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
@@ -788,7 +909,12 @@
             </div>
             <h4 style="color: #ffffff; margin: 0.3rem 0;">${event.title}</h4>
             ${event.description ? `<p style="margin: 0.3rem 0; font-size: 0.9rem; color: #e0e0e0;">${event.description}</p>` : ''}
-            ${event.registrationRequired ? '<p style="margin: 0.3rem 0; font-size: 0.85rem; color: #ffa726;">⚠️ Anmeldung erforderlich</p>' : ''}
+            ${event.registrationRequired ? `
+              <p style="margin: 0.5rem 0 0.3rem 0; font-size: 0.85rem; color: #ffa726;">⚠️ Anmeldung erforderlich</p>
+              <button onclick="openRegistrationModal()" style="background: linear-gradient(135deg, #1a472a 0%, #2d5a3d 100%); color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-size: 0.85rem; margin-top: 0.5rem;">
+                Jetzt anmelden
+              </button>
+            ` : ''}
           `;
           
           eventsList.appendChild(eventDiv);
