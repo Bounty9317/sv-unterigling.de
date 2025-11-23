@@ -1,0 +1,51 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper function to check if user is a helper
+    function isHelper() {
+      return request.auth != null && request.auth.token.email.matches('.*@helfer.schuetzenverein.local');
+    }
+    
+    // Helper function to check if user is admin/vorstand
+    function isAdmin() {
+      return request.auth != null && !request.auth.token.email.matches('.*@helfer.schuetzenverein.local');
+    }
+    
+    // Events - Public read, Admin write
+    match /events/{document} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
+    // Protocols - Admin only
+    match /protocols/{document} {
+      allow read, write: if isAdmin();
+    }
+    
+    // Wirte Assignments - Helpers and Admins can read/write
+    match /wirte-assignments/{document} {
+      allow read, write: if isHelper() || isAdmin();
+    }
+    
+    // Wirte Swaps - Helpers and Admins can read/write
+    match /wirte-swaps/{document} {
+      allow read, write: if isHelper() || isAdmin();
+    }
+    
+    // Aufsicht Assignments - Helpers and Admins can read/write
+    match /aufsicht-assignments/{document} {
+      allow read, write: if isHelper() || isAdmin();
+    }
+    
+    // Aufsicht Swaps - Helpers and Admins can read/write
+    match /aufsicht-swaps/{document} {
+      allow read, write: if isHelper() || isAdmin();
+    }
+    
+    // Default: Deny all other access
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

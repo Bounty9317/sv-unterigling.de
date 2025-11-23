@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Helfer Dashboard</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', sans-serif; background: #1a1a1a; color: #e0e0e0; }
+    .header { background: linear-gradient(135deg, #1a472a 0%, #2d5a3d 100%); padding: 1.5rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+    .header h1 { color: white; }
+    .btn { background: rgba(255,255,255,0.2); color: white; border: none; padding: 0.6rem 1.2rem; border-radius: 6px; cursor: pointer; }
+    .container { max-width: 1400px; margin: 2rem auto; padding: 0 2rem; }
+    .tabs { display: flex; gap: 1rem; margin-bottom: 2rem; border-bottom: 2px solid #3a3a3a; }
+    .tab { padding: 1rem 2rem; background: transparent; border: none; color: #999; cursor: pointer; font-size: 1rem; font-weight: 600; border-bottom: 3px solid transparent; }
+    .tab.active { color: #4CAF50; border-bottom-color: #4CAF50; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .dashboard-grid { display: grid; grid-template-columns: 1fr 350px; gap: 2rem; }
+    .calendar-section { background: #2a2a2a; padding: 2rem; border-radius: 8px; }
+    .chat-section { background: #2a2a2a; padding: 1.5rem; border-radius: 8px; position: sticky; top: 2rem; max-height: 600px; overflow-y: auto; }
+    h2 { color: #4CAF50; margin-bottom: 1.5rem; }
+    .person-cards { display: flex; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap; }
+    .person-card { padding: 0.8rem 1.2rem; border-radius: 6px; cursor: move; font-weight: 600; }
+    .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; background: #1a1a1a; }
+    .calendar-day { background: #2a2a2a; min-height: 100px; padding: 0.5rem; }
+    .calendar-day.drop-zone { background: rgba(76, 175, 80, 0.2); }
+    .assigned-person { padding: 0.5rem; border-radius: 4px; font-size: 0.85rem; margin-bottom: 0.3rem; cursor: pointer; }
+    .assigned-person.swapped { text-decoration: line-through; opacity: 0.6; }
+    .swap-info { font-size: 0.75rem; color: #ffa726; margin-top: 0.3rem; }
+    .chat-message { background: #1a1a1a; padding: 1rem; border-radius: 6px; margin-bottom: 1rem; border-left: 3px solid #ffa726; }
+    .btn-approve { background: #4CAF50; color: white; border: none; padding: 0.4rem 0.8rem; border-radius: 4px; cursor: pointer; margin-right: 0.5rem; }
+    .btn-reject { background: #c62828; color: white; border: none; padding: 0.4rem 0.8rem; border-radius: 4px; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>👥 Helfer Dashboard</h1>
+    <button class="btn" id="logout-btn">Abmelden</button>
+  </div>
+  <div class="container">
+    <div class="tabs">
+      <button class="tab active" onclick="showTab('wirte')">🍺 Wirte</button>
+      <button class="tab" onclick="showTab('aufsicht')">🎯 Schießaufsicht</button>
+    </div>
+    <div id="wirte-tab" class="tab-content active">
+      <div class="dashboard-grid">
+        <div class="calendar-section">
+          <button class="btn" onclick="downloadList('wirte')" style="margin-bottom: 1rem; background: #2d5a3d;">📥 Wirteliste herunterladen</button>
+          <h2>Wirte-Kalender</h2>
+          <div class="person-cards" id="wirte-cards"></div>
+          <div id="wirte-calendar" class="calendar-grid"></div>
+        </div>
+        <div class="chat-section">
+          <h2>💬 Tausch-Anfragen</h2>
+          <div id="wirte-chat"><p style="color: #999;">Keine Anfragen</p></div>
+        </div>
+      </div>
+    </div>
+    <div id="aufsicht-tab" class="tab-content">
+      <div class="dashboard-grid">
+        <div class="calendar-section">
+          <button class="btn" onclick="downloadList('aufsicht')" style="margin-bottom: 1rem; background: #2d5a3d;">📥 Schießaufsichtsliste herunterladen</button>
+          <h2>Schießaufsicht-Kalender</h2>
+          <div class="person-cards" id="aufsicht-cards"></div>
+          <div id="aufsicht-calendar" class="calendar-grid"></div>
+        </div>
+        <div class="chat-section">
+          <h2>💬 Tausch-Anfragen</h2>
+          <div id="aufsicht-chat"><p style="color: #999;">Keine Anfragen</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+    import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+    import { getFirestore, collection, addDoc, getDocs, updateDoc, doc, query, where, onSnapshot, deleteDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+    const app = initializeApp({
+      apiKey: "AIzaSyA6hD3scwCcytwkAoNhbNq6-lrYUcl8Fjk",
+      authDomain: "schuetzenverein-12cfa.firebaseapp.com",
+      projectId: "schuetzenverein-12cfa",
+      storageBucket: "schuetzenverein-12cfa.firebasestorage.app",
+      messagingSenderId: "791385091582",
+      appId: "1:791385091582:web:b4c5aae9ddb155f10ee4af"
+    });
+    const auth = getAuth(app);
+    const db = getFirestore(app, 'vorstandschaftschuetzen');
+
+    onAuthStateChanged(auth, (user) => { if (!user) window.location.href = 'helfer-login.html'; });
+    document.getElementById('logout-btn').addEventListener('click', async () => { await signOut(auth); window.location.href = 'index.html'; });
+    window.showTab = (t) => { document.querySelectorAll('.tab').forEach(x => x.classList.remove('active')); document.querySelectorAll('.tab-content').forEach(x => x.classList.remove('active')); document.querySelector(`[onclick="showTab('${t}')"]`).classList.add('active'); document.getElementById(`${t}-tab`).classList.add('active'); };
+
+    const persons = {
+      wirte: [{ name: 'Max Mustermann', color: '#e57373' }, { name: 'Anna Schmidt', color: '#64b5f6' }],
+      aufsicht: [{ name: 'Zink Alex', color: '#4CAF50' }, { name: 'Zink Michi', color: '#2196F3' }]
+    };
+
+    let assignments = { wirte: {}, aufsicht: {} };
+    let draggedPerson = null, draggedFrom = null;
+
+    async function loadAssignments(type) {
+      const snapshot = await getDocs(collection(db, `${type}-assignments`));
+      assignments[type] = {};
+      snapshot.forEach(d => { assignments[type][d.data().date] = { ...d.data(), id: d.id }; });
+      renderCalendar(type);
+    }
+
+    async function saveAssignment(type, date, person, color) {
+      const existing = assignments[type][date];
+      if (existing?.id) {
+        await updateDoc(doc(db, `${type}-assignments`, existing.id), { person, color, date });
+      } else {
+        await addDoc(collection(db, `${type}-assignments`), { person, color, date });
+      }
+      await loadAssignments(type);
+    }
+
+    async function createSwapRequest(type, fromPerson, toPerson, date, fromDate) {
+      await addDoc(collection(db, `${type}-swaps`), {
+        fromPerson, toPerson, date, fromDate, fromApproved: true, toApproved: false, status: 'pending', createdAt: new Date().toISOString()
+      });
+    }
+
+    function loadSwapRequests(type) {
+      onSnapshot(query(collection(db, `${type}-swaps`), where('status', '==', 'pending')), (snapshot) => {
+        const chat = document.getElementById(`${type}-chat`);
+        if (snapshot.empty) { chat.innerHTML = '<p style="color: #999;">Keine Anfragen</p>'; return; }
+        chat.innerHTML = '';
+        snapshot.forEach(d => {
+          const s = d.data();
+          const div = document.createElement('div');
+          div.className = 'chat-message';
+          div.innerHTML = `<strong>${s.fromPerson}</strong> übernimmt von <strong>${s.toPerson}</strong> am ${new Date(s.date).toLocaleDateString('de-DE')}<br>
+            <div style="margin: 0.5rem 0; font-size: 0.85rem;">
+              ${s.fromPerson}: ${s.fromApproved ? '✅' : '⏳'} | ${s.toPerson}: ${s.toApproved ? '✅' : '⏳'}
+            </div>
+            <button class="btn-approve" onclick="approveSwap('${type}', '${d.id}')">✓ Zustimmen</button>
+            <button class="btn-reject" onclick="rejectSwap('${type}', '${d.id}')">✗ Ablehnen</button>`;
+          chat.appendChild(div);
+        });
+      });
+    }
+
+    window.approveSwap = async (type, id) => {
+      const swapDoc = await getDocs(query(collection(db, `${type}-swaps`), where('__name__', '==', id)));
+      if (!swapDoc.empty) {
+        const swap = swapDoc.docs[0].data();
+        await updateDoc(doc(db, `${type}-swaps`, id), { toApproved: true, status: 'completed' });
+        
+        // Update assignments with swap info
+        if (swap.fromDate) {
+          await updateDoc(doc(db, `${type}-assignments`, assignments[type][swap.fromDate].id), { 
+            swappedWith: swap.fromPerson, 
+            swappedDate: swap.date 
+          });
+        }
+        await updateDoc(doc(db, `${type}-assignments`, assignments[type][swap.date].id), { 
+          swappedWith: swap.fromPerson, 
+          originalPerson: swap.toPerson 
+        });
+        
+        await loadAssignments(type);
+      }
+    };
+    window.rejectSwap = async (type, id) => { await deleteDoc(doc(db, `${type}-swaps`, id)); };
+
+    function renderPersonCards(type) {
+      document.getElementById(`${type}-cards`).innerHTML = persons[type].map(p => 
+        `<div class="person-card" draggable="true" style="background: ${p.color}; color: white;" data-person="${p.name}" data-color="${p.color}">${p.name}</div>`
+      ).join('');
+      document.querySelectorAll(`#${type}-cards .person-card`).forEach(c => {
+        c.addEventListener('dragstart', (e) => { draggedPerson = { name: e.target.dataset.person, color: e.target.dataset.color }; draggedFrom = null; });
+      });
+    }
+
+    function renderCalendar(type) {
+      const cal = document.getElementById(`${type}-calendar`);
+      cal.innerHTML = '';
+      ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'].forEach(d => { const h = document.createElement('div'); h.style.cssText = 'background: #1a472a; color: white; padding: 0.8rem; text-align: center; font-weight: 600;'; h.textContent = d; cal.appendChild(h); });
+      
+      for (let day = 1; day <= 31; day++) {
+        const cell = document.createElement('div');
+        cell.className = 'calendar-day';
+        const dateStr = `2025-01-${String(day).padStart(2, '0')}`;
+        cell.innerHTML = `<div style="font-size: 0.9rem; color: #999;">${day}</div>`;
+        cell.dataset.date = dateStr;
+        
+        const assignment = assignments[type][dateStr];
+        if (assignment) {
+          const personDiv = document.createElement('div');
+          personDiv.className = 'assigned-person' + (assignment.swappedWith ? ' swapped' : '');
+          personDiv.style.background = assignment.color;
+          personDiv.style.color = 'white';
+          personDiv.textContent = assignment.originalPerson || assignment.person;
+          personDiv.draggable = true;
+          personDiv.addEventListener('dragstart', () => { draggedPerson = { name: assignment.person, color: assignment.color }; draggedFrom = dateStr; });
+          cell.appendChild(personDiv);
+          
+          if (assignment.swappedWith) {
+            const swapInfo = document.createElement('div');
+            swapInfo.className = 'swap-info';
+            swapInfo.style.background = assignment.color;
+            swapInfo.innerHTML = `Getauscht mit:<br><strong>${assignment.swappedWith}</strong>`;
+            cell.appendChild(swapInfo);
+          }
+        }
+        
+        cell.addEventListener('dragover', (e) => { e.preventDefault(); e.currentTarget.classList.add('drop-zone'); });
+        cell.addEventListener('dragleave', (e) => e.currentTarget.classList.remove('drop-zone'));
+        cell.addEventListener('drop', async (e) => {
+          e.preventDefault();
+          e.currentTarget.classList.remove('drop-zone');
+          const targetDate = e.currentTarget.dataset.date;
+          const existing = assignments[type][targetDate];
+          if (existing && draggedFrom) {
+            await createSwapRequest(type, draggedPerson.name, existing.person, targetDate, draggedFrom);
+          } else if (draggedPerson) {
+            await saveAssignment(type, targetDate, draggedPerson.name, draggedPerson.color);
+          }
+        });
+        cal.appendChild(cell);
+      }
+    }
+
+    // PDF Export Function
+    window.downloadList = async (type) => {
+      const snapshot = await getDocs(collection(db, `${type}-assignments`));
+      let data = `${type === 'wirte' ? 'Wirteliste' : 'Schießaufsichtsliste'}\n`;
+      data += `Erstellt am: ${new Date().toLocaleDateString('de-DE')}\n\n`;
+      
+      const sortedAssignments = [];
+      snapshot.forEach(doc => {
+        const assignment = doc.data();
+        sortedAssignments.push(assignment);
+      });
+      
+      sortedAssignments.sort((a, b) => new Date(a.date) - new Date(b.date));
+      
+      sortedAssignments.forEach(assignment => {
+        const date = new Date(assignment.date).toLocaleDateString('de-DE');
+        let line = `${date}: ${assignment.person}`;
+        if (assignment.swappedWith) {
+          line += ` (Getauscht mit ${assignment.swappedWith})`;
+        }
+        data += line + '\n';
+      });
+      
+      const blob = new Blob([data], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${type}-liste-${new Date().toISOString().split('T')[0]}.txt`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    };
+
+    ['wirte', 'aufsicht'].forEach(type => { renderPersonCards(type); loadAssignments(type); loadSwapRequests(type); });
+  </script>
+</body>
+</html>
