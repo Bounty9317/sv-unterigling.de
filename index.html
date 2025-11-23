@@ -882,43 +882,81 @@
         }
 
         eventsList.innerHTML = '';
+        const monthNames = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 
+                           'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
+        
+        // Group events by month
+        const eventsByMonth = {};
         let count = 0;
+        
         querySnapshot.forEach((doc) => {
-          if (count >= 5) return; // Max 5 events
+          if (count >= 10) return; // Max 10 events
           
           const event = doc.data();
           const eventDate = new Date(event.date);
-          const monthNames = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 
-                             'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
+          const monthKey = `${eventDate.getFullYear()}-${eventDate.getMonth()}`;
+          const monthName = monthNames[eventDate.getMonth()];
           
-          const eventDiv = document.createElement('div');
-          eventDiv.style.cssText = `
-            background: ${event.cancelled ? 'rgba(200, 40, 40, 0.2)' : 'rgba(255, 255, 255, 0.1)'};
-            border-left: 4px solid ${event.cancelled ? '#c62828' : '#2d5a3d'};
-            padding: 1rem;
-            margin-bottom: 1rem;
-            border-radius: 4px;
-            transition: background 0.3s;
-          `;
+          if (!eventsByMonth[monthKey]) {
+            eventsByMonth[monthKey] = {
+              name: monthName,
+              year: eventDate.getFullYear(),
+              events: []
+            };
+          }
           
-          eventDiv.innerHTML = `
-            ${event.cancelled ? '<div style="color: #ff5252; font-weight: bold; margin-bottom: 0.5rem;">❌ ABGESAGT</div>' : ''}
-            <div style="color: #4CAF50; font-weight: bold; margin-bottom: 0.3rem;">
-              📅 ${monthNames[eventDate.getMonth()]} - ${eventDate.getDate()}.${(eventDate.getMonth() + 1).toString().padStart(2, '0')}.${eventDate.getFullYear()}
-              ${event.time ? ` um ${event.time} Uhr` : ''}
-            </div>
-            <h4 style="color: #ffffff; margin: 0.3rem 0;">${event.title}</h4>
-            ${event.description ? `<p style="margin: 0.3rem 0; font-size: 0.9rem; color: #e0e0e0;">${event.description}</p>` : ''}
-            ${event.registrationRequired ? `
-              <p style="margin: 0.5rem 0 0.3rem 0; font-size: 0.85rem; color: #ffa726;">⚠️ Anmeldung erforderlich</p>
-              <button onclick="openRegistrationModal()" style="background: linear-gradient(135deg, #1a472a 0%, #2d5a3d 100%); color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-size: 0.85rem; margin-top: 0.5rem;">
-                Jetzt anmelden
-              </button>
-            ` : ''}
-          `;
-          
-          eventsList.appendChild(eventDiv);
+          eventsByMonth[monthKey].events.push({ id: doc.id, data: event, date: eventDate });
           count++;
+        });
+        
+        // Display events grouped by month
+        Object.keys(eventsByMonth).sort().forEach(monthKey => {
+          const monthData = eventsByMonth[monthKey];
+          
+          // Month header
+          const monthHeader = document.createElement('div');
+          monthHeader.style.cssText = `
+            text-align: center;
+            color: #4CAF50;
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin: 1.5rem 0 1rem 0;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #4CAF50;
+          `;
+          monthHeader.textContent = `—— ${monthData.name} ${monthData.year} ——`;
+          eventsList.appendChild(monthHeader);
+          
+          // Events for this month
+          monthData.events.forEach(({ data: event, date: eventDate }) => {
+            const eventDiv = document.createElement('div');
+            eventDiv.style.cssText = `
+              background: ${event.cancelled ? 'rgba(200, 40, 40, 0.2)' : 'rgba(255, 255, 255, 0.1)'};
+              border-left: 4px solid ${event.cancelled ? '#c62828' : '#2d5a3d'};
+              padding: 1rem;
+              margin-bottom: 1rem;
+              border-radius: 4px;
+              transition: background 0.3s;
+            `;
+            
+            eventDiv.innerHTML = `
+              ${event.cancelled ? '<div style="color: #ff5252; font-weight: bold; margin-bottom: 0.5rem;">❌ ABGESAGT</div>' : ''}
+              <div style="color: #4CAF50; font-weight: bold; margin-bottom: 0.3rem;">
+                📅 ${eventDate.getDate()}.${(eventDate.getMonth() + 1).toString().padStart(2, '0')}.${eventDate.getFullYear()}
+                ${event.time ? ` um ${event.time} Uhr` : ''}
+              </div>
+              <h4 style="color: #ffffff; margin: 0.3rem 0;">${event.title}</h4>
+              ${event.description ? `<p style="margin: 0.3rem 0; font-size: 0.9rem; color: #e0e0e0;">${event.description}</p>` : ''}
+              ${event.registrationRequired ? `
+                <p style="margin: 0.5rem 0 0.3rem 0; font-size: 0.85rem; color: #ffa726;">⚠️ Anmeldung erforderlich</p>
+                <button onclick="openRegistrationModal()" style="background: linear-gradient(135deg, #1a472a 0%, #2d5a3d 100%); color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-size: 0.85rem; margin-top: 0.5rem;">
+                  Jetzt anmelden
+                </button>
+              ` : ''}
+            `;
+            
+            eventsList.appendChild(eventDiv);
+          });
         });
       } catch (error) {
         console.error('Error loading events:', error);
