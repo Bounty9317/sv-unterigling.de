@@ -870,21 +870,14 @@
             doc.rect(rightStartX + colWidths[0] + colWidths[1], rightYPos, colWidths[2], rowHeight);
             doc.rect(rightStartX + colWidths[0] + colWidths[1] + colWidths[2], rightYPos, colWidths[3], rowHeight);
             
-            // Dickes ! ganz links wenn nicht Sonntag
-            if (isNotSunday) {
-              doc.setTextColor(255, 255, 255);
-              doc.setFontSize(9);
-              doc.setFont('helvetica', 'bold');
-              doc.text('!', rightStartX - 4, rightYPos + 4.5);
-            }
-            
             // Text weiß für farbige Spalten
             doc.setTextColor(255, 255, 255);
             
-            // Tag - fett wenn nicht Sonntag
-            doc.setFontSize(isNotSunday ? 7 : 6.5);
-            doc.setFont('helvetica', isNotSunday ? 'bold' : 'normal');
-            doc.text(dayName, rightStartX + colWidths[0]/2, rightYPos + 4, { align: 'center' });
+            // Tag - mit ! wenn nicht Sonntag
+            doc.setFontSize(isNotSunday ? 8 : 6.5);
+            doc.setFont('helvetica', 'bold');
+            const tagText = isNotSunday ? `! ${dayName}` : dayName;
+            doc.text(tagText, rightStartX + colWidths[0]/2, rightYPos + 4, { align: 'center' });
             
             // Datum - fett wenn nicht Sonntag
             doc.setFont('helvetica', 'bold');
