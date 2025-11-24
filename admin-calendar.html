@@ -675,21 +675,27 @@
         const slots = assignmentsByDate[dateStr];
         const isHoliday = allHolidays.includes(dateStr);
         
+        // Spezielle Ausnahme: 26.12. ist immer Schießabend (links)
+        const is26Dec = dateStr.endsWith('-12-26');
+        
         // Samstag Schießabend
         if (slots.schiessabend) {
           saturdayEvening.push({ ...slots.schiessabend, dateStr, isHoliday, note: allNotes[dateStr] });
         } else if (dayOfWeek === 6 && slots.default && !slots.fruehschoppen) {
           saturdayEvening.push({ ...slots.default, dateStr, isHoliday, note: allNotes[dateStr] });
-        } else if (isHoliday && slots.default && dayOfWeek !== 0 && dayOfWeek !== 6) {
-          // Feiertage Mo-Fr (Wochentags) = Schießabend (links)
+        } else if (is26Dec && slots.default) {
+          // 26.12. = Schießabend (links)
           saturdayEvening.push({ ...slots.default, dateStr, isHoliday, note: allNotes[dateStr] });
         }
         
-        // Sonntag oder Samstag-Frühschoppen oder Sonntags-Feiertage
+        // Sonntag oder Samstag-Frühschoppen oder Feiertage
         if (slots.fruehschoppen) {
           sundayMorning.push({ ...slots.fruehschoppen, dateStr, isHoliday, isSaturdayMorning: dayOfWeek === 6, note: allNotes[dateStr] });
         } else if (dayOfWeek === 0 && slots.default) {
           // Sonntag = Frühschoppen (rechts)
+          sundayMorning.push({ ...slots.default, dateStr, isHoliday, note: allNotes[dateStr] });
+        } else if (isHoliday && slots.default && dayOfWeek !== 0 && dayOfWeek !== 6 && !is26Dec) {
+          // Andere Feiertage Mo-Fr (außer 26.12.) = Frühschoppen (rechts)
           sundayMorning.push({ ...slots.default, dateStr, isHoliday, note: allNotes[dateStr] });
         }
       });
