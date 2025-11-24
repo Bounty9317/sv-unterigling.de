@@ -870,23 +870,31 @@
             doc.rect(rightStartX + colWidths[0] + colWidths[1], rightYPos, colWidths[2], rowHeight);
             doc.rect(rightStartX + colWidths[0] + colWidths[1] + colWidths[2], rightYPos, colWidths[3], rowHeight);
             
+            // Dickes ! ganz links wenn nicht Sonntag
+            if (isNotSunday) {
+              doc.setTextColor(255, 255, 255);
+              doc.setFontSize(9);
+              doc.setFont('helvetica', 'bold');
+              doc.text('!', rightStartX - 4, rightYPos + 4.5);
+            }
+            
             // Text weiß für farbige Spalten
             doc.setTextColor(255, 255, 255);
             
-            // Tag - mit ! wenn nicht Sonntag
+            // Tag - fett wenn nicht Sonntag
             doc.setFontSize(isNotSunday ? 7 : 6.5);
             doc.setFont('helvetica', isNotSunday ? 'bold' : 'normal');
-            doc.text(prefix + dayName, rightStartX + colWidths[0]/2, rightYPos + 4, { align: 'center' });
+            doc.text(dayName, rightStartX + colWidths[0]/2, rightYPos + 4, { align: 'center' });
             
             // Datum - fett wenn nicht Sonntag
             doc.setFont('helvetica', 'bold');
             doc.setFontSize(isNotSunday ? 7 : 6.5);
-            doc.text(prefix + dateStr, rightStartX + colWidths[0] + colWidths[1]/2, rightYPos + 4, { align: 'center' });
+            doc.text(dateStr, rightStartX + colWidths[0] + colWidths[1]/2, rightYPos + 4, { align: 'center' });
             
             // Name - fett wenn nicht Sonntag
             doc.setFont('helvetica', 'bold');
             doc.setFontSize(isNotSunday ? 7 : 6.5);
-            doc.text(prefix + name, rightStartX + colWidths[0] + colWidths[1] + 1, rightYPos + 4);
+            doc.text(name, rightStartX + colWidths[0] + colWidths[1] + 1, rightYPos + 4);
             
             // Info Spalte - schwarzer Text auf weiß
             if (a.note) {
