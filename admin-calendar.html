@@ -241,13 +241,19 @@
     }
 
     async function loadDayNotes(type) {
-      const snapshot = await getDocs(collection(db, `${type}-notes`));
-      dayNotes[type] = {};
-      snapshot.forEach(d => { 
-        const data = d.data();
-        dayNotes[type][data.date] = { ...data, id: d.id };
-      });
-      renderCalendar(type);
+      try {
+        const snapshot = await getDocs(collection(db, `${type}-notes`));
+        dayNotes[type] = {};
+        snapshot.forEach(d => { 
+          const data = d.data();
+          dayNotes[type][data.date] = { ...data, id: d.id };
+        });
+        renderCalendar(type);
+      } catch (error) {
+        console.log('Fehler beim Laden der Notizen:', error);
+        dayNotes[type] = {};
+        renderCalendar(type);
+      }
     }
 
     async function saveDayNote(type, date, note) {
@@ -382,12 +388,11 @@
         if (!isAllowed) {
           cellClass += ' disabled';
         } else if (hasMultiSlots) {
+          // Bei Wirte-Samstag: beide Slots müssen belegt sein
           if (fruehschoppenAssignment && schiessabendAssignment) {
             cellClass += ' assigned';
-          } else if (fruehschoppenAssignment || schiessabendAssignment) {
-            cellClass += ' missing'; // Teilweise eingeteilt
           } else {
-            cellClass += ' missing';
+            cellClass += ' missing'; // Mindestens ein Slot fehlt
           }
         } else if (assignment) {
           cellClass += ' assigned';
