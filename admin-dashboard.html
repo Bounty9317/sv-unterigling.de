@@ -108,6 +108,142 @@
     .btn-primary:hover {
       transform: translateY(-2px);
     }
+
+    .person-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 1rem;
+    }
+
+    .person-item {
+      background: #1a1a1a;
+      padding: 1rem;
+      border-radius: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-left: 4px solid;
+    }
+
+    .person-name {
+      font-weight: 600;
+    }
+
+    .btn-delete {
+      background: #c62828;
+      color: white;
+      border: none;
+      padding: 0.4rem 0.8rem;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+
+    .btn-delete:hover {
+      background: #b71c1c;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 2000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.8);
+    }
+
+    .modal-content {
+      background: #2a2a2a;
+      margin: 5% auto;
+      padding: 2rem;
+      border-radius: 12px;
+      max-width: 500px;
+    }
+
+    .close-modal {
+      float: right;
+      font-size: 2rem;
+      color: #999;
+      cursor: pointer;
+    }
+
+    .close-modal:hover {
+      color: white;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      color: #e0e0e0;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 0.8rem;
+      background: #1a1a1a;
+      border: 2px solid #3a3a3a;
+      border-radius: 6px;
+      color: #e0e0e0;
+      font-size: 1rem;
+    }
+
+    .form-group input:focus {
+      outline: none;
+      border-color: #4CAF50;
+    }
+
+    .color-picker {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+
+    .color-option {
+      width: 50px;
+      height: 50px;
+      border-radius: 6px;
+      cursor: pointer;
+      border: 3px solid transparent;
+      transition: all 0.2s;
+    }
+
+    .color-option:hover:not(.disabled) {
+      transform: scale(1.1);
+    }
+
+    .color-option.selected {
+      border-color: white;
+      box-shadow: 0 0 10px rgba(255,255,255,0.5);
+    }
+
+    .color-option.disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    .btn-add {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      width: 100%;
+      font-size: 1rem;
+    }
+
+    .btn-add:hover {
+      background: #45a049;
+    }
   </style>
 </head>
 <body>
@@ -120,6 +256,8 @@
     <div class="tabs">
       <button class="tab active" onclick="showTab('events')">Veranstaltungen</button>
       <button class="tab" onclick="showTab('protocols')">Sitzungsprotokolle</button>
+      <button class="tab" onclick="showTab('wirte')">🍺 Wirte</button>
+      <button class="tab" onclick="showTab('aufsicht')">🎯 Schießaufsicht</button>
     </div>
 
     <!-- Events Tab -->
@@ -141,11 +279,55 @@
         </button>
       </div>
     </div>
+
+    <!-- Wirte Tab -->
+    <div id="wirte-tab" class="tab-content">
+      <div class="card">
+        <h2>Wirte verwalten</h2>
+        <button class="btn-primary" onclick="window.location.href='admin-calendar.html'" style="margin-bottom: 1rem;">📅 Kalender verwalten</button>
+        <button class="btn-primary" onclick="openAddPersonModal('wirte')" style="margin-bottom: 1.5rem;">➕ Wirt hinzufügen</button>
+        <div class="person-list" id="wirte-list"></div>
+      </div>
+    </div>
+
+    <!-- Aufsicht Tab -->
+    <div id="aufsicht-tab" class="tab-content">
+      <div class="card">
+        <h2>Schießaufsicht verwalten</h2>
+        <button class="btn-primary" onclick="window.location.href='admin-calendar.html'" style="margin-bottom: 1rem;">📅 Kalender verwalten</button>
+        <button class="btn-primary" onclick="openAddPersonModal('aufsicht')" style="margin-bottom: 1.5rem;">➕ Schießaufsicht hinzufügen</button>
+        <div class="person-list" id="aufsicht-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal für Helfer hinzufügen -->
+  <div id="add-person-modal" class="modal">
+    <div class="modal-content">
+      <span class="close-modal" onclick="closeAddPersonModal()">&times;</span>
+      <h2 id="modal-title">Helfer hinzufügen</h2>
+      <form id="add-person-form">
+        <div class="form-group">
+          <label>Vorname</label>
+          <input type="text" id="firstname" required>
+        </div>
+        <div class="form-group">
+          <label>Nachname</label>
+          <input type="text" id="lastname" required>
+        </div>
+        <div class="form-group">
+          <label>Kachelfarbe</label>
+          <div class="color-picker" id="color-picker"></div>
+        </div>
+        <button type="submit" class="btn-add">Hinzufügen</button>
+      </form>
+    </div>
   </div>
 
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
     import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
     // Firebase Config
     const firebaseConfig = {
@@ -159,6 +341,12 @@
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
+    const db = getFirestore(app, 'vorstandschaftschuetzen');
+
+    const persons = {
+      wirte: [],
+      aufsicht: []
+    };
 
     // Check if user is logged in and is admin (not helper)
     onAuthStateChanged(auth, (user) => {
@@ -169,6 +357,9 @@
         alert('Zugriff verweigert: Helfer haben keinen Zugang zum Vorstandsbereich.');
         signOut(auth);
         window.location.href = 'index.html';
+      } else {
+        loadPersons('wirte');
+        loadPersons('aufsicht');
       }
     });
 
@@ -186,6 +377,94 @@
       event.target.classList.add('active');
       document.getElementById(tabName + '-tab').classList.add('active');
     };
+
+    // Load persons from Firebase
+    async function loadPersons(type) {
+      const snapshot = await getDocs(collection(db, `${type}-persons`));
+      persons[type] = [];
+      snapshot.forEach(d => { 
+        persons[type].push({ ...d.data(), id: d.id }); 
+      });
+      renderPersonList(type);
+    }
+
+    // Render person list
+    function renderPersonList(type) {
+      const list = document.getElementById(`${type}-list`);
+      if (persons[type].length === 0) {
+        list.innerHTML = '<p style="color: #999;">Keine Helfer vorhanden</p>';
+        return;
+      }
+      list.innerHTML = persons[type].map(p => 
+        `<div class="person-item" style="border-left-color: ${p.color};">
+          <div>
+            <div class="person-name">${p.name}</div>
+            <div style="font-size: 0.85rem; color: #999; margin-top: 0.3rem;">
+              <span style="display: inline-block; width: 20px; height: 20px; background: ${p.color}; border-radius: 4px; vertical-align: middle;"></span>
+            </div>
+          </div>
+          <button class="btn-delete" onclick="deletePerson('${type}', '${p.id}')">Löschen</button>
+        </div>`
+      ).join('');
+    }
+
+    // Delete person
+    window.deletePerson = async (type, id) => {
+      if (!confirm('Möchten Sie diesen Helfer wirklich löschen?')) return;
+      await deleteDoc(doc(db, `${type}-persons`, id));
+      await loadPersons(type);
+    };
+
+    // Modal functions
+    const availableColors = ['#e57373', '#64b5f6', '#81c784', '#ffb74d', '#ba68c8', '#4db6ac', '#ff8a65', '#a1887f', '#90a4ae', '#f06292', '#7986cb', '#aed581'];
+    let selectedColor = null;
+    let currentModalType = null;
+
+    window.openAddPersonModal = (type) => {
+      currentModalType = type;
+      document.getElementById('modal-title').textContent = type === 'wirte' ? 'Wirt hinzufügen' : 'Schießaufsicht hinzufügen';
+      document.getElementById('add-person-modal').style.display = 'block';
+      renderColorPicker(type);
+    };
+
+    window.closeAddPersonModal = () => {
+      document.getElementById('add-person-modal').style.display = 'none';
+      document.getElementById('add-person-form').reset();
+      selectedColor = null;
+    };
+
+    function renderColorPicker(type) {
+      const usedColors = persons[type].map(p => p.color);
+      const picker = document.getElementById('color-picker');
+      picker.innerHTML = availableColors.map(color => {
+        const isUsed = usedColors.includes(color);
+        return `<div class="color-option ${isUsed ? 'disabled' : ''}" 
+                     style="background: ${color};"
+                     onclick="${isUsed ? '' : `selectColor('${color}')`}"></div>`;
+      }).join('');
+    }
+
+    window.selectColor = (color) => {
+      selectedColor = color;
+      document.querySelectorAll('.color-option').forEach(opt => opt.classList.remove('selected'));
+      event.target.classList.add('selected');
+    };
+
+    document.getElementById('add-person-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!selectedColor) { 
+        alert('Bitte wählen Sie eine Farbe!'); 
+        return; 
+      }
+      
+      const firstname = document.getElementById('firstname').value.trim();
+      const lastname = document.getElementById('lastname').value.trim();
+      const name = `${firstname} ${lastname}`;
+      
+      await addDoc(collection(db, `${currentModalType}-persons`), { name, color: selectedColor });
+      await loadPersons(currentModalType);
+      closeAddPersonModal();
+    });
   </script>
 </body>
 </html>

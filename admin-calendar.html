@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kalender-Verwaltung</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', sans-serif; background: #1a1a1a; color: #e0e0e0; }
+    .header { background: linear-gradient(135deg, #1a472a 0%, #2d5a3d 100%); padding: 1.5rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+    .header h1 { color: white; }
+    .btn { background: rgba(255,255,255,0.2); color: white; border: none; padding: 0.6rem 1.2rem; border-radius: 6px; cursor: pointer; }
+    .container { max-width: 1400px; margin: 2rem auto; padding: 0 2rem; }
+    .tabs { display: flex; gap: 1rem; margin-bottom: 2rem; border-bottom: 2px solid #3a3a3a; }
+    .tab { padding: 1rem 2rem; background: transparent; border: none; color: #999; cursor: pointer; font-size: 1rem; font-weight: 600; border-bottom: 3px solid transparent; }
+    .tab.active { color: #4CAF50; border-bottom-color: #4CAF50; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .dashboard-grid { display: grid; grid-template-columns: 1fr 350px; gap: 2rem; }
+    .calendar-section { background: #2a2a2a; padding: 2rem; border-radius: 8px; }
+    .chat-section { background: #2a2a2a; padding: 1.5rem; border-radius: 8px; position: sticky; top: 2rem; max-height: 600px; overflow-y: auto; }
+    h2 { color: #4CAF50; margin-bottom: 1.5rem; }
+    .person-cards { display: flex; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap; }
+    .person-card { padding: 0.8rem 1.2rem; border-radius: 6px; cursor: move; font-weight: 600; }
+    .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; background: #1a1a1a; }
+    .calendar-day { background: #2a2a2a; min-height: 100px; padding: 0.5rem; position: relative; border: 2px solid transparent; }
+    .calendar-day.disabled { background: #1a1a1a; opacity: 0.5; cursor: not-allowed; }
+    .calendar-day.assigned { border-color: #4CAF50; }
+    .calendar-day.missing { border-color: #c62828; }
+    .calendar-day.drop-zone { background: rgba(76, 175, 80, 0.2); }
+    .assigned-person { padding: 0.5rem; border-radius: 4px; font-size: 0.85rem; margin-bottom: 0.3rem; cursor: move; }
+    .swap-info { font-size: 0.75rem; background: #ffa726; color: #1a1a1a; padding: 0.3rem; border-radius: 4px; margin-top: 0.3rem; font-weight: 600; }
+    .chat-message { background: #1a1a1a; padding: 1rem; border-radius: 6px; margin-bottom: 1rem; border-left: 3px solid #ffa726; }
+    .chat-message.completed { border-left-color: #4CAF50; opacity: 0.7; }
+    .btn-delete-assignment { position: absolute; top: 5px; right: 5px; background: #c62828; color: white; border: none; width: 22px; height: 22px; border-radius: 50%; cursor: pointer; font-size: 0.9rem; line-height: 1; opacity: 0.8; transition: all 0.2s; z-index: 10; }
+    .btn-delete-assignment:hover { opacity: 1; transform: scale(1.1); box-shadow: 0 2px 8px rgba(198, 40, 40, 0.5); }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>📅 Kalender-Verwaltung (Vorstand)</h1>
+    <button class="btn" onclick="window.location.href='admin-dashboard.html'">Zurück</button>
+  </div>
+  <div class="container">
+    <div class="tabs">
+      <button class="tab active" onclick="showTab('wirte')">🍺 Wirte</button>
+      <button class="tab" onclick="showTab('aufsicht')">🎯 Schießaufsicht</button>
+    </div>
+    <div id="wirte-tab" class="tab-content active">
+      <div class="dashboard-grid">
+        <div class="calendar-section">
+          <button class="btn" onclick="downloadList('wirte')" style="margin-bottom: 1rem; background: #2d5a3d;">📥 Wirteliste herunterladen</button>
+          <h2>Wirte-Kalender</h2>
+          <div class="person-cards" id="wirte-cards"></div>
+          <div id="wirte-calendar" class="calendar-grid"></div>
+        </div>
+        <div class="chat-section">
+          <h2>💬 Tausch-Anfragen</h2>
+          <div id="wirte-chat"><p style="color: #999;">Keine Anfragen</p></div>
+        </div>
+      </div>
+    </div>
+    <div id="aufsicht-tab" class="tab-content">
+      <div class="dashboard-grid">
+        <div class="calendar-section">
+          <button class="btn" onclick="downloadList('aufsicht')" style="margin-bottom: 1rem; background: #2d5a3d;">📥 Schießaufsichtsliste herunterladen</button>
+          <h2>Schießaufsicht-Kalender</h2>
+          <div class="person-cards" id="aufsicht-cards"></div>
+          <div id="aufsicht-calendar" class="calendar-grid"></div>
+        </div>
+        <div class="chat-section">
+          <h2>💬 Tausch-Anfragen</h2>
+          <div id="aufsicht-chat"><p style="color: #999;">Keine Anfragen</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+    import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+    import { getFirestore, collection, addDoc, getDocs, updateDoc, doc, deleteDoc, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+    const app = initializeApp({
+      apiKey: "AIzaSyA6hD3scwCcytwkAoNhbNq6-lrYUcl8Fjk",
+      authDomain: "schuetzenverein-12cfa.firebaseapp.com",
+      projectId: "schuetzenverein-12cfa",
+      storageBucket: "schuetzenverein-12cfa.firebasestorage.app",
+      messagingSenderId: "791385091582",
+      appId: "1:791385091582:web:b4c5aae9ddb155f10ee4af"
+    });
+    const auth = getAuth(app);
+    const db = getFirestore(app, 'vorstandschaftschuetzen');
+
+    onAuthStateChanged(auth, (user) => { 
+      if (!user || (user.email && user.email.includes('@helfer.schuetzenverein.local'))) {
+        window.location.href = 'admin-login.html';
+      }
+    });
+
+    window.showTab = (t) => { 
+      document.querySelectorAll('.tab').forEach(x => x.classList.remove('active')); 
+      document.querySelectorAll('.tab-content').forEach(x => x.classList.remove('active')); 
+      document.querySelector(`[onclick="showTab('${t}')"]`).classList.add('active'); 
+      document.getElementById(`${t}-tab`).classList.add('active'); 
+    };
+
+    const persons = { wirte: [], aufsicht: [] };
+    let assignments = { wirte: {}, aufsicht: {} };
+    let draggedPerson = null, draggedFrom = null;
+
+    async function loadPersons(type) {
+      const snapshot = await getDocs(collection(db, `${type}-persons`));
+      persons[type] = [];
+      snapshot.forEach(d => { persons[type].push({ ...d.data(), id: d.id }); });
+      renderPersonCards(type);
+    }
+
+    async function loadAssignments(type) {
+      const snapshot = await getDocs(collection(db, `${type}-assignments`));
+      assignments[type] = {};
+      snapshot.forEach(d => { assignments[type][d.data().date] = { ...d.data(), id: d.id }; });
+      renderCalendar(type);
+    }
+
+    async function saveAssignment(type, date, person, color) {
+      const existing = assignments[type][date];
+      if (existing?.id) {
+        await updateDoc(doc(db, `${type}-assignments`, existing.id), { person, color, date, originalPerson: null, swappedWith: null });
+      } else {
+        await addDoc(collection(db, `${type}-assignments`), { person, color, date });
+      }
+      await loadAssignments(type);
+    }
+
+    window.deleteAssignment = async (type, date) => {
+      if (!confirm('Einteilung löschen?')) return;
+      const assignment = assignments[type][date];
+      if (assignment?.id) {
+        await deleteDoc(doc(db, `${type}-assignments`, assignment.id));
+        await loadAssignments(type);
+      }
+    };
+
+    function renderPersonCards(type) {
+      document.getElementById(`${type}-cards`).innerHTML = persons[type].map(p => 
+        `<div class="person-card" draggable="true" style="background: ${p.color}; color: white;" data-person="${p.name}" data-color="${p.color}">${p.name}</div>`
+      ).join('');
+      document.querySelectorAll(`#${type}-cards .person-card`).forEach(c => {
+        c.addEventListener('dragstart', (e) => { 
+          draggedPerson = { name: e.target.dataset.person, color: e.target.dataset.color }; 
+          draggedFrom = null; 
+        });
+      });
+    }
+
+    function renderCalendar(type) {
+      const cal = document.getElementById(`${type}-calendar`);
+      cal.innerHTML = '';
+      ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'].forEach(d => { 
+        const h = document.createElement('div'); 
+        h.style.cssText = 'background: #1a472a; color: white; padding: 0.8rem; text-align: center; font-weight: 600;'; 
+        h.textContent = d; 
+        cal.appendChild(h); 
+      });
+      
+      for (let day = 1; day <= 31; day++) {
+        const cell = document.createElement('div');
+        const dateStr = `2025-01-${String(day).padStart(2, '0')}`;
+        const date = new Date(dateStr);
+        const dayOfWeek = date.getDay(); // 0=Sonntag, 6=Samstag
+        
+        // Prüfe ob Tag erlaubt ist
+        let isAllowed = false;
+        if (type === 'aufsicht') {
+          isAllowed = dayOfWeek === 6; // Nur Samstag
+        } else if (type === 'wirte') {
+          isAllowed = dayOfWeek === 0 || dayOfWeek === 6; // Samstag oder Sonntag
+        }
+        
+        const assignment = assignments[type][dateStr];
+        
+        // Setze CSS-Klassen basierend auf Einteilung
+        let cellClass = 'calendar-day';
+        if (!isAllowed) {
+          cellClass += ' disabled';
+        } else if (assignment) {
+          cellClass += ' assigned';
+        } else {
+          cellClass += ' missing';
+        }
+        
+        cell.className = cellClass;
+        cell.innerHTML = `<div style="font-size: 0.9rem; color: #999;">${day}</div>`;
+        cell.dataset.date = dateStr;
+        
+        if (!isAllowed) {
+          cell.title = type === 'aufsicht' ? 'Nur Samstags möglich' : 'Nur Sa/So möglich';
+        } else if (!assignment) {
+          cell.title = 'Einteilung fehlt!';
+        }
+        if (assignment) {
+          const personDiv = document.createElement('div');
+          personDiv.className = 'assigned-person';
+          personDiv.style.background = assignment.color;
+          personDiv.style.color = 'white';
+          personDiv.textContent = assignment.originalPerson || assignment.person;
+          personDiv.draggable = true;
+          personDiv.addEventListener('dragstart', () => { 
+            draggedPerson = { name: assignment.person, color: assignment.color }; 
+            draggedFrom = dateStr; 
+          });
+          cell.appendChild(personDiv);
+          
+          if (assignment.swappedWith && assignment.originalPerson) {
+            const swapInfo = document.createElement('div');
+            swapInfo.className = 'swap-info';
+            swapInfo.innerHTML = `Getauscht mit:<br><strong>${assignment.swappedWith}</strong>`;
+            cell.appendChild(swapInfo);
+          }
+
+          const deleteBtn = document.createElement('button');
+          deleteBtn.className = 'btn-delete-assignment';
+          deleteBtn.innerHTML = '×';
+          deleteBtn.title = 'Einteilung löschen';
+          deleteBtn.onclick = (e) => {
+            e.stopPropagation();
+            deleteAssignment(type, dateStr);
+          };
+          cell.appendChild(deleteBtn);
+        }
+        
+        // Nur Drop erlauben wenn Tag erlaubt ist
+        if (isAllowed) {
+          cell.addEventListener('dragover', (e) => { e.preventDefault(); e.currentTarget.classList.add('drop-zone'); });
+          cell.addEventListener('dragleave', (e) => e.currentTarget.classList.remove('drop-zone'));
+          cell.addEventListener('drop', async (e) => {
+            e.preventDefault();
+            e.currentTarget.classList.remove('drop-zone');
+            const targetDate = e.currentTarget.dataset.date;
+            if (draggedPerson) {
+              await saveAssignment(type, targetDate, draggedPerson.name, draggedPerson.color);
+            }
+          });
+        }
+        
+        cal.appendChild(cell);
+      }
+    }
+
+    function loadSwapRequests(type) {
+      onSnapshot(collection(db, `${type}-swaps`), (snapshot) => {
+        const chat = document.getElementById(`${type}-chat`);
+        if (snapshot.empty) { chat.innerHTML = '<p style="color: #999;">Keine Anfragen</p>'; return; }
+        chat.innerHTML = '';
+        
+        const messages = [];
+        snapshot.forEach(d => { messages.push({ id: d.id, ...d.data() }); });
+        messages.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        
+        messages.forEach(s => {
+          const div = document.createElement('div');
+          div.className = 'chat-message' + (s.status === 'completed' ? ' completed' : '');
+          
+          if (s.status === 'pending') {
+            div.innerHTML = `<strong>${s.requestPerson}</strong> sucht Ersatz für ${new Date(s.date).toLocaleDateString('de-DE')}<br>
+              <div style="margin: 0.5rem 0; font-size: 0.85rem; color: #999;">
+                ${s.replacementPerson ? `Ersatz: ${s.replacementPerson}` : 'Warte auf Zusage...'}
+              </div>`;
+          } else if (s.status === 'completed') {
+            div.innerHTML = `✅ <strong>${s.replacementPerson}</strong> hat für <strong>${s.requestPerson}</strong> am ${new Date(s.date).toLocaleDateString('de-DE')} übernommen`;
+          }
+          chat.appendChild(div);
+        });
+      });
+    }
+
+    ['wirte', 'aufsicht'].forEach(type => { 
+      loadPersons(type); 
+      loadAssignments(type); 
+      loadSwapRequests(type); 
+    });
+
+    // PDF Export Function
+    window.downloadList = async (type) => {
+      // Prüfe ob jsPDF bereits geladen ist
+      if (!window.jspdf) {
+        const script = document.createElement('script');
+        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+        document.head.appendChild(script);
+        await new Promise(resolve => script.onload = resolve);
+      }
+      
+      const { jsPDF } = window.jspdf;
+      
+      // Assignments laden
+      const snapshot = await getDocs(collection(db, `${type}-assignments`));
+      const sortedAssignments = [];
+      snapshot.forEach(d => { sortedAssignments.push(d.data()); });
+      sortedAssignments.sort((a, b) => new Date(a.date) - new Date(b.date));
+      
+      // Nach Wochentag filtern
+      const saturdays = sortedAssignments.filter(a => new Date(a.date).getDay() === 6);
+      const sundays = sortedAssignments.filter(a => new Date(a.date).getDay() === 0);
+      
+      const createPDF = (withLogo = false, logoData = null) => {
+        const doc = new jsPDF('landscape', 'mm', 'a4');
+        
+        // Logo hinzufügen wenn vorhanden
+        if (withLogo && logoData) {
+          doc.addImage(logoData, 'PNG', 20, 10, 30, 30);
+        }
+          
+          // Überschrift
+          doc.setFontSize(20);
+          doc.setFont('helvetica', 'bold');
+          const title = type === 'wirte' ? 'Wirte Liste' : 'Schießaufsicht Liste';
+          const subtitle = type === 'wirte' ? 'Samstag / Sonntag' : 'Samstag';
+          doc.text(title, 148, 20, { align: 'center' });
+          doc.setFontSize(14);
+          doc.text(subtitle, 148, 28, { align: 'center' });
+          
+          // Datum
+          doc.setFontSize(10);
+          doc.setFont('helvetica', 'normal');
+          doc.text(`Erstellt am: ${new Date().toLocaleDateString('de-DE')}`, 148, 35, { align: 'center' });
+        
+        // Tabellen-Startposition
+          let startY = 50;
+          
+          if (type === 'wirte') {
+            // Zwei Tabellen nebeneinander
+            // Samstag Tabelle (links)
+            doc.setFontSize(12);
+            doc.setFont('helvetica', 'bold');
+            doc.text('Samstag', 50, startY);
+            
+            // Tabellen-Header
+            doc.setFontSize(10);
+            doc.rect(20, startY + 5, 30, 8);
+            doc.rect(50, startY + 5, 40, 8);
+            doc.rect(90, startY + 5, 50, 8);
+            doc.text('Tag', 35, startY + 10, { align: 'center' });
+            doc.text('Datum', 70, startY + 10, { align: 'center' });
+            doc.text('Name', 115, startY + 10, { align: 'center' });
+            
+            // Samstag Daten
+            doc.setFont('helvetica', 'normal');
+            let yPos = startY + 13;
+            saturdays.forEach(a => {
+              const date = new Date(a.date);
+              const dayName = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'][date.getDay()];
+              const dateStr = date.toLocaleDateString('de-DE');
+              const name = a.swappedWith ? `${a.swappedWith} (für ${a.originalPerson})` : a.person;
+              
+              doc.rect(20, yPos, 30, 8);
+              doc.rect(50, yPos, 40, 8);
+              doc.rect(90, yPos, 50, 8);
+              doc.text(dayName, 35, yPos + 5, { align: 'center' });
+              doc.text(dateStr, 70, yPos + 5, { align: 'center' });
+              doc.text(name, 92, yPos + 5);
+              yPos += 8;
+            });
+            
+            // Sonntag Tabelle (rechts)
+            doc.setFont('helvetica', 'bold');
+            doc.text('Sonntag', 200, startY);
+            
+            // Tabellen-Header
+            doc.rect(157, startY + 5, 30, 8);
+            doc.rect(187, startY + 5, 40, 8);
+            doc.rect(227, startY + 5, 50, 8);
+            doc.text('Tag', 172, startY + 10, { align: 'center' });
+            doc.text('Datum', 207, startY + 10, { align: 'center' });
+            doc.text('Name', 252, startY + 10, { align: 'center' });
+            
+            // Sonntag Daten
+            doc.setFont('helvetica', 'normal');
+            yPos = startY + 13;
+            sundays.forEach(a => {
+              const date = new Date(a.date);
+              const dayName = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'][date.getDay()];
+              const dateStr = date.toLocaleDateString('de-DE');
+              const name = a.swappedWith ? `${a.swappedWith} (für ${a.originalPerson})` : a.person;
+              
+              doc.rect(157, yPos, 30, 8);
+              doc.rect(187, yPos, 40, 8);
+              doc.rect(227, yPos, 50, 8);
+              doc.text(dayName, 172, yPos + 5, { align: 'center' });
+              doc.text(dateStr, 207, yPos + 5, { align: 'center' });
+              doc.text(name, 229, yPos + 5);
+              yPos += 8;
+            });
+          } else {
+            // Nur Samstag Tabelle (zentriert)
+            doc.setFontSize(12);
+            doc.setFont('helvetica', 'bold');
+            doc.text('Samstag', 148, startY, { align: 'center' });
+            
+            // Tabellen-Header
+            doc.setFontSize(10);
+            doc.rect(80, startY + 5, 30, 8);
+            doc.rect(110, startY + 5, 50, 8);
+            doc.rect(160, startY + 5, 60, 8);
+            doc.text('Tag', 95, startY + 10, { align: 'center' });
+            doc.text('Datum', 135, startY + 10, { align: 'center' });
+            doc.text('Name', 190, startY + 10, { align: 'center' });
+            
+            // Daten
+            doc.setFont('helvetica', 'normal');
+            let yPos = startY + 13;
+            saturdays.forEach(a => {
+              const date = new Date(a.date);
+              const dayName = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'][date.getDay()];
+              const dateStr = date.toLocaleDateString('de-DE');
+              const name = a.swappedWith ? `${a.swappedWith} (für ${a.originalPerson})` : a.person;
+              
+              doc.rect(80, yPos, 30, 8);
+              doc.rect(110, yPos, 50, 8);
+              doc.rect(160, yPos, 60, 8);
+              doc.text(dayName, 95, yPos + 5, { align: 'center' });
+              doc.text(dateStr, 135, yPos + 5, { align: 'center' });
+              doc.text(name, 162, yPos + 5);
+              yPos += 8;
+            });
+          }
+        
+        // PDF speichern
+        doc.save(`${type}-liste-${new Date().toISOString().split('T')[0]}.pdf`);
+      };
+      
+      // Versuche Logo zu laden
+      const logo = new Image();
+      logo.crossOrigin = 'anonymous';
+      logo.onload = () => createPDF(true, logo);
+      logo.onerror = () => createPDF(false);
+      logo.src = 'logo.png';
+    };
+  </script>
+</body>
+</html>

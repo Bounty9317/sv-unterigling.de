@@ -23,14 +23,32 @@
     .person-cards { display: flex; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap; }
     .person-card { padding: 0.8rem 1.2rem; border-radius: 6px; cursor: move; font-weight: 600; }
     .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; background: #1a1a1a; }
-    .calendar-day { background: #2a2a2a; min-height: 100px; padding: 0.5rem; }
+    .calendar-day { background: #2a2a2a; min-height: 100px; padding: 0.5rem; border: 2px solid transparent; }
+    .calendar-day.disabled { background: #1a1a1a; opacity: 0.5; }
+    .calendar-day.assigned { border-color: #4CAF50; }
+    .calendar-day.missing { border-color: #c62828; }
     .calendar-day.drop-zone { background: rgba(76, 175, 80, 0.2); }
     .assigned-person { padding: 0.5rem; border-radius: 4px; font-size: 0.85rem; margin-bottom: 0.3rem; cursor: pointer; }
-    .assigned-person.swapped { text-decoration: line-through; opacity: 0.6; }
-    .swap-info { font-size: 0.75rem; color: #ffa726; margin-top: 0.3rem; }
+    .swap-info { font-size: 0.75rem; background: #ffa726; color: #1a1a1a; padding: 0.3rem; border-radius: 4px; margin-top: 0.3rem; font-weight: 600; }
+    .chat-message.completed { border-left-color: #4CAF50; opacity: 0.7; }
     .chat-message { background: #1a1a1a; padding: 1rem; border-radius: 6px; margin-bottom: 1rem; border-left: 3px solid #ffa726; }
     .btn-approve { background: #4CAF50; color: white; border: none; padding: 0.4rem 0.8rem; border-radius: 4px; cursor: pointer; margin-right: 0.5rem; }
     .btn-reject { background: #c62828; color: white; border: none; padding: 0.4rem 0.8rem; border-radius: 4px; cursor: pointer; }
+    .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); }
+    .modal-content { background: #2a2a2a; margin: 5% auto; padding: 2rem; border-radius: 12px; max-width: 500px; }
+    .close-modal { float: right; font-size: 2rem; color: #999; cursor: pointer; }
+    .form-group { margin-bottom: 1.5rem; }
+    .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 600; }
+    .form-group input { width: 100%; padding: 0.8rem; background: #1a1a1a; border: 2px solid #3a3a3a; border-radius: 6px; color: #e0e0e0; }
+    .color-picker { display: grid; grid-template-columns: repeat(6, 1fr); gap: 0.5rem; margin-top: 0.5rem; }
+    .color-option { width: 40px; height: 40px; border-radius: 6px; cursor: pointer; border: 3px solid transparent; }
+    .color-option.selected { border-color: white; }
+    .btn-add { background: #4CAF50; color: white; border: none; padding: 0.8rem 1.5rem; border-radius: 6px; cursor: pointer; font-weight: 600; width: 100%; }
+    .person-card-wrapper { position: relative; }
+    .btn-delete-person { position: absolute; top: -5px; right: -5px; background: #c62828; color: white; border: none; width: 20px; height: 20px; border-radius: 50%; cursor: pointer; font-size: 0.7rem; }
+    .helper-select { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; max-height: 300px; overflow-y: auto; }
+    .helper-option { padding: 0.8rem; border-radius: 6px; cursor: pointer; text-align: center; font-weight: 600; color: white; transition: transform 0.2s; }
+    .helper-option:hover { transform: scale(1.05); }
   </style>
 </head>
 <body>
@@ -48,6 +66,7 @@
         <div class="calendar-section">
           <button class="btn" onclick="downloadList('wirte')" style="margin-bottom: 1rem; background: #2d5a3d;">📥 Wirteliste herunterladen</button>
           <h2>Wirte-Kalender</h2>
+          <button class="btn" onclick="openAddPersonModal('wirte')" style="margin-bottom: 1rem; background: #4CAF50;">➕ Wirt hinzufügen</button>
           <div class="person-cards" id="wirte-cards"></div>
           <div id="wirte-calendar" class="calendar-grid"></div>
         </div>
@@ -62,6 +81,7 @@
         <div class="calendar-section">
           <button class="btn" onclick="downloadList('aufsicht')" style="margin-bottom: 1rem; background: #2d5a3d;">📥 Schießaufsichtsliste herunterladen</button>
           <h2>Schießaufsicht-Kalender</h2>
+          <button class="btn" onclick="openAddPersonModal('aufsicht')" style="margin-bottom: 1rem; background: #4CAF50;">➕ Schießaufsicht hinzufügen</button>
           <div class="person-cards" id="aufsicht-cards"></div>
           <div id="aufsicht-calendar" class="calendar-grid"></div>
         </div>
@@ -93,9 +113,18 @@
     window.showTab = (t) => { document.querySelectorAll('.tab').forEach(x => x.classList.remove('active')); document.querySelectorAll('.tab-content').forEach(x => x.classList.remove('active')); document.querySelector(`[onclick="showTab('${t}')"]`).classList.add('active'); document.getElementById(`${t}-tab`).classList.add('active'); };
 
     const persons = {
-      wirte: [{ name: 'Max Mustermann', color: '#e57373' }, { name: 'Anna Schmidt', color: '#64b5f6' }],
-      aufsicht: [{ name: 'Zink Alex', color: '#4CAF50' }, { name: 'Zink Michi', color: '#2196F3' }]
+      wirte: [],
+      aufsicht: []
     };
+
+    async function loadPersons(type) {
+      const snapshot = await getDocs(collection(db, `${type}-persons`));
+      persons[type] = [];
+      snapshot.forEach(d => { 
+        persons[type].push({ ...d.data(), id: d.id }); 
+      });
+      renderPersonCards(type);
+    }
 
     let assignments = { wirte: {}, aufsicht: {} };
     let draggedPerson = null, draggedFrom = null;
@@ -117,148 +146,446 @@
       await loadAssignments(type);
     }
 
-    async function createSwapRequest(type, fromPerson, toPerson, date, fromDate) {
+    async function createSwapRequest(type, requestPerson, date, requestPersonColor) {
       await addDoc(collection(db, `${type}-swaps`), {
-        fromPerson, toPerson, date, fromDate, fromApproved: true, toApproved: false, status: 'pending', createdAt: new Date().toISOString()
+        requestPerson,
+        date,
+        requestPersonColor,
+        replacementPerson: null,
+        status: 'pending',
+        createdAt: new Date().toISOString()
       });
     }
 
     function loadSwapRequests(type) {
-      onSnapshot(query(collection(db, `${type}-swaps`), where('status', '==', 'pending')), (snapshot) => {
+      onSnapshot(collection(db, `${type}-swaps`), (snapshot) => {
         const chat = document.getElementById(`${type}-chat`);
         if (snapshot.empty) { chat.innerHTML = '<p style="color: #999;">Keine Anfragen</p>'; return; }
         chat.innerHTML = '';
+        
+        const messages = [];
         snapshot.forEach(d => {
-          const s = d.data();
+          messages.push({ id: d.id, ...d.data() });
+        });
+        
+        messages.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        
+        messages.forEach(s => {
           const div = document.createElement('div');
-          div.className = 'chat-message';
-          div.innerHTML = `<strong>${s.fromPerson}</strong> übernimmt von <strong>${s.toPerson}</strong> am ${new Date(s.date).toLocaleDateString('de-DE')}<br>
-            <div style="margin: 0.5rem 0; font-size: 0.85rem;">
-              ${s.fromPerson}: ${s.fromApproved ? '✅' : '⏳'} | ${s.toPerson}: ${s.toApproved ? '✅' : '⏳'}
-            </div>
-            <button class="btn-approve" onclick="approveSwap('${type}', '${d.id}')">✓ Zustimmen</button>
-            <button class="btn-reject" onclick="rejectSwap('${type}', '${d.id}')">✗ Ablehnen</button>`;
+          div.className = 'chat-message' + (s.status === 'completed' ? ' completed' : '');
+          
+          if (s.status === 'pending') {
+            div.innerHTML = `<strong>${s.requestPerson}</strong> sucht Ersatz für ${new Date(s.date).toLocaleDateString('de-DE')}<br>
+              <div style="margin: 0.5rem 0; font-size: 0.85rem; color: #999;">
+                Warte auf Zusage...
+              </div>
+              ${s.replacementPerson ? `<button class="btn-approve" onclick="approveSwapAsReplacement('${type}', '${s.id}', '${s.replacementPerson}')">✓ Einspringen als ${s.replacementPerson}</button>` : ''}
+              <button class="btn-reject" onclick="rejectSwap('${type}', '${s.id}')">✗ Anfrage zurückziehen</button>`;
+          } else if (s.status === 'completed') {
+            div.innerHTML = `✅ <strong>${s.replacementPerson}</strong> hat für <strong>${s.requestPerson}</strong> am ${new Date(s.date).toLocaleDateString('de-DE')} übernommen<br>
+              <div style="margin: 0.5rem 0; font-size: 0.75rem; color: #4CAF50;">
+                Tausch abgeschlossen
+              </div>`;
+          }
           chat.appendChild(div);
         });
       });
     }
 
-    window.approveSwap = async (type, id) => {
-      const swapDoc = await getDocs(query(collection(db, `${type}-swaps`), where('__name__', '==', id)));
-      if (!swapDoc.empty) {
-        const swap = swapDoc.docs[0].data();
-        await updateDoc(doc(db, `${type}-swaps`, id), { toApproved: true, status: 'completed' });
-        
-        // Update assignments with swap info
-        if (swap.fromDate) {
-          await updateDoc(doc(db, `${type}-assignments`, assignments[type][swap.fromDate].id), { 
-            swappedWith: swap.fromPerson, 
-            swappedDate: swap.date 
-          });
-        }
-        await updateDoc(doc(db, `${type}-assignments`, assignments[type][swap.date].id), { 
-          swappedWith: swap.fromPerson, 
-          originalPerson: swap.toPerson 
+    window.approveSwapAsReplacement = async (type, swapId, replacementPerson) => {
+      const swapSnapshot = await getDocs(query(collection(db, `${type}-swaps`)));
+      let swap = null;
+      swapSnapshot.forEach(d => {
+        if (d.id === swapId) swap = { id: d.id, ...d.data() };
+      });
+      
+      if (!swap) return;
+      
+      // Finde die Farbe des Ersatz-Helfers
+      const replacementHelper = persons[type].find(p => p.name === replacementPerson);
+      if (!replacementHelper) return;
+      
+      // Update swap status
+      await updateDoc(doc(db, `${type}-swaps`, swapId), { 
+        replacementPerson,
+        status: 'completed'
+      });
+      
+      // Update assignment
+      const assignment = assignments[type][swap.date];
+      if (assignment) {
+        await updateDoc(doc(db, `${type}-assignments`, assignment.id), { 
+          originalPerson: swap.requestPerson,
+          person: replacementPerson,
+          color: replacementHelper.color,
+          swappedWith: replacementPerson
         });
-        
-        await loadAssignments(type);
       }
+      
+      await loadAssignments(type);
     };
-    window.rejectSwap = async (type, id) => { await deleteDoc(doc(db, `${type}-swaps`, id)); };
+
+    window.rejectSwap = async (type, id) => { 
+      await deleteDoc(doc(db, `${type}-swaps`, id)); 
+    };
 
     function renderPersonCards(type) {
       document.getElementById(`${type}-cards`).innerHTML = persons[type].map(p => 
-        `<div class="person-card" draggable="true" style="background: ${p.color}; color: white;" data-person="${p.name}" data-color="${p.color}">${p.name}</div>`
+        `<div class="person-card-wrapper">
+          <div class="person-card" style="background: ${p.color}; color: white;" data-person="${p.name}" data-color="${p.color}">${p.name}</div>
+          <button class="btn-delete-person" onclick="deletePerson('${type}', '${p.id}')">×</button>
+        </div>`
       ).join('');
-      document.querySelectorAll(`#${type}-cards .person-card`).forEach(c => {
-        c.addEventListener('dragstart', (e) => { draggedPerson = { name: e.target.dataset.person, color: e.target.dataset.color }; draggedFrom = null; });
-      });
     }
+
+    window.deletePerson = async (type, id) => {
+      if (!confirm('Möchten Sie diesen Helfer wirklich löschen?')) return;
+      await deleteDoc(doc(db, `${type}-persons`, id));
+      await loadPersons(type);
+    };
 
     function renderCalendar(type) {
       const cal = document.getElementById(`${type}-calendar`);
       cal.innerHTML = '';
-      ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'].forEach(d => { const h = document.createElement('div'); h.style.cssText = 'background: #1a472a; color: white; padding: 0.8rem; text-align: center; font-weight: 600;'; h.textContent = d; cal.appendChild(h); });
+      ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'].forEach(d => { 
+        const h = document.createElement('div'); 
+        h.style.cssText = 'background: #1a472a; color: white; padding: 0.8rem; text-align: center; font-weight: 600;'; 
+        h.textContent = d; 
+        cal.appendChild(h); 
+      });
       
       for (let day = 1; day <= 31; day++) {
         const cell = document.createElement('div');
-        cell.className = 'calendar-day';
         const dateStr = `2025-01-${String(day).padStart(2, '0')}`;
-        cell.innerHTML = `<div style="font-size: 0.9rem; color: #999;">${day}</div>`;
-        cell.dataset.date = dateStr;
+        const date = new Date(dateStr);
+        const dayOfWeek = date.getDay(); // 0=Sonntag, 6=Samstag
+        
+        // Prüfe ob Tag erlaubt ist
+        let isAllowed = false;
+        if (type === 'aufsicht') {
+          isAllowed = dayOfWeek === 6; // Nur Samstag
+        } else if (type === 'wirte') {
+          isAllowed = dayOfWeek === 0 || dayOfWeek === 6; // Samstag oder Sonntag
+        }
         
         const assignment = assignments[type][dateStr];
+        
+        // Setze CSS-Klassen basierend auf Einteilung
+        let cellClass = 'calendar-day';
+        if (!isAllowed) {
+          cellClass += ' disabled';
+        } else if (assignment) {
+          cellClass += ' assigned';
+        } else {
+          cellClass += ' missing';
+        }
+        
+        cell.className = cellClass;
+        cell.innerHTML = `<div style="font-size: 0.9rem; color: #999;">${day}</div>`;
+        cell.dataset.date = dateStr;
         if (assignment) {
           const personDiv = document.createElement('div');
-          personDiv.className = 'assigned-person' + (assignment.swappedWith ? ' swapped' : '');
+          personDiv.className = 'assigned-person';
           personDiv.style.background = assignment.color;
           personDiv.style.color = 'white';
           personDiv.textContent = assignment.originalPerson || assignment.person;
-          personDiv.draggable = true;
-          personDiv.addEventListener('dragstart', () => { draggedPerson = { name: assignment.person, color: assignment.color }; draggedFrom = dateStr; });
+          personDiv.addEventListener('click', () => openSwapModal(type, dateStr, assignment));
           cell.appendChild(personDiv);
           
-          if (assignment.swappedWith) {
+          if (assignment.swappedWith && assignment.originalPerson) {
             const swapInfo = document.createElement('div');
             swapInfo.className = 'swap-info';
-            swapInfo.style.background = assignment.color;
             swapInfo.innerHTML = `Getauscht mit:<br><strong>${assignment.swappedWith}</strong>`;
             cell.appendChild(swapInfo);
           }
         }
         
-        cell.addEventListener('dragover', (e) => { e.preventDefault(); e.currentTarget.classList.add('drop-zone'); });
-        cell.addEventListener('dragleave', (e) => e.currentTarget.classList.remove('drop-zone'));
-        cell.addEventListener('drop', async (e) => {
-          e.preventDefault();
-          e.currentTarget.classList.remove('drop-zone');
-          const targetDate = e.currentTarget.dataset.date;
-          const existing = assignments[type][targetDate];
-          if (existing && draggedFrom) {
-            await createSwapRequest(type, draggedPerson.name, existing.person, targetDate, draggedFrom);
-          } else if (draggedPerson) {
-            await saveAssignment(type, targetDate, draggedPerson.name, draggedPerson.color);
-          }
-        });
         cal.appendChild(cell);
       }
     }
 
-    // PDF Export Function
-    window.downloadList = async (type) => {
-      const snapshot = await getDocs(collection(db, `${type}-assignments`));
-      let data = `${type === 'wirte' ? 'Wirteliste' : 'Schießaufsichtsliste'}\n`;
-      data += `Erstellt am: ${new Date().toLocaleDateString('de-DE')}\n\n`;
+    let currentSwapRequest = null;
+
+    function openSwapModal(type, date, assignment) {
+      currentSwapRequest = { type, date, assignment };
+      document.getElementById('swap-modal-title').textContent = `Tausch-Anfrage für ${new Date(date).toLocaleDateString('de-DE')}`;
+      document.getElementById('swap-modal-info').textContent = `Du bist eingeteilt: ${assignment.person}`;
       
-      const sortedAssignments = [];
-      snapshot.forEach(doc => {
-        const assignment = doc.data();
-        sortedAssignments.push(assignment);
-      });
+      const helperSelect = document.getElementById('helper-select');
+      helperSelect.innerHTML = persons[type]
+        .filter(p => p.name !== assignment.person)
+        .map(p => `<div class="helper-option" style="background: ${p.color};" onclick="selectReplacement('${p.name}')">${p.name}</div>`)
+        .join('');
       
-      sortedAssignments.sort((a, b) => new Date(a.date) - new Date(b.date));
+      document.getElementById('swap-modal').style.display = 'block';
+    }
+
+    window.selectReplacement = async (replacementName) => {
+      if (!currentSwapRequest) return;
       
-      sortedAssignments.forEach(assignment => {
-        const date = new Date(assignment.date).toLocaleDateString('de-DE');
-        let line = `${date}: ${assignment.person}`;
-        if (assignment.swappedWith) {
-          line += ` (Getauscht mit ${assignment.swappedWith})`;
+      const { type, date, assignment } = currentSwapRequest;
+      
+      // Erstelle Tausch-Anfrage
+      await createSwapRequest(type, assignment.person, date, assignment.color);
+      
+      // Aktualisiere die Anfrage mit dem gewählten Ersatz
+      const swapsSnapshot = await getDocs(collection(db, `${type}-swaps`));
+      let latestSwapId = null;
+      swapsSnapshot.forEach(d => {
+        const data = d.data();
+        if (data.requestPerson === assignment.person && data.date === date && data.status === 'pending') {
+          latestSwapId = d.id;
         }
-        data += line + '\n';
       });
       
-      const blob = new Blob([data], { type: 'text/plain;charset=utf-8' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${type}-liste-${new Date().toISOString().split('T')[0]}.txt`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      if (latestSwapId) {
+        await updateDoc(doc(db, `${type}-swaps`, latestSwapId), { replacementPerson: replacementName });
+      }
+      
+      closeSwapModal();
+      alert(`Tausch-Anfrage an ${replacementName} gesendet!`);
     };
 
-    ['wirte', 'aufsicht'].forEach(type => { renderPersonCards(type); loadAssignments(type); loadSwapRequests(type); });
+    window.closeSwapModal = () => {
+      document.getElementById('swap-modal').style.display = 'none';
+      currentSwapRequest = null;
+    };
+
+    // PDF Export Function
+    window.downloadList = async (type) => {
+      // Prüfe ob jsPDF bereits geladen ist
+      if (!window.jspdf) {
+        const script = document.createElement('script');
+        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+        document.head.appendChild(script);
+        await new Promise(resolve => script.onload = resolve);
+      }
+      
+      const { jsPDF } = window.jspdf;
+      
+      // Assignments laden
+      const snapshot = await getDocs(collection(db, `${type}-assignments`));
+      const sortedAssignments = [];
+      snapshot.forEach(d => { sortedAssignments.push(d.data()); });
+      sortedAssignments.sort((a, b) => new Date(a.date) - new Date(b.date));
+      
+      // Nach Wochentag filtern
+      const saturdays = sortedAssignments.filter(a => new Date(a.date).getDay() === 6);
+      const sundays = sortedAssignments.filter(a => new Date(a.date).getDay() === 0);
+      
+      const createPDF = (withLogo = false, logoData = null) => {
+        const doc = new jsPDF('landscape', 'mm', 'a4');
+        
+        // Logo hinzufügen wenn vorhanden
+        if (withLogo && logoData) {
+          doc.addImage(logoData, 'PNG', 20, 10, 30, 30);
+        }
+        
+        // Überschrift
+        doc.setFontSize(20);
+        doc.setFont('helvetica', 'bold');
+        const title = type === 'wirte' ? 'Wirte Liste' : 'Schießaufsicht Liste';
+        const subtitle = type === 'wirte' ? 'Samstag / Sonntag' : 'Samstag';
+        doc.text(title, 148, 20, { align: 'center' });
+        doc.setFontSize(14);
+        doc.text(subtitle, 148, 28, { align: 'center' });
+        
+        // Datum
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
+        doc.text(`Erstellt am: ${new Date().toLocaleDateString('de-DE')}`, 148, 35, { align: 'center' });
+        
+        // Tabellen-Startposition
+        let startY = 50;
+        
+        if (type === 'wirte') {
+          // Samstag Tabelle (links)
+          doc.setFontSize(12);
+          doc.setFont('helvetica', 'bold');
+          doc.text('Samstag', 50, startY);
+          
+          doc.setFontSize(10);
+          doc.rect(20, startY + 5, 30, 8);
+          doc.rect(50, startY + 5, 40, 8);
+          doc.rect(90, startY + 5, 50, 8);
+          doc.text('Tag', 35, startY + 10, { align: 'center' });
+          doc.text('Datum', 70, startY + 10, { align: 'center' });
+          doc.text('Name', 115, startY + 10, { align: 'center' });
+          
+          doc.setFont('helvetica', 'normal');
+          let yPos = startY + 13;
+          saturdays.forEach(a => {
+            const date = new Date(a.date);
+            const dayName = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'][date.getDay()];
+            const dateStr = date.toLocaleDateString('de-DE');
+            const name = a.swappedWith ? `${a.swappedWith} (für ${a.originalPerson})` : a.person;
+            
+            doc.rect(20, yPos, 30, 8);
+            doc.rect(50, yPos, 40, 8);
+            doc.rect(90, yPos, 50, 8);
+            doc.text(dayName, 35, yPos + 5, { align: 'center' });
+            doc.text(dateStr, 70, yPos + 5, { align: 'center' });
+            doc.text(name, 92, yPos + 5);
+            yPos += 8;
+          });
+          
+          // Sonntag Tabelle (rechts)
+          doc.setFont('helvetica', 'bold');
+          doc.text('Sonntag', 200, startY);
+          
+          doc.rect(157, startY + 5, 30, 8);
+          doc.rect(187, startY + 5, 40, 8);
+          doc.rect(227, startY + 5, 50, 8);
+          doc.text('Tag', 172, startY + 10, { align: 'center' });
+          doc.text('Datum', 207, startY + 10, { align: 'center' });
+          doc.text('Name', 252, startY + 10, { align: 'center' });
+          
+          doc.setFont('helvetica', 'normal');
+          yPos = startY + 13;
+          sundays.forEach(a => {
+            const date = new Date(a.date);
+            const dayName = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'][date.getDay()];
+            const dateStr = date.toLocaleDateString('de-DE');
+            const name = a.swappedWith ? `${a.swappedWith} (für ${a.originalPerson})` : a.person;
+            
+            doc.rect(157, yPos, 30, 8);
+            doc.rect(187, yPos, 40, 8);
+            doc.rect(227, yPos, 50, 8);
+            doc.text(dayName, 172, yPos + 5, { align: 'center' });
+            doc.text(dateStr, 207, yPos + 5, { align: 'center' });
+            doc.text(name, 229, yPos + 5);
+            yPos += 8;
+          });
+        } else {
+          // Nur Samstag Tabelle (zentriert)
+          doc.setFontSize(12);
+          doc.setFont('helvetica', 'bold');
+          doc.text('Samstag', 148, startY, { align: 'center' });
+          
+          doc.setFontSize(10);
+          doc.rect(80, startY + 5, 30, 8);
+          doc.rect(110, startY + 5, 50, 8);
+          doc.rect(160, startY + 5, 60, 8);
+          doc.text('Tag', 95, startY + 10, { align: 'center' });
+          doc.text('Datum', 135, startY + 10, { align: 'center' });
+          doc.text('Name', 190, startY + 10, { align: 'center' });
+          
+          doc.setFont('helvetica', 'normal');
+          let yPos = startY + 13;
+          saturdays.forEach(a => {
+            const date = new Date(a.date);
+            const dayName = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'][date.getDay()];
+            const dateStr = date.toLocaleDateString('de-DE');
+            const name = a.swappedWith ? `${a.swappedWith} (für ${a.originalPerson})` : a.person;
+            
+            doc.rect(80, yPos, 30, 8);
+            doc.rect(110, yPos, 50, 8);
+            doc.rect(160, yPos, 60, 8);
+            doc.text(dayName, 95, yPos + 5, { align: 'center' });
+            doc.text(dateStr, 135, yPos + 5, { align: 'center' });
+            doc.text(name, 162, yPos + 5);
+            yPos += 8;
+          });
+        }
+        
+        // PDF speichern
+        doc.save(`${type}-liste-${new Date().toISOString().split('T')[0]}.pdf`);
+      };
+      
+      // Versuche Logo zu laden
+      const logo = new Image();
+      logo.crossOrigin = 'anonymous';
+      logo.onload = () => createPDF(true, logo);
+      logo.onerror = () => createPDF(false);
+      logo.src = 'logo.png';
+    };
+
+    ['wirte', 'aufsicht'].forEach(type => { loadPersons(type); loadAssignments(type); loadSwapRequests(type); });
+  </script>
+
+  <!-- Modal für Helfer hinzufügen -->
+  <div id="add-person-modal" class="modal">
+    <div class="modal-content">
+      <span class="close-modal" onclick="closeAddPersonModal()">&times;</span>
+      <h2 id="modal-title">Helfer hinzufügen</h2>
+      <form id="add-person-form">
+        <div class="form-group">
+          <label>Vorname</label>
+          <input type="text" id="firstname" required>
+        </div>
+        <div class="form-group">
+          <label>Nachname</label>
+          <input type="text" id="lastname" required>
+        </div>
+        <div class="form-group">
+          <label>Kachelfarbe</label>
+          <div class="color-picker" id="color-picker"></div>
+        </div>
+        <button type="submit" class="btn-add">Hinzufügen</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal für Tausch-Anfrage -->
+  <div id="swap-modal" class="modal">
+    <div class="modal-content">
+      <span class="close-modal" onclick="closeSwapModal()">&times;</span>
+      <h2 id="swap-modal-title">Tausch-Anfrage</h2>
+      <p id="swap-modal-info" style="margin-bottom: 1.5rem; color: #999;"></p>
+      <div class="form-group">
+        <label>Wähle einen Ersatz-Helfer:</label>
+        <div class="helper-select" id="helper-select"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const availableColors = ['#e57373', '#64b5f6', '#81c784', '#ffb74d', '#ba68c8', '#4db6ac', '#ff8a65', '#a1887f', '#90a4ae', '#f06292', '#7986cb', '#aed581'];
+    let selectedColor = null;
+    let currentModalType = null;
+
+    window.openAddPersonModal = (type) => {
+      currentModalType = type;
+      document.getElementById('modal-title').textContent = type === 'wirte' ? 'Wirt hinzufügen' : 'Schießaufsicht hinzufügen';
+      document.getElementById('add-person-modal').style.display = 'block';
+      renderColorPicker(type);
+    };
+
+    window.closeAddPersonModal = () => {
+      document.getElementById('add-person-modal').style.display = 'none';
+      document.getElementById('add-person-form').reset();
+      selectedColor = null;
+    };
+
+    function renderColorPicker(type) {
+      const usedColors = persons[type].map(p => p.color);
+      const picker = document.getElementById('color-picker');
+      picker.innerHTML = availableColors.map(color => {
+        const isUsed = usedColors.includes(color);
+        return `<div class="color-option ${isUsed ? 'disabled' : ''}" 
+                     style="background: ${color}; ${isUsed ? 'opacity: 0.3; cursor: not-allowed;' : ''}"
+                     onclick="${isUsed ? '' : `selectColor('${color}')`}"></div>`;
+      }).join('');
+    }
+
+    window.selectColor = (color) => {
+      selectedColor = color;
+      document.querySelectorAll('.color-option').forEach(opt => opt.classList.remove('selected'));
+      event.target.classList.add('selected');
+    };
+
+    document.getElementById('add-person-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!selectedColor) { alert('Bitte wählen Sie eine Farbe!'); return; }
+      
+      const firstname = document.getElementById('firstname').value.trim();
+      const lastname = document.getElementById('lastname').value.trim();
+      const name = `${firstname} ${lastname}`;
+      
+      await addDoc(collection(db, `${currentModalType}-persons`), { name, color: selectedColor });
+      await loadPersons(currentModalType);
+      closeAddPersonModal();
+    });
   </script>
 </body>
 </html>
