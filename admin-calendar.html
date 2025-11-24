@@ -650,29 +650,47 @@
         doc.text(`Erstellt am: ${new Date().toLocaleDateString('de-DE')}`, 105, startY + 6, { align: 'center' });
         
         let yPos = startY + 15;
-        const rowHeight = 6.5;
-        const colWidths = [18, 38, 74]; // Tag, Datum, Name
-        const startX = 15;
+        const rowHeight = 6;
+        const colWidths = [15, 28, 50]; // Tag, Datum, Name (schmaler für nebeneinander)
+        const leftStartX = 8;
+        const rightStartX = 110;
         
         if (type === 'wirte') {
-          // Samstag Schießabend Tabelle
-          doc.setFontSize(11);
+          // Überschriften für beide Tabellen
+          doc.setFontSize(10);
           doc.setFont('helvetica', 'bold');
-          doc.text('Samstag Schießabend (19:30-24:00)', 105, yPos, { align: 'center' });
-          yPos += 7;
+          doc.text('Samstag Schießabend', leftStartX + 46.5, yPos, { align: 'center' });
+          doc.text('Sonntag / Frühschoppen / Feiertage', rightStartX + 46.5, yPos, { align: 'center' });
+          doc.setFontSize(8);
+          doc.setFont('helvetica', 'normal');
+          doc.text('(19:30-24:00)', leftStartX + 46.5, yPos + 4, { align: 'center' });
+          doc.text('(10:00-12:00)', rightStartX + 46.5, yPos + 4, { align: 'center' });
+          yPos += 10;
           
-          // Header
-          doc.setFontSize(9);
+          // Header für beide Tabellen
+          doc.setFontSize(8);
           doc.setFont('helvetica', 'bold');
-          doc.rect(startX, yPos, colWidths[0], rowHeight);
-          doc.rect(startX + colWidths[0], yPos, colWidths[1], rowHeight);
-          doc.rect(startX + colWidths[0] + colWidths[1], yPos, colWidths[2], rowHeight);
-          doc.text('Tag', startX + colWidths[0]/2, yPos + 4.5, { align: 'center' });
-          doc.text('Datum', startX + colWidths[0] + colWidths[1]/2, yPos + 4.5, { align: 'center' });
-          doc.text('Name', startX + colWidths[0] + colWidths[1] + colWidths[2]/2, yPos + 4.5, { align: 'center' });
-          yPos += rowHeight;
           
-          // Daten
+          // Linke Tabelle Header
+          doc.rect(leftStartX, yPos, colWidths[0], rowHeight);
+          doc.rect(leftStartX + colWidths[0], yPos, colWidths[1], rowHeight);
+          doc.rect(leftStartX + colWidths[0] + colWidths[1], yPos, colWidths[2], rowHeight);
+          doc.text('Tag', leftStartX + colWidths[0]/2, yPos + 4, { align: 'center' });
+          doc.text('Datum', leftStartX + colWidths[0] + colWidths[1]/2, yPos + 4, { align: 'center' });
+          doc.text('Name', leftStartX + colWidths[0] + colWidths[1] + colWidths[2]/2, yPos + 4, { align: 'center' });
+          
+          // Rechte Tabelle Header
+          doc.rect(rightStartX, yPos, colWidths[0], rowHeight);
+          doc.rect(rightStartX + colWidths[0], yPos, colWidths[1], rowHeight);
+          doc.rect(rightStartX + colWidths[0] + colWidths[1], yPos, colWidths[2], rowHeight);
+          doc.text('Tag', rightStartX + colWidths[0]/2, yPos + 4, { align: 'center' });
+          doc.text('Datum', rightStartX + colWidths[0] + colWidths[1]/2, yPos + 4, { align: 'center' });
+          doc.text('Name', rightStartX + colWidths[0] + colWidths[1] + colWidths[2]/2, yPos + 4, { align: 'center' });
+          
+          let leftYPos = yPos + rowHeight;
+          let rightYPos = yPos + rowHeight;
+          
+          // Linke Tabelle Daten (Samstag Schießabend)
           doc.setFont('helvetica', 'normal');
           saturdayEvening.forEach(a => {
             const date = new Date(a.dateStr);
@@ -684,47 +702,30 @@
             if (a.color) {
               const rgb = hexToRgb(a.color);
               doc.setFillColor(rgb.r, rgb.g, rgb.b);
-              doc.rect(startX, yPos, colWidths[0] + colWidths[1] + colWidths[2], rowHeight, 'F');
+              doc.rect(leftStartX, leftYPos, colWidths[0] + colWidths[1] + colWidths[2], rowHeight, 'F');
             }
             
             // Rahmen
             doc.setDrawColor(0);
-            doc.rect(startX, yPos, colWidths[0], rowHeight);
-            doc.rect(startX + colWidths[0], yPos, colWidths[1], rowHeight);
-            doc.rect(startX + colWidths[0] + colWidths[1], yPos, colWidths[2], rowHeight);
+            doc.rect(leftStartX, leftYPos, colWidths[0], rowHeight);
+            doc.rect(leftStartX + colWidths[0], leftYPos, colWidths[1], rowHeight);
+            doc.rect(leftStartX + colWidths[0] + colWidths[1], leftYPos, colWidths[2], rowHeight);
             
             // Text weiß
             doc.setTextColor(255, 255, 255);
-            doc.text(dayName, startX + colWidths[0]/2, yPos + 4.5, { align: 'center' });
+            doc.setFontSize(8);
+            doc.text(dayName, leftStartX + colWidths[0]/2, leftYPos + 4, { align: 'center' });
             doc.setFont('helvetica', 'bold');
-            doc.text(dateStr, startX + colWidths[0] + colWidths[1]/2, yPos + 4.5, { align: 'center' });
-            doc.setFont('helvetica', 'bold'); // Namen fett
-            doc.text(name, startX + colWidths[0] + colWidths[1] + 2, yPos + 4.5);
+            doc.text(dateStr, leftStartX + colWidths[0] + colWidths[1]/2, leftYPos + 4, { align: 'center' });
+            doc.setFont('helvetica', 'bold');
+            doc.text(name, leftStartX + colWidths[0] + colWidths[1] + 1, leftYPos + 4);
             doc.setFont('helvetica', 'normal');
             doc.setTextColor(0, 0, 0);
             
-            yPos += rowHeight;
+            leftYPos += rowHeight;
           });
-            
-          // Sonntag / Frühschoppen / Feiertage Tabelle
-          yPos += 8;
-          doc.setFontSize(11);
-          doc.setFont('helvetica', 'bold');
-          doc.text('Sonntag / Frühschoppen / Feiertage (10:00-12:00)', 105, yPos, { align: 'center' });
-          yPos += 7;
           
-          // Header
-          doc.setFontSize(9);
-          doc.rect(startX, yPos, colWidths[0], rowHeight);
-          doc.rect(startX + colWidths[0], yPos, colWidths[1], rowHeight);
-          doc.rect(startX + colWidths[0] + colWidths[1], yPos, colWidths[2], rowHeight);
-          doc.text('Tag', startX + colWidths[0]/2, yPos + 4.5, { align: 'center' });
-          doc.text('Datum', startX + colWidths[0] + colWidths[1]/2, yPos + 4.5, { align: 'center' });
-          doc.text('Name', startX + colWidths[0] + colWidths[1] + colWidths[2]/2, yPos + 4.5, { align: 'center' });
-          yPos += rowHeight;
-          
-          // Daten
-          doc.setFont('helvetica', 'normal');
+          // Rechte Tabelle Daten (Sonntag/Frühschoppen/Feiertage)
           sundayMorning.forEach(a => {
             const date = new Date(a.dateStr);
             const dayOfWeek = date.getDay();
@@ -739,39 +740,43 @@
             if (a.color) {
               const rgb = hexToRgb(a.color);
               doc.setFillColor(rgb.r, rgb.g, rgb.b);
-              doc.rect(startX, yPos, colWidths[0] + colWidths[1] + colWidths[2], rowHeight, 'F');
+              doc.rect(rightStartX, rightYPos, colWidths[0] + colWidths[1] + colWidths[2], rowHeight, 'F');
             }
             
             // Rahmen
             doc.setDrawColor(0);
-            doc.rect(startX, yPos, colWidths[0], rowHeight);
-            doc.rect(startX + colWidths[0], yPos, colWidths[1], rowHeight);
-            doc.rect(startX + colWidths[0] + colWidths[1], yPos, colWidths[2], rowHeight);
+            doc.rect(rightStartX, rightYPos, colWidths[0], rowHeight);
+            doc.rect(rightStartX + colWidths[0], rightYPos, colWidths[1], rowHeight);
+            doc.rect(rightStartX + colWidths[0] + colWidths[1], rightYPos, colWidths[2], rowHeight);
             
             // Text weiß
             doc.setTextColor(255, 255, 255);
+            doc.setFontSize(8);
             
             // Tag fett wenn unregelmäßig
             if (isIrregular) {
               doc.setFont('helvetica', 'bold');
             }
-            doc.text(dayName, startX + colWidths[0]/2, yPos + 4.5, { align: 'center' });
+            doc.text(dayName, rightStartX + colWidths[0]/2, rightYPos + 4, { align: 'center' });
             
             // Datum immer fett
             doc.setFont('helvetica', 'bold');
-            doc.text(dateStr, startX + colWidths[0] + colWidths[1]/2, yPos + 4.5, { align: 'center' });
+            doc.text(dateStr, rightStartX + colWidths[0] + colWidths[1]/2, rightYPos + 4, { align: 'center' });
             
             // Name fett
             doc.setFont('helvetica', 'bold');
-            doc.text(name, startX + colWidths[0] + colWidths[1] + 2, yPos + 4.5);
+            doc.text(name, rightStartX + colWidths[0] + colWidths[1] + 1, rightYPos + 4);
             
             doc.setFont('helvetica', 'normal');
             doc.setTextColor(0, 0, 0);
             
-            yPos += rowHeight;
+            rightYPos += rowHeight;
           });
         } else {
-          // Schießaufsicht - nur Samstag
+          // Schießaufsicht - nur Samstag (zentriert)
+          const centerStartX = 60;
+          const centerColWidths = [18, 38, 74];
+          
           doc.setFontSize(11);
           doc.setFont('helvetica', 'bold');
           doc.text('Samstag (19:30-21:00)', 105, yPos, { align: 'center' });
@@ -779,12 +784,13 @@
           
           // Header
           doc.setFontSize(9);
-          doc.rect(startX, yPos, colWidths[0], rowHeight);
-          doc.rect(startX + colWidths[0], yPos, colWidths[1], rowHeight);
-          doc.rect(startX + colWidths[0] + colWidths[1], yPos, colWidths[2], rowHeight);
-          doc.text('Tag', startX + colWidths[0]/2, yPos + 4.5, { align: 'center' });
-          doc.text('Datum', startX + colWidths[0] + colWidths[1]/2, yPos + 4.5, { align: 'center' });
-          doc.text('Name', startX + colWidths[0] + colWidths[1] + colWidths[2]/2, yPos + 4.5, { align: 'center' });
+          doc.setFont('helvetica', 'bold');
+          doc.rect(centerStartX, yPos, centerColWidths[0], rowHeight);
+          doc.rect(centerStartX + centerColWidths[0], yPos, centerColWidths[1], rowHeight);
+          doc.rect(centerStartX + centerColWidths[0] + centerColWidths[1], yPos, centerColWidths[2], rowHeight);
+          doc.text('Tag', centerStartX + centerColWidths[0]/2, yPos + 4, { align: 'center' });
+          doc.text('Datum', centerStartX + centerColWidths[0] + centerColWidths[1]/2, yPos + 4, { align: 'center' });
+          doc.text('Name', centerStartX + centerColWidths[0] + centerColWidths[1] + centerColWidths[2]/2, yPos + 4, { align: 'center' });
           yPos += rowHeight;
           
           // Daten
@@ -799,22 +805,23 @@
             if (a.color) {
               const rgb = hexToRgb(a.color);
               doc.setFillColor(rgb.r, rgb.g, rgb.b);
-              doc.rect(startX, yPos, colWidths[0] + colWidths[1] + colWidths[2], rowHeight, 'F');
+              doc.rect(centerStartX, yPos, centerColWidths[0] + centerColWidths[1] + centerColWidths[2], rowHeight, 'F');
             }
             
             // Rahmen
             doc.setDrawColor(0);
-            doc.rect(startX, yPos, colWidths[0], rowHeight);
-            doc.rect(startX + colWidths[0], yPos, colWidths[1], rowHeight);
-            doc.rect(startX + colWidths[0] + colWidths[1], yPos, colWidths[2], rowHeight);
+            doc.rect(centerStartX, yPos, centerColWidths[0], rowHeight);
+            doc.rect(centerStartX + centerColWidths[0], yPos, centerColWidths[1], rowHeight);
+            doc.rect(centerStartX + centerColWidths[0] + centerColWidths[1], yPos, centerColWidths[2], rowHeight);
             
             // Text weiß
             doc.setTextColor(255, 255, 255);
-            doc.text(dayName, startX + colWidths[0]/2, yPos + 4.5, { align: 'center' });
+            doc.setFontSize(8);
+            doc.text(dayName, centerStartX + centerColWidths[0]/2, yPos + 4, { align: 'center' });
             doc.setFont('helvetica', 'bold');
-            doc.text(dateStr, startX + colWidths[0] + colWidths[1]/2, yPos + 4.5, { align: 'center' });
-            doc.setFont('helvetica', 'bold'); // Namen fett
-            doc.text(name, startX + colWidths[0] + colWidths[1] + 2, yPos + 4.5);
+            doc.text(dateStr, centerStartX + centerColWidths[0] + centerColWidths[1]/2, yPos + 4, { align: 'center' });
+            doc.setFont('helvetica', 'bold');
+            doc.text(name, centerStartX + centerColWidths[0] + centerColWidths[1] + 2, yPos + 4);
             doc.setFont('helvetica', 'normal');
             doc.setTextColor(0, 0, 0);
             
