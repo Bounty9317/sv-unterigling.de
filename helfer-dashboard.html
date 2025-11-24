@@ -229,6 +229,9 @@
         messages.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
         
         messages.forEach(s => {
+          // Überspringe Einträge mit fehlenden Daten
+          if (!s.requestPerson || !s.date) return;
+          
           const div = document.createElement('div');
           div.className = 'chat-message' + (s.status === 'completed' ? ' completed' : '');
           
@@ -239,11 +242,13 @@
               </div>
               ${s.replacementPerson ? `<button class="btn-approve" onclick="approveSwapAsReplacement('${type}', '${s.id}', '${s.replacementPerson}')">✓ Einspringen als ${s.replacementPerson}</button>` : ''}
               <button class="btn-reject" onclick="rejectSwap('${type}', '${s.id}')">✗ Anfrage zurückziehen</button>`;
-          } else if (s.status === 'completed') {
+          } else if (s.status === 'completed' && s.replacementPerson) {
             div.innerHTML = `✅ <strong>${s.replacementPerson}</strong> hat für <strong>${s.requestPerson}</strong> am ${new Date(s.date).toLocaleDateString('de-DE')} übernommen<br>
               <div style="margin: 0.5rem 0; font-size: 0.75rem; color: #4CAF50;">
                 Tausch abgeschlossen
               </div>`;
+          } else {
+            return; // Überspringe ungültige completed swaps
           }
           chat.appendChild(div);
         });

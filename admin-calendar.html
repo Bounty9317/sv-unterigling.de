@@ -186,7 +186,21 @@
       if (!confirm('Einteilung löschen?')) return;
       const assignment = assignments[type][date];
       if (assignment?.id) {
+        // Lösche die Einteilung
         await deleteDoc(doc(db, `${type}-assignments`, assignment.id));
+        
+        // Lösche alle zugehörigen Tausch-Anfragen
+        const swapsSnapshot = await getDocs(collection(db, `${type}-swaps`));
+        const deletePromises = [];
+        swapsSnapshot.forEach(d => {
+          const swap = d.data();
+          // Lösche Swaps die mit diesem Datum verbunden sind
+          if (swap.date === date) {
+            deletePromises.push(deleteDoc(doc(db, `${type}-swaps`, d.id)));
+          }
+        });
+        
+        await Promise.all(deletePromises);
         await loadAssignments(type);
       }
     };
@@ -329,6 +343,9 @@
         messages.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
         
         messages.forEach(s => {
+          // Überspringe Einträge mit fehlenden Daten
+          if (!s.requestPerson || !s.date) return;
+          
           const div = document.createElement('div');
           div.className = 'chat-message' + (s.status === 'completed' ? ' completed' : '');
           
@@ -337,8 +354,10 @@
               <div style="margin: 0.5rem 0; font-size: 0.85rem; color: #999;">
                 ${s.replacementPerson ? `Ersatz: ${s.replacementPerson}` : 'Warte auf Zusage...'}
               </div>`;
-          } else if (s.status === 'completed') {
+          } else if (s.status === 'completed' && s.replacementPerson) {
             div.innerHTML = `✅ <strong>${s.replacementPerson}</strong> hat für <strong>${s.requestPerson}</strong> am ${new Date(s.date).toLocaleDateString('de-DE')} übernommen`;
+          } else {
+            return; // Überspringe ungültige completed swaps
           }
           chat.appendChild(div);
         });
