@@ -471,13 +471,20 @@
       const name = `${firstname} ${lastname}`;
       
       if (window.globalAddDocFunc && window.globalDbRef && window.globalCollectionFunc) {
-        const col = window.globalCollectionFunc(window.globalDbRef, `${currentModalType}-persons`);
-        await window.globalAddDocFunc(col, { name, color: selectedColor });
-        if (window.globalLoadPersons) {
-          await window.globalLoadPersons(currentModalType);
+        try {
+          const col = window.globalCollectionFunc(window.globalDbRef, `${currentModalType}-persons`);
+          await window.globalAddDocFunc(col, { name, color: selectedColor });
+          if (window.globalLoadPersons) {
+            await window.globalLoadPersons(currentModalType);
+          }
+          closeAddPersonModal();
+        } catch (error) {
+          console.error('Fehler beim Hinzufügen:', error);
+          alert('Fehler beim Hinzufügen des Helfers: ' + error.message);
         }
+      } else {
+        alert('Firebase nicht initialisiert. Bitte Seite neu laden.');
       }
-      closeAddPersonModal();
     });
   </script>
 </body>
