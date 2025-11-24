@@ -243,7 +243,17 @@
     async function loadAssignments(type) {
       const snapshot = await getDocs(collection(db, `${type}-assignments`));
       assignments[type] = {};
-      snapshot.forEach(d => { assignments[type][d.data().date] = { ...d.data(), id: d.id }; });
+      snapshot.forEach(d => { 
+        const data = d.data();
+        if (data.slot) {
+          // Multi-slot assignment
+          const slotKey = `${data.date}-${data.slot}`;
+          assignments[type][slotKey] = { ...data, id: d.id };
+        } else {
+          // Single assignment
+          assignments[type][data.date] = { ...data, id: d.id };
+        }
+      });
       renderCalendar(type);
     }
 
@@ -398,12 +408,26 @@
           isAllowed = dayOfWeek === 0 || dayOfWeek === 6 || isHoliday; // Samstag, Sonntag oder Feiertag
         }
         
+        // Prüfe ob Samstag und Wirte (dann 2 Slots)
+        const isSaturday = dayOfWeek === 6;
+        const hasMultiSlots = type === 'wirte' && isSaturday;
+        
         const assignment = assignments[type][dateStr];
+        const fruehschoppenAssignment = hasMultiSlots ? assignments[type][`${dateStr}-fruehschoppen`] : null;
+        const schiessabendAssignment = hasMultiSlots ? assignments[type][`${dateStr}-schiessabend`] : null;
         
         // Setze CSS-Klassen basierend auf Einteilung
         let cellClass = 'calendar-day';
         if (!isAllowed) {
           cellClass += ' disabled';
+        } else if (hasMultiSlots) {
+          if (fruehschoppenAssignment && schiessabendAssignment) {
+            cellClass += ' assigned';
+          } else if (fruehschoppenAssignment || schiessabendAssignment) {
+            cellClass += ' missing';
+          } else {
+            cellClass += ' missing';
+          }
         } else if (assignment) {
           cellClass += ' assigned';
         } else {
@@ -413,7 +437,42 @@
         cell.className = cellClass;
         cell.innerHTML = `<div style="font-size: 0.9rem; color: ${isHoliday ? '#ffa726' : '#999'};">${day}${isHoliday ? ' 🎉' : ''}</div>`;
         cell.dataset.date = dateStr;
-        if (assignment) {
+        
+        // Render Multi-Slot Assignments (Samstag bei Wirten)
+        if (hasMultiSlots) {
+          if (fruehschoppenAssignment) {
+            const slotDiv = document.createElement('div');
+            slotDiv.style.cssText = 'margin-bottom: 0.3rem;';
+            slotDiv.innerHTML = `<div style="font-size: 0.7rem; color: #999; margin-bottom: 0.2rem;">☀️ Frühschoppen</div>`;
+            
+            const personDiv = document.createElement('div');
+            personDiv.className = 'assigned-person';
+            personDiv.style.background = fruehschoppenAssignment.color;
+            personDiv.style.color = 'white';
+            personDiv.style.fontSize = '0.8rem';
+            personDiv.textContent = fruehschoppenAssignment.person;
+            personDiv.addEventListener('click', () => openSwapModal(type, `${dateStr}-fruehschoppen`, fruehschoppenAssignment));
+            
+            slotDiv.appendChild(personDiv);
+            cell.appendChild(slotDiv);
+          }
+          
+          if (schiessabendAssignment) {
+            const slotDiv = document.createElement('div');
+            slotDiv.innerHTML = `<div style="font-size: 0.7rem; color: #999; margin-bottom: 0.2rem;">🌙 Schießabend</div>`;
+            
+            const personDiv = document.createElement('div');
+            personDiv.className = 'assigned-person';
+            personDiv.style.background = schiessabendAssignment.color;
+            personDiv.style.color = 'white';
+            personDiv.style.fontSize = '0.8rem';
+            personDiv.textContent = schiessabendAssignment.person;
+            personDiv.addEventListener('click', () => openSwapModal(type, `${dateStr}-schiessabend`, schiessabendAssignment));
+            
+            slotDiv.appendChild(personDiv);
+            cell.appendChild(slotDiv);
+          }
+        } else if (assignment) {
           const personDiv = document.createElement('div');
           personDiv.className = 'assigned-person';
           personDiv.style.background = assignment.color;
