@@ -461,6 +461,16 @@
       const saturdays = sortedAssignments.filter(a => new Date(a.date).getDay() === 6);
       const sundays = sortedAssignments.filter(a => new Date(a.date).getDay() === 0);
       
+      // Hilfsfunktion: Hex zu RGB konvertieren
+      const hexToRgb = (hex) => {
+        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result ? {
+          r: parseInt(result[1], 16),
+          g: parseInt(result[2], 16),
+          b: parseInt(result[3], 16)
+        } : { r: 200, g: 200, b: 200 };
+      };
+
       const createPDF = (withLogo = false, logoData = null) => {
         const doc = new jsPDF('landscape', 'mm', 'a4');
         
@@ -508,12 +518,22 @@
             const dateStr = date.toLocaleDateString('de-DE');
             const name = a.swappedWith ? `${a.swappedWith} (für ${a.originalPerson})` : a.person;
             
+            if (a.color) {
+              const rgb = hexToRgb(a.color);
+              doc.setFillColor(rgb.r, rgb.g, rgb.b);
+              doc.rect(20, yPos, 30, 8, 'F');
+              doc.rect(50, yPos, 40, 8, 'F');
+              doc.rect(90, yPos, 50, 8, 'F');
+            }
+            doc.setDrawColor(0);
             doc.rect(20, yPos, 30, 8);
             doc.rect(50, yPos, 40, 8);
             doc.rect(90, yPos, 50, 8);
+            doc.setTextColor(255, 255, 255);
             doc.text(dayName, 35, yPos + 5, { align: 'center' });
             doc.text(dateStr, 70, yPos + 5, { align: 'center' });
             doc.text(name, 92, yPos + 5);
+            doc.setTextColor(0, 0, 0);
             yPos += 8;
           });
           
@@ -536,12 +556,22 @@
             const dateStr = date.toLocaleDateString('de-DE');
             const name = a.swappedWith ? `${a.swappedWith} (für ${a.originalPerson})` : a.person;
             
+            if (a.color) {
+              const rgb = hexToRgb(a.color);
+              doc.setFillColor(rgb.r, rgb.g, rgb.b);
+              doc.rect(157, yPos, 30, 8, 'F');
+              doc.rect(187, yPos, 40, 8, 'F');
+              doc.rect(227, yPos, 50, 8, 'F');
+            }
+            doc.setDrawColor(0);
             doc.rect(157, yPos, 30, 8);
             doc.rect(187, yPos, 40, 8);
             doc.rect(227, yPos, 50, 8);
+            doc.setTextColor(255, 255, 255);
             doc.text(dayName, 172, yPos + 5, { align: 'center' });
             doc.text(dateStr, 207, yPos + 5, { align: 'center' });
             doc.text(name, 229, yPos + 5);
+            doc.setTextColor(0, 0, 0);
             yPos += 8;
           });
         } else {
@@ -566,12 +596,22 @@
             const dateStr = date.toLocaleDateString('de-DE');
             const name = a.swappedWith ? `${a.swappedWith} (für ${a.originalPerson})` : a.person;
             
+            if (a.color) {
+              const rgb = hexToRgb(a.color);
+              doc.setFillColor(rgb.r, rgb.g, rgb.b);
+              doc.rect(80, yPos, 30, 8, 'F');
+              doc.rect(110, yPos, 50, 8, 'F');
+              doc.rect(160, yPos, 60, 8, 'F');
+            }
+            doc.setDrawColor(0);
             doc.rect(80, yPos, 30, 8);
             doc.rect(110, yPos, 50, 8);
             doc.rect(160, yPos, 60, 8);
+            doc.setTextColor(255, 255, 255);
             doc.text(dayName, 95, yPos + 5, { align: 'center' });
             doc.text(dateStr, 135, yPos + 5, { align: 'center' });
             doc.text(name, 162, yPos + 5);
+            doc.setTextColor(0, 0, 0);
             yPos += 8;
           });
         }
