@@ -492,17 +492,12 @@
         
         // Logo hinzufügen wenn vorhanden (mit korrektem Seitenverhältnis)
         if (withLogo && logoData) {
-          const imgWidth = logoData.width;
-          const imgHeight = logoData.height;
-          const maxWidth = 40;
-          const maxHeight = 40;
+          // Verwende feste Höhe und berechne Breite basierend auf Seitenverhältnis
+          const aspectRatio = logoData.width / logoData.height;
+          const logoHeight = 35; // mm
+          const logoWidth = logoHeight * aspectRatio;
           
-          // Berechne Skalierung unter Beibehaltung des Seitenverhältnisses
-          const ratio = Math.min(maxWidth / imgWidth, maxHeight / imgHeight);
-          const scaledWidth = imgWidth * ratio;
-          const scaledHeight = imgHeight * ratio;
-          
-          doc.addImage(logoData, 'PNG', 20, 10, scaledWidth, scaledHeight);
+          doc.addImage(logoData, 'PNG', 15, 8, logoWidth, logoHeight);
         }
         
         // Überschrift
