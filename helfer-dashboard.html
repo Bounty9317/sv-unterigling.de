@@ -66,22 +66,10 @@
         <div class="calendar-section">
           <button class="btn" onclick="downloadList('wirte')" style="margin-bottom: 1rem; background: #2d5a3d;">📥 Wirteliste herunterladen</button>
           <h2>Wirte-Kalender</h2>
-          <div style="margin-bottom: 1rem;">
-            <label style="margin-right: 0.5rem; font-weight: 600;">Monat:</label>
-            <select id="wirte-month-select" onchange="changeMonth('wirte')" style="padding: 0.5rem; background: #1a1a1a; color: #e0e0e0; border: 2px solid #3a3a3a; border-radius: 6px;">
-              <option value="2025-01">Januar 2025</option>
-              <option value="2025-02">Februar 2025</option>
-              <option value="2025-03">März 2025</option>
-              <option value="2025-04">April 2025</option>
-              <option value="2025-05">Mai 2025</option>
-              <option value="2025-06">Juni 2025</option>
-              <option value="2025-07">Juli 2025</option>
-              <option value="2025-08">August 2025</option>
-              <option value="2025-09">September 2025</option>
-              <option value="2025-10">Oktober 2025</option>
-              <option value="2025-11">November 2025</option>
-              <option value="2025-12">Dezember 2025</option>
-            </select>
+          <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem; gap: 1rem;">
+            <button class="btn" onclick="previousMonth('wirte')" style="padding: 0.5rem 1rem; font-size: 1.2rem;">◀</button>
+            <h3 id="wirte-month-display" style="min-width: 200px; text-align: center; color: #4CAF50; font-size: 1.3rem;">Januar 2025</h3>
+            <button class="btn" onclick="nextMonth('wirte')" style="padding: 0.5rem 1rem; font-size: 1.2rem;">▶</button>
           </div>
           <button class="btn" onclick="openAddPersonModal('wirte')" style="margin-bottom: 1rem; background: #4CAF50;">➕ Wirt hinzufügen</button>
           <div class="person-cards" id="wirte-cards"></div>
@@ -98,22 +86,10 @@
         <div class="calendar-section">
           <button class="btn" onclick="downloadList('aufsicht')" style="margin-bottom: 1rem; background: #2d5a3d;">📥 Schießaufsichtsliste herunterladen</button>
           <h2>Schießaufsicht-Kalender</h2>
-          <div style="margin-bottom: 1rem;">
-            <label style="margin-right: 0.5rem; font-weight: 600;">Monat:</label>
-            <select id="aufsicht-month-select" onchange="changeMonth('aufsicht')" style="padding: 0.5rem; background: #1a1a1a; color: #e0e0e0; border: 2px solid #3a3a3a; border-radius: 6px;">
-              <option value="2025-01">Januar 2025</option>
-              <option value="2025-02">Februar 2025</option>
-              <option value="2025-03">März 2025</option>
-              <option value="2025-04">April 2025</option>
-              <option value="2025-05">Mai 2025</option>
-              <option value="2025-06">Juni 2025</option>
-              <option value="2025-07">Juli 2025</option>
-              <option value="2025-08">August 2025</option>
-              <option value="2025-09">September 2025</option>
-              <option value="2025-10">Oktober 2025</option>
-              <option value="2025-11">November 2025</option>
-              <option value="2025-12">Dezember 2025</option>
-            </select>
+          <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem; gap: 1rem;">
+            <button class="btn" onclick="previousMonth('aufsicht')" style="padding: 0.5rem 1rem; font-size: 1.2rem;">◀</button>
+            <h3 id="aufsicht-month-display" style="min-width: 200px; text-align: center; color: #4CAF50; font-size: 1.3rem;">Januar 2025</h3>
+            <button class="btn" onclick="nextMonth('aufsicht')" style="padding: 0.5rem 1rem; font-size: 1.2rem;">▶</button>
           </div>
           <button class="btn" onclick="openAddPersonModal('aufsicht')" style="margin-bottom: 1rem; background: #4CAF50;">➕ Schießaufsicht hinzufügen</button>
           <div class="person-cards" id="aufsicht-cards"></div>
@@ -173,9 +149,41 @@
     let draggedPerson = null, draggedFrom = null;
     let currentMonth = { wirte: '2025-01', aufsicht: '2025-01' };
 
-    window.changeMonth = (type) => {
-      const select = document.getElementById(`${type}-month-select`);
-      currentMonth[type] = select.value;
+    const monthNames = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
+
+    function updateMonthDisplay(type) {
+      const [year, month] = currentMonth[type].split('-');
+      const monthName = monthNames[parseInt(month) - 1];
+      document.getElementById(`${type}-month-display`).textContent = `${monthName} ${year}`;
+    }
+
+    window.previousMonth = (type) => {
+      const [year, month] = currentMonth[type].split('-');
+      let newYear = parseInt(year);
+      let newMonth = parseInt(month) - 1;
+      
+      if (newMonth < 1) {
+        newMonth = 12;
+        newYear--;
+      }
+      
+      currentMonth[type] = `${newYear}-${String(newMonth).padStart(2, '0')}`;
+      updateMonthDisplay(type);
+      renderCalendar(type);
+    };
+
+    window.nextMonth = (type) => {
+      const [year, month] = currentMonth[type].split('-');
+      let newYear = parseInt(year);
+      let newMonth = parseInt(month) + 1;
+      
+      if (newMonth > 12) {
+        newMonth = 1;
+        newYear++;
+      }
+      
+      currentMonth[type] = `${newYear}-${String(newMonth).padStart(2, '0')}`;
+      updateMonthDisplay(type);
       renderCalendar(type);
     };
 
@@ -298,8 +306,8 @@
       const cal = document.getElementById(`${type}-calendar`);
       cal.innerHTML = '';
       
-      // Header mit Wochentagen
-      ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'].forEach(d => { 
+      // Header mit Wochentagen (Mo-So)
+      ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'].forEach(d => { 
         const h = document.createElement('div'); 
         h.style.cssText = 'background: #1a472a; color: white; padding: 0.8rem; text-align: center; font-weight: 600;'; 
         h.textContent = d; 
@@ -311,7 +319,10 @@
       const firstDay = new Date(parseInt(year), parseInt(month) - 1, 1);
       const lastDay = new Date(parseInt(year), parseInt(month), 0);
       const daysInMonth = lastDay.getDate();
-      const startDayOfWeek = firstDay.getDay(); // 0=Sonntag
+      let startDayOfWeek = firstDay.getDay(); // 0=Sonntag, 1=Montag, ...
+      
+      // Konvertiere zu Mo-So Format (0=Montag, 6=Sonntag)
+      startDayOfWeek = startDayOfWeek === 0 ? 6 : startDayOfWeek - 1;
       
       // Leere Zellen am Anfang für Ausrichtung
       for (let i = 0; i < startDayOfWeek; i++) {
