@@ -53,6 +53,18 @@ service cloud.firestore {
       allow read, write: if isHelper() || isAdmin();
     }
     
+    // Wirte Notes - Admins can read/write, Helpers can read
+    match /wirte-notes/{document} {
+      allow read: if isHelper() || isAdmin();
+      allow write: if isAdmin();
+    }
+    
+    // Aufsicht Notes - Admins can read/write, Helpers can read
+    match /aufsicht-notes/{document} {
+      allow read: if isHelper() || isAdmin();
+      allow write: if isAdmin();
+    }
+    
     // Default: Deny all other access
     match /{document=**} {
       allow read, write: if false;

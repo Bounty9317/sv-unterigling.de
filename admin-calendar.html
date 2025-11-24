@@ -117,6 +117,7 @@
 
     const persons = { wirte: [], aufsicht: [] };
     let assignments = { wirte: {}, aufsicht: {} };
+    let dayNotes = { wirte: {}, aufsicht: {} };
     let draggedPerson = null, draggedFrom = null;
     
     // Aktuelles Datum holen
@@ -237,6 +238,31 @@
         }
       });
       renderCalendar(type);
+    }
+
+    async function loadDayNotes(type) {
+      const snapshot = await getDocs(collection(db, `${type}-notes`));
+      dayNotes[type] = {};
+      snapshot.forEach(d => { 
+        const data = d.data();
+        dayNotes[type][data.date] = { ...data, id: d.id };
+      });
+      renderCalendar(type);
+    }
+
+    async function saveDayNote(type, date, note) {
+      const existing = dayNotes[type][date];
+      if (note.trim() === '') {
+        // Lösche Notiz wenn leer
+        if (existing?.id) {
+          await deleteDoc(doc(db, `${type}-notes`, existing.id));
+        }
+      } else if (existing?.id) {
+        await updateDoc(doc(db, `${type}-notes`, existing.id), { note, date });
+      } else {
+        await addDoc(collection(db, `${type}-notes`), { note, date });
+      }
+      await loadDayNotes(type);
     }
 
     async function saveAssignment(type, date, person, color, slot = 'default') {
@@ -370,7 +396,8 @@
         }
         
         cell.className = cellClass;
-        cell.innerHTML = `<div style="font-size: 0.9rem; color: ${isHoliday ? '#ffa726' : '#999'};">${day}${isHoliday ? ' 🎉' : ''}</div>`;
+        const dayNote = dayNotes[type][dateStr];
+        cell.innerHTML = `<div style="font-size: 0.9rem; color: ${isHoliday ? '#ffa726' : '#999'};">${day}${isHoliday ? ' 🎉' : ''}${dayNote ? ' 📝' : ''}</div>`;
         cell.dataset.date = dateStr;
         
         if (!isAllowed) {
@@ -487,6 +514,25 @@
           };
           cell.appendChild(deleteBtn);
         }
+
+        // Notiz anzeigen wenn vorhanden
+        if (dayNote) {
+          const noteDiv = document.createElement('div');
+          noteDiv.style.cssText = 'background: #ffa726; color: #1a1a1a; padding: 0.3rem; border-radius: 4px; margin-top: 0.3rem; font-size: 0.75rem; font-weight: 600; cursor: pointer;';
+          noteDiv.textContent = dayNote.note;
+          noteDiv.title = 'Klicken zum Bearbeiten';
+          noteDiv.onclick = () => editDayNote(type, dateStr);
+          cell.appendChild(noteDiv);
+        }
+
+        // Button zum Hinzufügen/Bearbeiten von Notizen (nur bei erlaubten Tagen)
+        if (isAllowed && !dayNote) {
+          const addNoteBtn = document.createElement('button');
+          addNoteBtn.style.cssText = 'background: rgba(255,167,38,0.3); color: #ffa726; border: 1px dashed #ffa726; padding: 0.2rem 0.4rem; border-radius: 4px; cursor: pointer; font-size: 0.7rem; margin-top: 0.3rem; width: 100%;';
+          addNoteBtn.textContent = '+ Info';
+          addNoteBtn.onclick = () => editDayNote(type, dateStr);
+          cell.appendChild(addNoteBtn);
+        }
         
         // Nur Drop erlauben wenn Tag erlaubt ist
         if (isAllowed) {
@@ -550,13 +596,22 @@
       });
     }
 
+    window.editDayNote = async (type, date) => {
+      const existing = dayNotes[type][date]?.note || '';
+      const note = prompt('Info für diesen Tag eingeben:\n(z.B. "Anfangsschießen")\n\nLeer lassen zum Löschen:', existing);
+      if (note !== null) {
+        await saveDayNote(type, date, note);
+      }
+    };
+
     ['wirte', 'aufsicht'].forEach(type => { 
       loadPersons(type); 
       loadAssignments(type); 
+      loadDayNotes(type);
       loadSwapRequests(type); 
     });
 
-    // PDF Export Function - Optimiert für Hochformat
+    // PDF Export Function - Optimiert für Querformat
     window.downloadList = async (type) => {
       if (!window.jspdf) {
         const script = document.createElement('script');
@@ -571,6 +626,14 @@
       const snapshot = await getDocs(collection(db, `${type}-assignments`));
       const allAssignments = [];
       snapshot.forEach(d => { allAssignments.push(d.data()); });
+
+      // Notizen laden
+      const notesSnapshot = await getDocs(collection(db, `${type}-notes`));
+      const allNotes = {};
+      notesSnapshot.forEach(d => { 
+        const data = d.data();
+        allNotes[data.date] = data.note;
+      });
       
       // Gruppiere nach Datum und Slot
       const assignmentsByDate = {};
@@ -600,18 +663,18 @@
         
         // Samstag Schießabend
         if (slots.schiessabend) {
-          saturdayEvening.push({ ...slots.schiessabend, dateStr, isHoliday });
+          saturdayEvening.push({ ...slots.schiessabend, dateStr, isHoliday, note: allNotes[dateStr] });
         } else if (dayOfWeek === 6 && slots.default && !slots.fruehschoppen) {
-          saturdayEvening.push({ ...slots.default, dateStr, isHoliday });
+          saturdayEvening.push({ ...slots.default, dateStr, isHoliday, note: allNotes[dateStr] });
         }
         
         // Sonntag oder Samstag-Frühschoppen oder Feiertage
         if (slots.fruehschoppen) {
-          sundayMorning.push({ ...slots.fruehschoppen, dateStr, isHoliday, isSaturdayMorning: dayOfWeek === 6 });
+          sundayMorning.push({ ...slots.fruehschoppen, dateStr, isHoliday, isSaturdayMorning: dayOfWeek === 6, note: allNotes[dateStr] });
         } else if (dayOfWeek === 0 && slots.default) {
-          sundayMorning.push({ ...slots.default, dateStr, isHoliday });
+          sundayMorning.push({ ...slots.default, dateStr, isHoliday, note: allNotes[dateStr] });
         } else if (isHoliday && slots.default && dayOfWeek !== 6 && dayOfWeek !== 0) {
-          sundayMorning.push({ ...slots.default, dateStr, isHoliday });
+          sundayMorning.push({ ...slots.default, dateStr, isHoliday, note: allNotes[dateStr] });
         }
       });
       
@@ -635,61 +698,66 @@
       };
 
       const createPDF = (withLogo = false, logoData = null) => {
-        const doc = new jsPDF('portrait', 'mm', 'a4'); // Hochformat A4: 210x297mm
+        const doc = new jsPDF('landscape', 'mm', 'a4'); // Querformat A4: 297x210mm
         
         // Logo zentriert oben
         if (withLogo && logoData) {
-          const logoWidth = 40;
+          const logoWidth = 50;
           const logoHeight = logoWidth / 1.664;
-          doc.addImage(logoData, 'PNG', (210 - logoWidth) / 2, 10, logoWidth, logoHeight);
+          doc.addImage(logoData, 'PNG', (297 - logoWidth) / 2, 8, logoWidth, logoHeight);
         }
         
         // Überschrift
-        const startY = withLogo ? 40 : 15;
-        doc.setFontSize(16);
+        const startY = withLogo ? 38 : 12;
+        doc.setFontSize(18);
         doc.setFont('helvetica', 'bold');
-        doc.text(type === 'wirte' ? 'Wirte Liste' : 'Schießaufsicht Liste', 105, startY, { align: 'center' });
+        doc.text(type === 'wirte' ? 'Wirte Liste' : 'Schießaufsicht Liste', 148.5, startY, { align: 'center' });
         doc.setFontSize(10);
         doc.setFont('helvetica', 'normal');
-        doc.text(`Erstellt am: ${new Date().toLocaleDateString('de-DE')}`, 105, startY + 6, { align: 'center' });
+        doc.text(`Erstellt am: ${new Date().toLocaleDateString('de-DE')}`, 148.5, startY + 6, { align: 'center' });
         
-        let yPos = startY + 15;
-        const rowHeight = 6;
-        const colWidths = [15, 28, 50]; // Tag, Datum, Name (schmaler für nebeneinander)
-        const leftStartX = 8;
-        const rightStartX = 110;
+        let yPos = startY + 14;
+        const rowHeight = 7;
+        const colWidths = [18, 35, 70, 30]; // Tag, Datum, Name, Info
+        const leftStartX = 15;
+        const rightStartX = 160;
         
         if (type === 'wirte') {
           // Überschriften für beide Tabellen
-          doc.setFontSize(10);
+          doc.setFontSize(12);
           doc.setFont('helvetica', 'bold');
-          doc.text('Samstag Schießabend', leftStartX + 46.5, yPos, { align: 'center' });
-          doc.text('Sonntag / Feiertage - Frühschoppen', rightStartX + 46.5, yPos, { align: 'center' });
-          doc.setFontSize(8);
+          const leftTableWidth = colWidths[0] + colWidths[1] + colWidths[2] + colWidths[3];
+          doc.text('Samstag Schießabend', leftStartX + leftTableWidth/2, yPos, { align: 'center' });
+          doc.text('Sonntag / Feiertage - Frühschoppen', rightStartX + leftTableWidth/2, yPos, { align: 'center' });
+          doc.setFontSize(9);
           doc.setFont('helvetica', 'normal');
-          doc.text('(19:30-24:00)', leftStartX + 46.5, yPos + 4, { align: 'center' });
-          doc.text('(10:00-12:00)', rightStartX + 46.5, yPos + 4, { align: 'center' });
-          yPos += 10;
+          doc.text('(19:30-24:00)', leftStartX + leftTableWidth/2, yPos + 5, { align: 'center' });
+          doc.text('(10:00-12:00)', rightStartX + leftTableWidth/2, yPos + 5, { align: 'center' });
+          yPos += 11;
           
           // Header für beide Tabellen
-          doc.setFontSize(8);
+          doc.setFontSize(9);
           doc.setFont('helvetica', 'bold');
           
           // Linke Tabelle Header
           doc.rect(leftStartX, yPos, colWidths[0], rowHeight);
           doc.rect(leftStartX + colWidths[0], yPos, colWidths[1], rowHeight);
           doc.rect(leftStartX + colWidths[0] + colWidths[1], yPos, colWidths[2], rowHeight);
-          doc.text('Tag', leftStartX + colWidths[0]/2, yPos + 4, { align: 'center' });
-          doc.text('Datum', leftStartX + colWidths[0] + colWidths[1]/2, yPos + 4, { align: 'center' });
-          doc.text('Name', leftStartX + colWidths[0] + colWidths[1] + colWidths[2]/2, yPos + 4, { align: 'center' });
+          doc.rect(leftStartX + colWidths[0] + colWidths[1] + colWidths[2], yPos, colWidths[3], rowHeight);
+          doc.text('Tag', leftStartX + colWidths[0]/2, yPos + 4.5, { align: 'center' });
+          doc.text('Datum', leftStartX + colWidths[0] + colWidths[1]/2, yPos + 4.5, { align: 'center' });
+          doc.text('Name', leftStartX + colWidths[0] + colWidths[1] + colWidths[2]/2, yPos + 4.5, { align: 'center' });
+          doc.text('Info', leftStartX + colWidths[0] + colWidths[1] + colWidths[2] + colWidths[3]/2, yPos + 4.5, { align: 'center' });
           
           // Rechte Tabelle Header
           doc.rect(rightStartX, yPos, colWidths[0], rowHeight);
           doc.rect(rightStartX + colWidths[0], yPos, colWidths[1], rowHeight);
           doc.rect(rightStartX + colWidths[0] + colWidths[1], yPos, colWidths[2], rowHeight);
-          doc.text('Tag', rightStartX + colWidths[0]/2, yPos + 4, { align: 'center' });
-          doc.text('Datum', rightStartX + colWidths[0] + colWidths[1]/2, yPos + 4, { align: 'center' });
-          doc.text('Name', rightStartX + colWidths[0] + colWidths[1] + colWidths[2]/2, yPos + 4, { align: 'center' });
+          doc.rect(rightStartX + colWidths[0] + colWidths[1] + colWidths[2], yPos, colWidths[3], rowHeight);
+          doc.text('Tag', rightStartX + colWidths[0]/2, yPos + 4.5, { align: 'center' });
+          doc.text('Datum', rightStartX + colWidths[0] + colWidths[1]/2, yPos + 4.5, { align: 'center' });
+          doc.text('Name', rightStartX + colWidths[0] + colWidths[1] + colWidths[2]/2, yPos + 4.5, { align: 'center' });
+          doc.text('Info', rightStartX + colWidths[0] + colWidths[1] + colWidths[2] + colWidths[3]/2, yPos + 4.5, { align: 'center' });
           
           let leftYPos = yPos + rowHeight;
           let rightYPos = yPos + rowHeight;
@@ -706,7 +774,7 @@
             if (a.color) {
               const rgb = hexToRgb(a.color);
               doc.setFillColor(rgb.r, rgb.g, rgb.b);
-              doc.rect(leftStartX, leftYPos, colWidths[0] + colWidths[1] + colWidths[2], rowHeight, 'F');
+              doc.rect(leftStartX, leftYPos, colWidths[0] + colWidths[1] + colWidths[2] + colWidths[3], rowHeight, 'F');
             }
             
             // Rahmen
@@ -714,6 +782,7 @@
             doc.rect(leftStartX, leftYPos, colWidths[0], rowHeight);
             doc.rect(leftStartX + colWidths[0], leftYPos, colWidths[1], rowHeight);
             doc.rect(leftStartX + colWidths[0] + colWidths[1], leftYPos, colWidths[2], rowHeight);
+            doc.rect(leftStartX + colWidths[0] + colWidths[1] + colWidths[2], leftYPos, colWidths[3], rowHeight);
             
             // Text weiß
             doc.setTextColor(255, 255, 255);
@@ -723,6 +792,14 @@
             doc.text(dateStr, leftStartX + colWidths[0] + colWidths[1]/2, leftYPos + 4, { align: 'center' });
             doc.setFont('helvetica', 'bold');
             doc.text(name, leftStartX + colWidths[0] + colWidths[1] + 1, leftYPos + 4);
+            
+            // Info Spalte
+            if (a.note) {
+              doc.setFontSize(7);
+              doc.setFont('helvetica', 'normal');
+              doc.text(a.note, leftStartX + colWidths[0] + colWidths[1] + colWidths[2] + 1, leftYPos + 4);
+            }
+            
             doc.setFont('helvetica', 'normal');
             doc.setTextColor(0, 0, 0);
             
@@ -744,7 +821,7 @@
             if (a.color) {
               const rgb = hexToRgb(a.color);
               doc.setFillColor(rgb.r, rgb.g, rgb.b);
-              doc.rect(rightStartX, rightYPos, colWidths[0] + colWidths[1] + colWidths[2], rowHeight, 'F');
+              doc.rect(rightStartX, rightYPos, colWidths[0] + colWidths[1] + colWidths[2] + colWidths[3], rowHeight, 'F');
             }
             
             // Rahmen
@@ -752,6 +829,7 @@
             doc.rect(rightStartX, rightYPos, colWidths[0], rowHeight);
             doc.rect(rightStartX + colWidths[0], rightYPos, colWidths[1], rowHeight);
             doc.rect(rightStartX + colWidths[0] + colWidths[1], rightYPos, colWidths[2], rowHeight);
+            doc.rect(rightStartX + colWidths[0] + colWidths[1] + colWidths[2], rightYPos, colWidths[3], rowHeight);
             
             // Text weiß
             doc.setTextColor(255, 255, 255);
@@ -771,6 +849,13 @@
             doc.setFont('helvetica', 'bold');
             doc.text(name, rightStartX + colWidths[0] + colWidths[1] + 1, rightYPos + 4);
             
+            // Info Spalte
+            if (a.note) {
+              doc.setFontSize(7);
+              doc.setFont('helvetica', 'normal');
+              doc.text(a.note, rightStartX + colWidths[0] + colWidths[1] + colWidths[2] + 1, rightYPos + 4);
+            }
+            
             doc.setFont('helvetica', 'normal');
             doc.setTextColor(0, 0, 0);
             
@@ -778,12 +863,12 @@
           });
         } else {
           // Schießaufsicht - nur Samstag (zentriert)
-          const centerStartX = 60;
-          const centerColWidths = [18, 38, 74];
+          const centerStartX = 50;
+          const centerColWidths = [18, 38, 74, 30];
           
           doc.setFontSize(11);
           doc.setFont('helvetica', 'bold');
-          doc.text('Samstag (19:30-21:00)', 105, yPos, { align: 'center' });
+          doc.text('Samstag (19:30-21:00)', 148.5, yPos, { align: 'center' });
           yPos += 7;
           
           // Header
@@ -792,9 +877,11 @@
           doc.rect(centerStartX, yPos, centerColWidths[0], rowHeight);
           doc.rect(centerStartX + centerColWidths[0], yPos, centerColWidths[1], rowHeight);
           doc.rect(centerStartX + centerColWidths[0] + centerColWidths[1], yPos, centerColWidths[2], rowHeight);
+          doc.rect(centerStartX + centerColWidths[0] + centerColWidths[1] + centerColWidths[2], yPos, centerColWidths[3], rowHeight);
           doc.text('Tag', centerStartX + centerColWidths[0]/2, yPos + 4, { align: 'center' });
           doc.text('Datum', centerStartX + centerColWidths[0] + centerColWidths[1]/2, yPos + 4, { align: 'center' });
           doc.text('Name', centerStartX + centerColWidths[0] + centerColWidths[1] + centerColWidths[2]/2, yPos + 4, { align: 'center' });
+          doc.text('Info', centerStartX + centerColWidths[0] + centerColWidths[1] + centerColWidths[2] + centerColWidths[3]/2, yPos + 4, { align: 'center' });
           yPos += rowHeight;
           
           // Daten
@@ -809,7 +896,7 @@
             if (a.color) {
               const rgb = hexToRgb(a.color);
               doc.setFillColor(rgb.r, rgb.g, rgb.b);
-              doc.rect(centerStartX, yPos, centerColWidths[0] + centerColWidths[1] + centerColWidths[2], rowHeight, 'F');
+              doc.rect(centerStartX, yPos, centerColWidths[0] + centerColWidths[1] + centerColWidths[2] + centerColWidths[3], rowHeight, 'F');
             }
             
             // Rahmen
@@ -817,6 +904,7 @@
             doc.rect(centerStartX, yPos, centerColWidths[0], rowHeight);
             doc.rect(centerStartX + centerColWidths[0], yPos, centerColWidths[1], rowHeight);
             doc.rect(centerStartX + centerColWidths[0] + centerColWidths[1], yPos, centerColWidths[2], rowHeight);
+            doc.rect(centerStartX + centerColWidths[0] + centerColWidths[1] + centerColWidths[2], yPos, centerColWidths[3], rowHeight);
             
             // Text weiß
             doc.setTextColor(255, 255, 255);
@@ -826,6 +914,14 @@
             doc.text(dateStr, centerStartX + centerColWidths[0] + centerColWidths[1]/2, yPos + 4, { align: 'center' });
             doc.setFont('helvetica', 'bold');
             doc.text(name, centerStartX + centerColWidths[0] + centerColWidths[1] + 2, yPos + 4);
+            
+            // Info Spalte
+            if (a.note) {
+              doc.setFontSize(7);
+              doc.setFont('helvetica', 'normal');
+              doc.text(a.note, centerStartX + centerColWidths[0] + centerColWidths[1] + centerColWidths[2] + 1, yPos + 4);
+            }
+            
             doc.setFont('helvetica', 'normal');
             doc.setTextColor(0, 0, 0);
             
