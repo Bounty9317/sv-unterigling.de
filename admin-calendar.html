@@ -845,6 +845,10 @@
             const dateStr = date.toLocaleDateString('de-DE');
             const name = a.swappedWith ? `${a.swappedWith} (für ${shortenName(a.originalPerson)})` : a.person;
             
+            // Nicht-Sonntage bekommen ein "!" Präfix
+            const isNotSunday = dayOfWeek !== 0;
+            const prefix = isNotSunday ? '! ' : '';
+            
             // Prüfe ob unregelmäßig (Feiertag oder Samstag-Frühschoppen)
             const isIrregular = a.isHoliday || a.isSaturdayMorning;
             
@@ -869,23 +873,20 @@
             // Text weiß für farbige Spalten
             doc.setTextColor(255, 255, 255);
             
-            // Nicht-Sonntage (Feiertage, Samstag-Frühschoppen) sind FETT
-            const isNotSunday = dayOfWeek !== 0;
-            
-            // Tag - fett wenn nicht Sonntag
+            // Tag - mit ! wenn nicht Sonntag
             doc.setFontSize(isNotSunday ? 7 : 6.5);
             doc.setFont('helvetica', isNotSunday ? 'bold' : 'normal');
-            doc.text(dayName, rightStartX + colWidths[0]/2, rightYPos + 4, { align: 'center' });
+            doc.text(prefix + dayName, rightStartX + colWidths[0]/2, rightYPos + 4, { align: 'center' });
             
             // Datum - fett wenn nicht Sonntag
             doc.setFont('helvetica', 'bold');
             doc.setFontSize(isNotSunday ? 7 : 6.5);
-            doc.text(dateStr, rightStartX + colWidths[0] + colWidths[1]/2, rightYPos + 4, { align: 'center' });
+            doc.text(prefix + dateStr, rightStartX + colWidths[0] + colWidths[1]/2, rightYPos + 4, { align: 'center' });
             
             // Name - fett wenn nicht Sonntag
             doc.setFont('helvetica', 'bold');
             doc.setFontSize(isNotSunday ? 7 : 6.5);
-            doc.text(name, rightStartX + colWidths[0] + colWidths[1] + 1, rightYPos + 4);
+            doc.text(prefix + name, rightStartX + colWidths[0] + colWidths[1] + 1, rightYPos + 4);
             
             // Info Spalte - schwarzer Text auf weiß
             if (a.note) {
