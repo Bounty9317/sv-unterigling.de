@@ -868,21 +868,23 @@
             
             // Text weiß für farbige Spalten
             doc.setTextColor(255, 255, 255);
-            doc.setFontSize(6.5);
             
-            // Tag fett wenn unregelmäßig
-            if (isIrregular) {
-              doc.setFont('helvetica', 'bold');
-            }
+            // Nicht-Sonntage (Feiertage, Samstag-Frühschoppen) sind FETT
+            const isNotSunday = dayOfWeek !== 0;
+            
+            // Tag - fett wenn nicht Sonntag
+            doc.setFontSize(isNotSunday ? 7 : 6.5);
+            doc.setFont('helvetica', isNotSunday ? 'bold' : 'normal');
             doc.text(dayName, rightStartX + colWidths[0]/2, rightYPos + 4, { align: 'center' });
             
-            // Datum immer fett
+            // Datum - fett wenn nicht Sonntag
             doc.setFont('helvetica', 'bold');
+            doc.setFontSize(isNotSunday ? 7 : 6.5);
             doc.text(dateStr, rightStartX + colWidths[0] + colWidths[1]/2, rightYPos + 4, { align: 'center' });
             
-            // Name fett
+            // Name - fett wenn nicht Sonntag
             doc.setFont('helvetica', 'bold');
-            doc.setFontSize(6.5);
+            doc.setFontSize(isNotSunday ? 7 : 6.5);
             doc.text(name, rightStartX + colWidths[0] + colWidths[1] + 1, rightYPos + 4);
             
             // Info Spalte - schwarzer Text auf weiß
