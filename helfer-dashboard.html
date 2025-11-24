@@ -372,7 +372,14 @@
           personDiv.className = 'assigned-person';
           personDiv.style.background = assignment.color;
           personDiv.style.color = 'white';
-          personDiv.textContent = assignment.originalPerson || assignment.person;
+          
+          // Wenn getauscht, zeige durchgestrichenen Namen
+          if (assignment.swappedWith && assignment.originalPerson) {
+            personDiv.innerHTML = `<span style="text-decoration: line-through;">${assignment.originalPerson}</span>`;
+          } else {
+            personDiv.textContent = assignment.person;
+          }
+          
           personDiv.addEventListener('click', () => openSwapModal(type, dateStr, assignment));
           cell.appendChild(personDiv);
           
@@ -471,6 +478,15 @@
         } : { r: 200, g: 200, b: 200 };
       };
 
+      // Hilfsfunktion: Namen kürzen (Christian Mader -> C. Mader)
+      const shortenName = (fullName) => {
+        const parts = fullName.trim().split(' ');
+        if (parts.length < 2) return fullName;
+        const firstName = parts[0];
+        const lastName = parts.slice(1).join(' ');
+        return `${firstName.charAt(0)}. ${lastName}`;
+      };
+
       const createPDF = (withLogo = false, logoData = null) => {
         const doc = new jsPDF('landscape', 'mm', 'a4');
         
@@ -516,7 +532,7 @@
             const date = new Date(a.date);
             const dayName = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'][date.getDay()];
             const dateStr = date.toLocaleDateString('de-DE');
-            const name = a.swappedWith ? `${a.swappedWith} (für ${a.originalPerson})` : a.person;
+            const name = a.swappedWith ? `${a.swappedWith} (für ${shortenName(a.originalPerson)})` : a.person;
             
             if (a.color) {
               const rgb = hexToRgb(a.color);
@@ -531,7 +547,9 @@
             doc.rect(90, yPos, 50, 8);
             doc.setTextColor(255, 255, 255);
             doc.text(dayName, 35, yPos + 5, { align: 'center' });
+            doc.setFont('helvetica', 'bold');
             doc.text(dateStr, 70, yPos + 5, { align: 'center' });
+            doc.setFont('helvetica', 'normal');
             doc.text(name, 92, yPos + 5);
             doc.setTextColor(0, 0, 0);
             yPos += 8;
@@ -554,7 +572,7 @@
             const date = new Date(a.date);
             const dayName = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'][date.getDay()];
             const dateStr = date.toLocaleDateString('de-DE');
-            const name = a.swappedWith ? `${a.swappedWith} (für ${a.originalPerson})` : a.person;
+            const name = a.swappedWith ? `${a.swappedWith} (für ${shortenName(a.originalPerson)})` : a.person;
             
             if (a.color) {
               const rgb = hexToRgb(a.color);
@@ -569,7 +587,9 @@
             doc.rect(227, yPos, 50, 8);
             doc.setTextColor(255, 255, 255);
             doc.text(dayName, 172, yPos + 5, { align: 'center' });
+            doc.setFont('helvetica', 'bold');
             doc.text(dateStr, 207, yPos + 5, { align: 'center' });
+            doc.setFont('helvetica', 'normal');
             doc.text(name, 229, yPos + 5);
             doc.setTextColor(0, 0, 0);
             yPos += 8;
@@ -594,7 +614,7 @@
             const date = new Date(a.date);
             const dayName = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'][date.getDay()];
             const dateStr = date.toLocaleDateString('de-DE');
-            const name = a.swappedWith ? `${a.swappedWith} (für ${a.originalPerson})` : a.person;
+            const name = a.swappedWith ? `${a.swappedWith} (für ${shortenName(a.originalPerson)})` : a.person;
             
             if (a.color) {
               const rgb = hexToRgb(a.color);
@@ -609,7 +629,9 @@
             doc.rect(160, yPos, 60, 8);
             doc.setTextColor(255, 255, 255);
             doc.text(dayName, 95, yPos + 5, { align: 'center' });
+            doc.setFont('helvetica', 'bold');
             doc.text(dateStr, 135, yPos + 5, { align: 'center' });
+            doc.setFont('helvetica', 'normal');
             doc.text(name, 162, yPos + 5);
             doc.setTextColor(0, 0, 0);
             yPos += 8;
