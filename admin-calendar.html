@@ -566,13 +566,51 @@
       
       // Assignments laden
       const snapshot = await getDocs(collection(db, `${type}-assignments`));
-      const sortedAssignments = [];
-      snapshot.forEach(d => { sortedAssignments.push(d.data()); });
-      sortedAssignments.sort((a, b) => new Date(a.date) - new Date(b.date));
+      const allAssignments = [];
+      snapshot.forEach(d => { allAssignments.push(d.data()); });
       
-      // Nach Wochentag filtern
-      const saturdays = sortedAssignments.filter(a => new Date(a.date).getDay() === 6);
-      const sundays = sortedAssignments.filter(a => new Date(a.date).getDay() === 0);
+      // Gruppiere nach Datum und Slot
+      const assignmentsByDate = {};
+      allAssignments.forEach(a => {
+        if (!assignmentsByDate[a.date]) {
+          assignmentsByDate[a.date] = {};
+        }
+        if (a.slot) {
+          assignmentsByDate[a.date][a.slot] = a;
+        } else {
+          assignmentsByDate[a.date].default = a;
+        }
+      });
+      
+      // Sortiere nach Datum
+      const sortedDates = Object.keys(assignmentsByDate).sort((a, b) => new Date(a) - new Date(b));
+      
+      // Erstelle Listen für Samstag-Schießabend und Sonntag/Frühschoppen
+      const saturdayEvening = [];
+      const sundayMorning = [];
+      
+      sortedDates.forEach(dateStr => {
+        const date = new Date(dateStr);
+        const dayOfWeek = date.getDay();
+        const slots = assignmentsByDate[dateStr];
+        const isHoliday = allHolidays.includes(dateStr);
+        
+        // Samstag Schießabend
+        if (slots.schiessabend) {
+          saturdayEvening.push({ ...slots.schiessabend, dateStr, isHoliday });
+        } else if (dayOfWeek === 6 && slots.default) {
+          saturdayEvening.push({ ...slots.default, dateStr, isHoliday });
+        }
+        
+        // Sonntag oder Samstag-Frühschoppen oder Feiertage
+        if (slots.fruehschoppen) {
+          sundayMorning.push({ ...slots.fruehschoppen, dateStr, isHoliday, isSaturdayMorning: dayOfWeek === 6 });
+        } else if (dayOfWeek === 0 && slots.default) {
+          sundayMorning.push({ ...slots.default, dateStr, isHoliday });
+        } else if (isHoliday && slots.default && dayOfWeek !== 6) {
+          sundayMorning.push({ ...slots.default, dateStr, isHoliday });
+        }
+      });
       
       // Hilfsfunktion: Hex zu RGB konvertieren
       const hexToRgb = (hex) => {
@@ -594,45 +632,37 @@
       };
 
       const createPDF = (withLogo = false, logoData = null) => {
-        const doc = new jsPDF('landscape', 'mm', 'a4');
+        const doc = new jsPDF('portrait', 'mm', 'a4'); // Hochformat!
         
-        // Logo hinzufügen wenn vorhanden (oval wie Original)
+        // Logo hinzufügen wenn vorhanden (zentriert oben)
         if (withLogo && logoData) {
-          // Original: 644x387 px = ovale Form
-          // Seitenverhältnis exakt beibehalten: 644/387 = 1.664
-          const logoWidth = 60; // mm
+          const logoWidth = 50;
           const logoHeight = logoWidth / 1.664;
-          
-          // Logo links
-          doc.addImage(logoData, 'PNG', 15, 8, logoWidth, logoHeight);
-          
-          // Logo rechts (A4 Querformat = 297mm breit)
-          doc.addImage(logoData, 'PNG', 297 - 15 - logoWidth, 8, logoWidth, logoHeight);
+          doc.addImage(logoData, 'PNG', (210 - logoWidth) / 2, 10, logoWidth, logoHeight);
         }
           
-          // Überschrift
-          doc.setFontSize(20);
-          doc.setFont('helvetica', 'bold');
-          const title = type === 'wirte' ? 'Wirte Liste' : 'Schießaufsicht Liste';
-          const subtitle = type === 'wirte' ? 'Samstag / Sonntag' : 'Samstag';
-          doc.text(title, 148, 20, { align: 'center' });
-          doc.setFontSize(14);
-          doc.text(subtitle, 148, 28, { align: 'center' });
-          
-          // Datum
-          doc.setFontSize(10);
-          doc.setFont('helvetica', 'normal');
-          doc.text(`Erstellt am: ${new Date().toLocaleDateString('de-DE')}`, 148, 35, { align: 'center' });
+        // Überschrift
+        doc.setFontSize(18);
+        doc.setFont('helvetica', 'bold');
+        const title = type === 'wirte' ? 'Wirte Liste' : 'Schießaufsicht Liste';
+        const subtitle = type === 'wirte' ? 'Samstag / Sonntag' : 'Samstag';
+        doc.text(title, 105, withLogo ? 45 : 20, { align: 'center' });
+        doc.setFontSize(12);
+        doc.text(subtitle, 105, withLogo ? 52 : 27, { align: 'center' });
+        
+        // Datum
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'normal');
+        doc.text(`Erstellt am: ${new Date().toLocaleDateString('de-DE')}`, 105, withLogo ? 58 : 33, { align: 'center' });
         
         // Tabellen-Startposition
-          let startY = 50;
+        let startY = withLogo ? 65 : 40;
           
           if (type === 'wirte') {
-            // Zwei Tabellen nebeneinander
-            // Samstag Tabelle (links)
-            doc.setFontSize(12);
+            // Samstag Schießabend Tabelle
+            doc.setFontSize(11);
             doc.setFont('helvetica', 'bold');
-            doc.text('Samstag', 50, startY);
+            doc.text('Samstag Schießabend (19:30-24:00)', 105, startY, { align: 'center' });
             
             // Tabellen-Header
             doc.setFontSize(10);
