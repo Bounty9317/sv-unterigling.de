@@ -680,14 +680,16 @@
           saturdayEvening.push({ ...slots.schiessabend, dateStr, isHoliday, note: allNotes[dateStr] });
         } else if (dayOfWeek === 6 && slots.default && !slots.fruehschoppen) {
           saturdayEvening.push({ ...slots.default, dateStr, isHoliday, note: allNotes[dateStr] });
+        } else if (isHoliday && slots.default && dayOfWeek !== 0 && dayOfWeek !== 6) {
+          // Feiertage Mo-Fr (Wochentags) = Schießabend (links)
+          saturdayEvening.push({ ...slots.default, dateStr, isHoliday, note: allNotes[dateStr] });
         }
         
-        // Sonntag oder Samstag-Frühschoppen oder Feiertage
+        // Sonntag oder Samstag-Frühschoppen oder Sonntags-Feiertage
         if (slots.fruehschoppen) {
           sundayMorning.push({ ...slots.fruehschoppen, dateStr, isHoliday, isSaturdayMorning: dayOfWeek === 6, note: allNotes[dateStr] });
         } else if (dayOfWeek === 0 && slots.default) {
-          sundayMorning.push({ ...slots.default, dateStr, isHoliday, note: allNotes[dateStr] });
-        } else if (isHoliday && slots.default && dayOfWeek !== 6 && dayOfWeek !== 0) {
+          // Sonntag = Frühschoppen (rechts)
           sundayMorning.push({ ...slots.default, dateStr, isHoliday, note: allNotes[dateStr] });
         }
       });
