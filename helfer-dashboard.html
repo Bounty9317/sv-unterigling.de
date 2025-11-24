@@ -490,13 +490,14 @@
       const createPDF = (withLogo = false, logoData = null) => {
         const doc = new jsPDF('landscape', 'mm', 'a4');
         
-        // Logo hinzufügen wenn vorhanden (644x387 px skaliert)
+        // Logo hinzufügen wenn vorhanden (oval wie Original)
         if (withLogo && logoData) {
-          // Original: 644x387 px, Seitenverhältnis: 1.66:1
-          const logoWidth = 50; // mm
-          const logoHeight = logoWidth / 1.664; // 644/387 = 1.664
+          // Original: 644x387 px = ovale Form
+          // Seitenverhältnis exakt beibehalten: 644/387 = 1.664
+          const logoWidth = 60; // mm (breiter für bessere Sichtbarkeit)
+          const logoHeight = logoWidth / 1.664;
           
-          doc.addImage(logoData, 'PNG', 15, 10, logoWidth, logoHeight);
+          doc.addImage(logoData, 'PNG', 15, 8, logoWidth, logoHeight);
         }
         
         // Überschrift
