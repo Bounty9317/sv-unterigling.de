@@ -117,14 +117,23 @@
       aufsicht: []
     };
 
+    // Mache Variablen global verfügbar für Modal
+    window.globalPersons = persons;
+    window.globalDbRef = db;
+    window.globalCollectionFunc = collection;
+    window.globalAddDocFunc = addDoc;
+
     async function loadPersons(type) {
       const snapshot = await getDocs(collection(db, `${type}-persons`));
       persons[type] = [];
       snapshot.forEach(d => { 
         persons[type].push({ ...d.data(), id: d.id }); 
       });
+      window.globalPersons = persons; // Update global reference
       renderPersonCards(type);
     }
+
+    window.globalLoadPersons = loadPersons;
 
     let assignments = { wirte: {}, aufsicht: {} };
     let draggedPerson = null, draggedFrom = null;
@@ -546,9 +555,14 @@
   </div>
 
   <script>
+    // Diese Variablen müssen im globalen Scope sein
     const availableColors = ['#e57373', '#64b5f6', '#81c784', '#ffb74d', '#ba68c8', '#4db6ac', '#ff8a65', '#a1887f', '#90a4ae', '#f06292', '#7986cb', '#aed581'];
     let selectedColor = null;
     let currentModalType = null;
+    let globalPersons = { wirte: [], aufsicht: [] };
+    let globalDb = null;
+    let globalAddDoc = null;
+    let globalLoadPersons = null;
 
     window.openAddPersonModal = (type) => {
       currentModalType = type;
@@ -564,7 +578,7 @@
     };
 
     function renderColorPicker(type) {
-      const usedColors = persons[type].map(p => p.color);
+      const usedColors = globalPersons[type] ? globalPersons[type].map(p => p.color) : [];
       const picker = document.getElementById('color-picker');
       picker.innerHTML = availableColors.map(color => {
         const isUsed = usedColors.includes(color);
@@ -588,8 +602,13 @@
       const lastname = document.getElementById('lastname').value.trim();
       const name = `${firstname} ${lastname}`;
       
-      await addDoc(collection(db, `${currentModalType}-persons`), { name, color: selectedColor });
-      await loadPersons(currentModalType);
+      if (window.globalAddDocFunc && window.globalDbRef && window.globalCollectionFunc) {
+        const col = window.globalCollectionFunc(window.globalDbRef, `${currentModalType}-persons`);
+        await window.globalAddDocFunc(col, { name, color: selectedColor });
+        if (globalLoadPersons) {
+          await globalLoadPersons(currentModalType);
+        }
+      }
       closeAddPersonModal();
     });
   </script>

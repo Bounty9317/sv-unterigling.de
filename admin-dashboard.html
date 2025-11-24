@@ -348,6 +348,12 @@
       aufsicht: []
     };
 
+    // Mache Variablen global verfügbar für Modal
+    window.globalPersons = persons;
+    window.globalDbRef = db;
+    window.globalCollectionFunc = collection;
+    window.globalAddDocFunc = addDoc;
+
     // Check if user is logged in and is admin (not helper)
     onAuthStateChanged(auth, (user) => {
       if (!user) {
@@ -385,8 +391,11 @@
       snapshot.forEach(d => { 
         persons[type].push({ ...d.data(), id: d.id }); 
       });
+      window.globalPersons = persons; // Update global reference
       renderPersonList(type);
     }
+
+    window.globalLoadPersons = loadPersons;
 
     // Render person list
     function renderPersonList(type) {
@@ -434,12 +443,12 @@
     };
 
     function renderColorPicker(type) {
-      const usedColors = persons[type].map(p => p.color);
+      const usedColors = window.globalPersons[type] ? window.globalPersons[type].map(p => p.color) : [];
       const picker = document.getElementById('color-picker');
       picker.innerHTML = availableColors.map(color => {
         const isUsed = usedColors.includes(color);
         return `<div class="color-option ${isUsed ? 'disabled' : ''}" 
-                     style="background: ${color};"
+                     style="background: ${color}; ${isUsed ? 'opacity: 0.3; cursor: not-allowed;' : ''}"
                      onclick="${isUsed ? '' : `selectColor('${color}')`}"></div>`;
       }).join('');
     }
@@ -461,8 +470,13 @@
       const lastname = document.getElementById('lastname').value.trim();
       const name = `${firstname} ${lastname}`;
       
-      await addDoc(collection(db, `${currentModalType}-persons`), { name, color: selectedColor });
-      await loadPersons(currentModalType);
+      if (window.globalAddDocFunc && window.globalDbRef && window.globalCollectionFunc) {
+        const col = window.globalCollectionFunc(window.globalDbRef, `${currentModalType}-persons`);
+        await window.globalAddDocFunc(col, { name, color: selectedColor });
+        if (window.globalLoadPersons) {
+          await window.globalLoadPersons(currentModalType);
+        }
+      }
       closeAddPersonModal();
     });
   </script>
