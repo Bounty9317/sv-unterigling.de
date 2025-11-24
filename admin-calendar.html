@@ -723,9 +723,9 @@
         
         let yPos = startY + 14;
         const rowHeight = 7;
-        const colWidths = [18, 35, 70, 30]; // Tag, Datum, Name, Info
-        const leftStartX = 15;
-        const rightStartX = 160;
+        const colWidths = [12, 25, 45, 25]; // Tag, Datum, Name, Info (kompakter)
+        const leftStartX = 10;
+        const rightStartX = 155;
         
         if (type === 'wirte') {
           // Überschriften für beide Tabellen
@@ -775,12 +775,16 @@
             const dateStr = date.toLocaleDateString('de-DE');
             const name = a.swappedWith ? `${a.swappedWith} (für ${shortenName(a.originalPerson)})` : a.person;
             
-            // Hintergrund
+            // Hintergrund für Tag, Datum, Name (ohne Info)
             if (a.color) {
               const rgb = hexToRgb(a.color);
               doc.setFillColor(rgb.r, rgb.g, rgb.b);
-              doc.rect(leftStartX, leftYPos, colWidths[0] + colWidths[1] + colWidths[2] + colWidths[3], rowHeight, 'F');
+              doc.rect(leftStartX, leftYPos, colWidths[0] + colWidths[1] + colWidths[2], rowHeight, 'F');
             }
+            
+            // Weißer Hintergrund für Info-Spalte
+            doc.setFillColor(255, 255, 255);
+            doc.rect(leftStartX + colWidths[0] + colWidths[1] + colWidths[2], leftYPos, colWidths[3], rowHeight, 'F');
             
             // Rahmen
             doc.setDrawColor(0);
@@ -789,20 +793,22 @@
             doc.rect(leftStartX + colWidths[0] + colWidths[1], leftYPos, colWidths[2], rowHeight);
             doc.rect(leftStartX + colWidths[0] + colWidths[1] + colWidths[2], leftYPos, colWidths[3], rowHeight);
             
-            // Text weiß
+            // Text weiß für farbige Spalten
             doc.setTextColor(255, 255, 255);
-            doc.setFontSize(8);
-            doc.text(dayName, leftStartX + colWidths[0]/2, leftYPos + 4, { align: 'center' });
+            doc.setFontSize(7);
+            doc.text(dayName, leftStartX + colWidths[0]/2, leftYPos + 4.5, { align: 'center' });
             doc.setFont('helvetica', 'bold');
-            doc.text(dateStr, leftStartX + colWidths[0] + colWidths[1]/2, leftYPos + 4, { align: 'center' });
+            doc.text(dateStr, leftStartX + colWidths[0] + colWidths[1]/2, leftYPos + 4.5, { align: 'center' });
             doc.setFont('helvetica', 'bold');
-            doc.text(name, leftStartX + colWidths[0] + colWidths[1] + 1, leftYPos + 4);
+            doc.setFontSize(7);
+            doc.text(name, leftStartX + colWidths[0] + colWidths[1] + 1, leftYPos + 4.5);
             
-            // Info Spalte
+            // Info Spalte - schwarzer Text auf weiß
             if (a.note) {
-              doc.setFontSize(7);
+              doc.setTextColor(0, 0, 0);
+              doc.setFontSize(6);
               doc.setFont('helvetica', 'normal');
-              doc.text(a.note, leftStartX + colWidths[0] + colWidths[1] + colWidths[2] + 1, leftYPos + 4);
+              doc.text(a.note, leftStartX + colWidths[0] + colWidths[1] + colWidths[2] + 1, leftYPos + 4.5);
             }
             
             doc.setFont('helvetica', 'normal');
@@ -822,12 +828,16 @@
             // Prüfe ob unregelmäßig (Feiertag oder Samstag-Frühschoppen)
             const isIrregular = a.isHoliday || a.isSaturdayMorning;
             
-            // Hintergrund
+            // Hintergrund für Tag, Datum, Name (ohne Info)
             if (a.color) {
               const rgb = hexToRgb(a.color);
               doc.setFillColor(rgb.r, rgb.g, rgb.b);
-              doc.rect(rightStartX, rightYPos, colWidths[0] + colWidths[1] + colWidths[2] + colWidths[3], rowHeight, 'F');
+              doc.rect(rightStartX, rightYPos, colWidths[0] + colWidths[1] + colWidths[2], rowHeight, 'F');
             }
+            
+            // Weißer Hintergrund für Info-Spalte
+            doc.setFillColor(255, 255, 255);
+            doc.rect(rightStartX + colWidths[0] + colWidths[1] + colWidths[2], rightYPos, colWidths[3], rowHeight, 'F');
             
             // Rahmen
             doc.setDrawColor(0);
@@ -836,29 +846,31 @@
             doc.rect(rightStartX + colWidths[0] + colWidths[1], rightYPos, colWidths[2], rowHeight);
             doc.rect(rightStartX + colWidths[0] + colWidths[1] + colWidths[2], rightYPos, colWidths[3], rowHeight);
             
-            // Text weiß
+            // Text weiß für farbige Spalten
             doc.setTextColor(255, 255, 255);
-            doc.setFontSize(8);
+            doc.setFontSize(7);
             
             // Tag fett wenn unregelmäßig
             if (isIrregular) {
               doc.setFont('helvetica', 'bold');
             }
-            doc.text(dayName, rightStartX + colWidths[0]/2, rightYPos + 4, { align: 'center' });
+            doc.text(dayName, rightStartX + colWidths[0]/2, rightYPos + 4.5, { align: 'center' });
             
             // Datum immer fett
             doc.setFont('helvetica', 'bold');
-            doc.text(dateStr, rightStartX + colWidths[0] + colWidths[1]/2, rightYPos + 4, { align: 'center' });
+            doc.text(dateStr, rightStartX + colWidths[0] + colWidths[1]/2, rightYPos + 4.5, { align: 'center' });
             
             // Name fett
             doc.setFont('helvetica', 'bold');
-            doc.text(name, rightStartX + colWidths[0] + colWidths[1] + 1, rightYPos + 4);
+            doc.setFontSize(7);
+            doc.text(name, rightStartX + colWidths[0] + colWidths[1] + 1, rightYPos + 4.5);
             
-            // Info Spalte
+            // Info Spalte - schwarzer Text auf weiß
             if (a.note) {
-              doc.setFontSize(7);
+              doc.setTextColor(0, 0, 0);
+              doc.setFontSize(6);
               doc.setFont('helvetica', 'normal');
-              doc.text(a.note, rightStartX + colWidths[0] + colWidths[1] + colWidths[2] + 1, rightYPos + 4);
+              doc.text(a.note, rightStartX + colWidths[0] + colWidths[1] + colWidths[2] + 1, rightYPos + 4.5);
             }
             
             doc.setFont('helvetica', 'normal');
@@ -868,8 +880,8 @@
           });
         } else {
           // Schießaufsicht - nur Samstag (zentriert)
-          const centerStartX = 50;
-          const centerColWidths = [18, 38, 74, 30];
+          const centerStartX = 70;
+          const centerColWidths = [12, 28, 50, 25];
           
           doc.setFontSize(11);
           doc.setFont('helvetica', 'bold');
@@ -897,12 +909,16 @@
             const dateStr = date.toLocaleDateString('de-DE');
             const name = a.swappedWith ? `${a.swappedWith} (für ${shortenName(a.originalPerson)})` : a.person;
             
-            // Hintergrund
+            // Hintergrund für Tag, Datum, Name (ohne Info)
             if (a.color) {
               const rgb = hexToRgb(a.color);
               doc.setFillColor(rgb.r, rgb.g, rgb.b);
-              doc.rect(centerStartX, yPos, centerColWidths[0] + centerColWidths[1] + centerColWidths[2] + centerColWidths[3], rowHeight, 'F');
+              doc.rect(centerStartX, yPos, centerColWidths[0] + centerColWidths[1] + centerColWidths[2], rowHeight, 'F');
             }
+            
+            // Weißer Hintergrund für Info-Spalte
+            doc.setFillColor(255, 255, 255);
+            doc.rect(centerStartX + centerColWidths[0] + centerColWidths[1] + centerColWidths[2], yPos, centerColWidths[3], rowHeight, 'F');
             
             // Rahmen
             doc.setDrawColor(0);
@@ -911,20 +927,22 @@
             doc.rect(centerStartX + centerColWidths[0] + centerColWidths[1], yPos, centerColWidths[2], rowHeight);
             doc.rect(centerStartX + centerColWidths[0] + centerColWidths[1] + centerColWidths[2], yPos, centerColWidths[3], rowHeight);
             
-            // Text weiß
+            // Text weiß für farbige Spalten
             doc.setTextColor(255, 255, 255);
-            doc.setFontSize(8);
-            doc.text(dayName, centerStartX + centerColWidths[0]/2, yPos + 4, { align: 'center' });
+            doc.setFontSize(7);
+            doc.text(dayName, centerStartX + centerColWidths[0]/2, yPos + 4.5, { align: 'center' });
             doc.setFont('helvetica', 'bold');
-            doc.text(dateStr, centerStartX + centerColWidths[0] + centerColWidths[1]/2, yPos + 4, { align: 'center' });
+            doc.text(dateStr, centerStartX + centerColWidths[0] + centerColWidths[1]/2, yPos + 4.5, { align: 'center' });
             doc.setFont('helvetica', 'bold');
-            doc.text(name, centerStartX + centerColWidths[0] + centerColWidths[1] + 2, yPos + 4);
+            doc.setFontSize(7);
+            doc.text(name, centerStartX + centerColWidths[0] + centerColWidths[1] + 1, yPos + 4.5);
             
-            // Info Spalte
+            // Info Spalte - schwarzer Text auf weiß
             if (a.note) {
-              doc.setFontSize(7);
+              doc.setTextColor(0, 0, 0);
+              doc.setFontSize(6);
               doc.setFont('helvetica', 'normal');
-              doc.text(a.note, centerStartX + centerColWidths[0] + centerColWidths[1] + centerColWidths[2] + 1, yPos + 4);
+              doc.text(a.note, centerStartX + centerColWidths[0] + centerColWidths[1] + centerColWidths[2] + 1, yPos + 4.5);
             }
             
             doc.setFont('helvetica', 'normal');
