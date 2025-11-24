@@ -733,15 +733,15 @@
         }
         
         // Überschrift
-        const startY = withLogo ? 32 : 12;
-        doc.setFontSize(16);
+        const startY = withLogo ? 35 : 15;
+        doc.setFontSize(20);
         doc.setFont('helvetica', 'bold');
-        doc.text(type === 'wirte' ? 'Wirte Liste' : 'Schießaufsicht Liste', 148.5, startY, { align: 'center' });
-        doc.setFontSize(9);
+        doc.text(type === 'wirte' ? 'Wirte Liste Lamm' : 'Schießaufsicht Liste', 148.5, startY, { align: 'center' });
+        doc.setFontSize(10);
         doc.setFont('helvetica', 'normal');
-        doc.text(`Erstellt am: ${new Date().toLocaleDateString('de-DE')}`, 148.5, startY + 5, { align: 'center' });
+        doc.text(`Erstellt am: ${new Date().toLocaleDateString('de-DE')}`, 148.5, startY + 6, { align: 'center' });
         
-        let yPos = startY + 12;
+        let yPos = startY + 14;
         const rowHeight = 6;
         const colWidths = [10, 22, 38, 22]; // Tag, Datum, Name, Info (sehr kompakt)
         const leftStartX = 8;
@@ -749,16 +749,16 @@
         
         if (type === 'wirte') {
           // Überschriften für beide Tabellen
-          doc.setFontSize(10);
+          doc.setFontSize(11);
           doc.setFont('helvetica', 'bold');
           const leftTableWidth = colWidths[0] + colWidths[1] + colWidths[2] + colWidths[3];
           doc.text('Samstag Schießabend', leftStartX + leftTableWidth/2, yPos, { align: 'center' });
           doc.text('Sonntag / Feiertage - Frühschoppen', rightStartX + leftTableWidth/2, yPos, { align: 'center' });
-          doc.setFontSize(8);
+          doc.setFontSize(9);
           doc.setFont('helvetica', 'normal');
-          doc.text('(19:30-24:00)', leftStartX + leftTableWidth/2, yPos + 4, { align: 'center' });
-          doc.text('(10:00-12:00)', rightStartX + leftTableWidth/2, yPos + 4, { align: 'center' });
-          yPos += 9;
+          doc.text('(19:30-24:00)', leftStartX + leftTableWidth/2, yPos + 5, { align: 'center' });
+          doc.text('(10:00-12:00)', rightStartX + leftTableWidth/2, yPos + 5, { align: 'center' });
+          yPos += 11;
           
           // Header für beide Tabellen
           doc.setFontSize(8);
