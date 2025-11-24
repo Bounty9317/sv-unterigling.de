@@ -23,6 +23,11 @@ service cloud.firestore {
       allow read, write: if isAdmin();
     }
     
+    // Wirte Persons - Helpers and Admins can read/write
+    match /wirte-persons/{document} {
+      allow read, write: if isHelper() || isAdmin();
+    }
+    
     // Wirte Assignments - Helpers and Admins can read/write
     match /wirte-assignments/{document} {
       allow read, write: if isHelper() || isAdmin();
@@ -30,6 +35,11 @@ service cloud.firestore {
     
     // Wirte Swaps - Helpers and Admins can read/write
     match /wirte-swaps/{document} {
+      allow read, write: if isHelper() || isAdmin();
+    }
+    
+    // Aufsicht Persons - Helpers and Admins can read/write
+    match /aufsicht-persons/{document} {
       allow read, write: if isHelper() || isAdmin();
     }
     
