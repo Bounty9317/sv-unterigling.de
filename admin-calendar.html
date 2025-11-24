@@ -122,6 +122,59 @@
 
     const monthNames = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
 
+    // Funktion zur Berechnung deutscher Feiertage
+    function getGermanHolidays(year) {
+      const holidays = [];
+      
+      // Feste Feiertage
+      holidays.push(`${year}-01-01`); // Neujahr
+      holidays.push(`${year}-01-06`); // Heilige Drei Könige
+      holidays.push(`${year}-05-01`); // Tag der Arbeit
+      holidays.push(`${year}-08-15`); // Mariä Himmelfahrt
+      holidays.push(`${year}-10-03`); // Tag der Deutschen Einheit
+      holidays.push(`${year}-11-01`); // Allerheiligen
+      holidays.push(`${year}-12-25`); // 1. Weihnachtstag
+      holidays.push(`${year}-12-26`); // 2. Weihnachtstag
+      
+      // Berechnung von Ostern (Gaußsche Osterformel)
+      const a = year % 19;
+      const b = Math.floor(year / 100);
+      const c = year % 100;
+      const d = Math.floor(b / 4);
+      const e = b % 4;
+      const f = Math.floor((b + 8) / 25);
+      const g = Math.floor((b - f + 1) / 3);
+      const h = (19 * a + b - d - g + 15) % 30;
+      const i = Math.floor(c / 4);
+      const k = c % 4;
+      const l = (32 + 2 * e + 2 * i - h - k) % 7;
+      const m = Math.floor((a + 11 * h + 22 * l) / 451);
+      const month = Math.floor((h + l - 7 * m + 114) / 31);
+      const day = ((h + l - 7 * m + 114) % 31) + 1;
+      
+      const easter = new Date(year, month - 1, day);
+      
+      // Bewegliche Feiertage basierend auf Ostern
+      const addDays = (date, days) => {
+        const result = new Date(date);
+        result.setDate(result.getDate() + days);
+        return result.toISOString().split('T')[0];
+      };
+      
+      holidays.push(addDays(easter, -2));  // Karfreitag
+      holidays.push(addDays(easter, 1));   // Ostermontag
+      holidays.push(addDays(easter, 39));  // Christi Himmelfahrt
+      holidays.push(addDays(easter, 50));  // Pfingstmontag
+      holidays.push(addDays(easter, 60));  // Fronleichnam
+      
+      return holidays;
+    }
+
+    // Feiertage für 2025 und 2026 vorab berechnen
+    const holidays2025 = getGermanHolidays(2025);
+    const holidays2026 = getGermanHolidays(2026);
+    const allHolidays = [...holidays2025, ...holidays2026];
+
     function updateMonthDisplay(type) {
       const [year, month] = currentMonth[type].split('-');
       const monthName = monthNames[parseInt(month) - 1];
@@ -256,10 +309,12 @@
         
         // Prüfe ob Tag erlaubt ist
         let isAllowed = false;
+        const isHoliday = allHolidays.includes(dateStr);
+        
         if (type === 'aufsicht') {
           isAllowed = dayOfWeek === 6; // Nur Samstag
         } else if (type === 'wirte') {
-          isAllowed = dayOfWeek === 0 || dayOfWeek === 6; // Samstag oder Sonntag
+          isAllowed = dayOfWeek === 0 || dayOfWeek === 6 || isHoliday; // Samstag, Sonntag oder Feiertag
         }
         
         const assignment = assignments[type][dateStr];
@@ -275,13 +330,15 @@
         }
         
         cell.className = cellClass;
-        cell.innerHTML = `<div style="font-size: 0.9rem; color: #999;">${day}</div>`;
+        cell.innerHTML = `<div style="font-size: 0.9rem; color: ${isHoliday ? '#ffa726' : '#999'};">${day}${isHoliday ? ' 🎉' : ''}</div>`;
         cell.dataset.date = dateStr;
         
         if (!isAllowed) {
-          cell.title = type === 'aufsicht' ? 'Nur Samstags möglich' : 'Nur Sa/So möglich';
+          cell.title = type === 'aufsicht' ? 'Nur Samstags möglich' : 'Nur Sa/So/Feiertage möglich';
         } else if (!assignment) {
-          cell.title = 'Einteilung fehlt!';
+          cell.title = isHoliday ? 'Feiertag - Einteilung fehlt!' : 'Einteilung fehlt!';
+        } else if (isHoliday) {
+          cell.title = 'Feiertag';
         }
         if (assignment) {
           const personDiv = document.createElement('div');
