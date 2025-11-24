@@ -494,10 +494,14 @@
         if (withLogo && logoData) {
           // Original: 644x387 px = ovale Form
           // Seitenverhältnis exakt beibehalten: 644/387 = 1.664
-          const logoWidth = 60; // mm (breiter für bessere Sichtbarkeit)
+          const logoWidth = 60; // mm
           const logoHeight = logoWidth / 1.664;
           
+          // Logo links
           doc.addImage(logoData, 'PNG', 15, 8, logoWidth, logoHeight);
+          
+          // Logo rechts (A4 Querformat = 297mm breit)
+          doc.addImage(logoData, 'PNG', 297 - 15 - logoWidth, 8, logoWidth, logoHeight);
         }
         
         // Überschrift
