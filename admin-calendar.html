@@ -743,9 +743,12 @@
         
         let yPos = startY + 14;
         const rowHeight = 6;
-        const colWidths = [10, 22, 38, 22]; // Tag, Datum, Name, Info (sehr kompakt)
-        const leftStartX = 8;
-        const rightStartX = 152;
+        const colWidths = [11, 24, 42, 24]; // Tag, Datum, Name, Info
+        const tableWidth = colWidths[0] + colWidths[1] + colWidths[2] + colWidths[3]; // 101mm
+        const gap = 8; // Abstand zwischen Tabellen
+        const totalWidth = tableWidth * 2 + gap; // 210mm
+        const leftStartX = (297 - totalWidth) / 2; // Zentriert auf A4 Querformat (297mm)
+        const rightStartX = leftStartX + tableWidth + gap;
         
         if (type === 'wirte') {
           // Überschriften für beide Tabellen
