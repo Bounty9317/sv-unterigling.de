@@ -118,7 +118,11 @@
     const persons = { wirte: [], aufsicht: [] };
     let assignments = { wirte: {}, aufsicht: {} };
     let draggedPerson = null, draggedFrom = null;
-    let currentMonth = { wirte: '2025-01', aufsicht: '2025-01' };
+    
+    // Aktuelles Datum holen
+    const today = new Date();
+    const currentYearMonth = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
+    let currentMonth = { wirte: currentYearMonth, aufsicht: currentYearMonth };
 
     const monthNames = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
 
