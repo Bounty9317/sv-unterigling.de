@@ -221,14 +221,36 @@
     async function loadAssignments(type) {
       const snapshot = await getDocs(collection(db, `${type}-assignments`));
       assignments[type] = {};
-      snapshot.forEach(d => { assignments[type][d.data().date] = { ...d.data(), id: d.id }; });
+      snapshot.forEach(d => { 
+        const data = d.data();
+        if (data.slot) {
+          // Multi-slot assignment
+          const slotKey = `${data.date}-${data.slot}`;
+          assignments[type][slotKey] = { ...data, id: d.id };
+        } else {
+          // Single assignment
+          assignments[type][data.date] = { ...data, id: d.id };
+        }
+      });
       renderCalendar(type);
     }
 
-    async function saveAssignment(type, date, person, color) {
+    async function saveAssignment(type, date, person, color, slot = 'default') {
       const existing = assignments[type][date];
-      if (existing?.id) {
+      
+      if (slot === 'default' && existing?.id) {
+        // Update existing single assignment
         await updateDoc(doc(db, `${type}-assignments`, existing.id), { person, color, date, originalPerson: null, swappedWith: null });
+      } else if (slot !== 'default') {
+        // Multi-slot assignment (Frühschoppen/Schießabend)
+        const slotKey = `${date}-${slot}`;
+        const existingSlot = assignments[type][slotKey];
+        
+        if (existingSlot?.id) {
+          await updateDoc(doc(db, `${type}-assignments`, existingSlot.id), { person, color, date, slot, originalPerson: null, swappedWith: null });
+        } else {
+          await addDoc(collection(db, `${type}-assignments`), { person, color, date, slot });
+        }
       } else {
         await addDoc(collection(db, `${type}-assignments`), { person, color, date });
       }
@@ -317,12 +339,26 @@
           isAllowed = dayOfWeek === 0 || dayOfWeek === 6 || isHoliday; // Samstag, Sonntag oder Feiertag
         }
         
+        // Prüfe ob Samstag und Wirte (dann 2 Slots)
+        const isSaturday = dayOfWeek === 6;
+        const hasMultiSlots = type === 'wirte' && isSaturday;
+        
         const assignment = assignments[type][dateStr];
+        const fruehschoppenAssignment = hasMultiSlots ? assignments[type][`${dateStr}-fruehschoppen`] : null;
+        const schiessabendAssignment = hasMultiSlots ? assignments[type][`${dateStr}-schiessabend`] : null;
         
         // Setze CSS-Klassen basierend auf Einteilung
         let cellClass = 'calendar-day';
         if (!isAllowed) {
           cellClass += ' disabled';
+        } else if (hasMultiSlots) {
+          if (fruehschoppenAssignment && schiessabendAssignment) {
+            cellClass += ' assigned';
+          } else if (fruehschoppenAssignment || schiessabendAssignment) {
+            cellClass += ' missing'; // Teilweise eingeteilt
+          } else {
+            cellClass += ' missing';
+          }
         } else if (assignment) {
           cellClass += ' assigned';
         } else {
@@ -335,12 +371,82 @@
         
         if (!isAllowed) {
           cell.title = type === 'aufsicht' ? 'Nur Samstags möglich' : 'Nur Sa/So/Feiertage möglich';
-        } else if (!assignment) {
+        } else if (hasMultiSlots && (!fruehschoppenAssignment || !schiessabendAssignment)) {
+          cell.title = 'Samstag - Frühschoppen und/oder Schießabend fehlt!';
+        } else if (!assignment && !hasMultiSlots) {
           cell.title = isHoliday ? 'Feiertag - Einteilung fehlt!' : 'Einteilung fehlt!';
         } else if (isHoliday) {
           cell.title = 'Feiertag';
         }
-        if (assignment) {
+        
+        // Render Multi-Slot Assignments (Samstag bei Wirten)
+        if (hasMultiSlots) {
+          if (fruehschoppenAssignment) {
+            const slotDiv = document.createElement('div');
+            slotDiv.style.cssText = 'margin-bottom: 0.3rem;';
+            slotDiv.innerHTML = `<div style="font-size: 0.7rem; color: #999; margin-bottom: 0.2rem;">☀️ Frühschoppen</div>`;
+            
+            const personDiv = document.createElement('div');
+            personDiv.className = 'assigned-person';
+            personDiv.style.background = fruehschoppenAssignment.color;
+            personDiv.style.color = 'white';
+            personDiv.style.fontSize = '0.8rem';
+            personDiv.textContent = fruehschoppenAssignment.person;
+            personDiv.draggable = true;
+            personDiv.addEventListener('dragstart', () => { 
+              draggedPerson = { name: fruehschoppenAssignment.person, color: fruehschoppenAssignment.color, slot: 'fruehschoppen' }; 
+              draggedFrom = `${dateStr}-fruehschoppen`; 
+            });
+            
+            slotDiv.appendChild(personDiv);
+            cell.appendChild(slotDiv);
+            
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'btn-delete-assignment';
+            deleteBtn.style.top = '5px';
+            deleteBtn.style.right = '5px';
+            deleteBtn.innerHTML = '×';
+            deleteBtn.title = 'Frühschoppen löschen';
+            deleteBtn.onclick = (e) => {
+              e.stopPropagation();
+              deleteAssignment(type, `${dateStr}-fruehschoppen`);
+            };
+            slotDiv.appendChild(deleteBtn);
+          }
+          
+          if (schiessabendAssignment) {
+            const slotDiv = document.createElement('div');
+            slotDiv.innerHTML = `<div style="font-size: 0.7rem; color: #999; margin-bottom: 0.2rem;">🌙 Schießabend</div>`;
+            
+            const personDiv = document.createElement('div');
+            personDiv.className = 'assigned-person';
+            personDiv.style.background = schiessabendAssignment.color;
+            personDiv.style.color = 'white';
+            personDiv.style.fontSize = '0.8rem';
+            personDiv.textContent = schiessabendAssignment.person;
+            personDiv.draggable = true;
+            personDiv.addEventListener('dragstart', () => { 
+              draggedPerson = { name: schiessabendAssignment.person, color: schiessabendAssignment.color, slot: 'schiessabend' }; 
+              draggedFrom = `${dateStr}-schiessabend`; 
+            });
+            
+            slotDiv.appendChild(personDiv);
+            cell.appendChild(slotDiv);
+            
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'btn-delete-assignment';
+            deleteBtn.style.top = 'auto';
+            deleteBtn.style.bottom = '5px';
+            deleteBtn.style.right = '5px';
+            deleteBtn.innerHTML = '×';
+            deleteBtn.title = 'Schießabend löschen';
+            deleteBtn.onclick = (e) => {
+              e.stopPropagation();
+              deleteAssignment(type, `${dateStr}-schiessabend`);
+            };
+            slotDiv.appendChild(deleteBtn);
+          }
+        } else if (assignment) {
           const personDiv = document.createElement('div');
           personDiv.className = 'assigned-person';
           personDiv.style.background = assignment.color;
@@ -387,7 +493,19 @@
             e.currentTarget.classList.remove('drop-zone');
             const targetDate = e.currentTarget.dataset.date;
             if (draggedPerson) {
-              await saveAssignment(type, targetDate, draggedPerson.name, draggedPerson.color);
+              // Wenn Samstag bei Wirten, frage nach Slot
+              if (hasMultiSlots) {
+                const slot = prompt('Für welchen Zeitraum einteilen?\n\n1 = Frühschoppen (10:00-12:00)\n2 = Schießabend (19:30-24:00)\n\nBitte 1 oder 2 eingeben:');
+                if (slot === '1') {
+                  await saveAssignment(type, targetDate, draggedPerson.name, draggedPerson.color, 'fruehschoppen');
+                } else if (slot === '2') {
+                  await saveAssignment(type, targetDate, draggedPerson.name, draggedPerson.color, 'schiessabend');
+                } else if (slot !== null) {
+                  alert('Ungültige Eingabe. Bitte 1 oder 2 eingeben.');
+                }
+              } else {
+                await saveAssignment(type, targetDate, draggedPerson.name, draggedPerson.color);
+              }
             }
           });
         }
