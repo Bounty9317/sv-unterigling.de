@@ -389,11 +389,11 @@
         if (!isAllowed) {
           cellClass += ' disabled';
         } else if (hasMultiSlots) {
-          // Bei Wirte-Samstag: beide Slots müssen belegt sein
-          if (fruehschoppenAssignment && schiessabendAssignment) {
+          // Bei Wirte-Samstag: mindestens EIN Slot muss belegt sein
+          if (fruehschoppenAssignment || schiessabendAssignment) {
             cellClass += ' assigned';
           } else {
-            cellClass += ' missing'; // Mindestens ein Slot fehlt
+            cellClass += ' missing'; // Kein Slot eingeteilt
           }
         } else if (assignment) {
           cellClass += ' assigned';
@@ -408,8 +408,10 @@
         
         if (!isAllowed) {
           cell.title = type === 'aufsicht' ? 'Nur Samstags möglich' : 'Nur Sa/So/Feiertage möglich';
+        } else if (hasMultiSlots && !fruehschoppenAssignment && !schiessabendAssignment) {
+          cell.title = 'Samstag - Keine Einteilung!';
         } else if (hasMultiSlots && (!fruehschoppenAssignment || !schiessabendAssignment)) {
-          cell.title = 'Samstag - Frühschoppen und/oder Schießabend fehlt!';
+          cell.title = fruehschoppenAssignment ? 'Samstag - Nur Frühschoppen eingeteilt' : 'Samstag - Nur Schießabend eingeteilt';
         } else if (!assignment && !hasMultiSlots) {
           cell.title = isHoliday ? 'Feiertag - Einteilung fehlt!' : 'Einteilung fehlt!';
         } else if (isHoliday) {
