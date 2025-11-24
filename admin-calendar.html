@@ -628,12 +628,17 @@
       snapshot.forEach(d => { allAssignments.push(d.data()); });
 
       // Notizen laden
-      const notesSnapshot = await getDocs(collection(db, `${type}-notes`));
-      const allNotes = {};
-      notesSnapshot.forEach(d => { 
-        const data = d.data();
-        allNotes[data.date] = data.note;
-      });
+      let allNotes = {};
+      try {
+        const notesSnapshot = await getDocs(collection(db, `${type}-notes`));
+        notesSnapshot.forEach(d => { 
+          const data = d.data();
+          allNotes[data.date] = data.note;
+        });
+      } catch (error) {
+        console.log('Keine Notizen gefunden:', error);
+        allNotes = {};
+      }
       
       // Gruppiere nach Datum und Slot
       const assignmentsByDate = {};
