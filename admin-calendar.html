@@ -421,10 +421,13 @@
       const createPDF = (withLogo = false, logoData = null) => {
         const doc = new jsPDF('landscape', 'mm', 'a4');
         
-        // Logo hinzufügen wenn vorhanden (Original 1:1 ohne Anpassung)
+        // Logo hinzufügen wenn vorhanden (644x387 px skaliert)
         if (withLogo && logoData) {
-          // Füge Logo in Originalgröße ein
-          doc.addImage(logoData, 'PNG', 15, 10);
+          // Original: 644x387 px, Seitenverhältnis: 1.66:1
+          const logoWidth = 50; // mm
+          const logoHeight = logoWidth / 1.664; // 644/387 = 1.664
+          
+          doc.addImage(logoData, 'PNG', 15, 10, logoWidth, logoHeight);
         }
           
           // Überschrift
