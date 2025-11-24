@@ -727,13 +727,13 @@
           const logoWidth = 35;
           const logoHeight = logoWidth / 1.664;
           // Logo links
-          doc.addImage(logoData, 'PNG', 10, 8, logoWidth, logoHeight);
+          doc.addImage(logoData, 'PNG', 10, 5, logoWidth, logoHeight);
           // Logo rechts
-          doc.addImage(logoData, 'PNG', 297 - logoWidth - 10, 8, logoWidth, logoHeight);
+          doc.addImage(logoData, 'PNG', 297 - logoWidth - 10, 5, logoWidth, logoHeight);
         }
         
-        // Überschrift
-        const startY = withLogo ? 35 : 15;
+        // Überschrift - zwischen den Logos
+        const startY = withLogo ? 18 : 10;
         doc.setFontSize(20);
         doc.setFont('helvetica', 'bold');
         doc.text(type === 'wirte' ? 'Wirte Liste Lamm' : 'Schießaufsicht Liste', 148.5, startY, { align: 'center' });
@@ -741,7 +741,7 @@
         doc.setFont('helvetica', 'normal');
         doc.text(`Erstellt am: ${new Date().toLocaleDateString('de-DE')}`, 148.5, startY + 6, { align: 'center' });
         
-        let yPos = startY + 14;
+        let yPos = startY + 12;
         const rowHeight = 6;
         const colWidths = [11, 24, 42, 24]; // Tag, Datum, Name, Info
         const tableWidth = colWidths[0] + colWidths[1] + colWidths[2] + colWidths[3]; // 101mm
