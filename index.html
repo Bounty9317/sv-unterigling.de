@@ -1170,7 +1170,7 @@
             padding-bottom: 0.5rem;
             border-bottom: 2px solid #4CAF50;
           `;
-          monthHeader.textContent = `�� ${monthData.name} ${monthData.year} ��`;
+          monthHeader.textContent = `◆◆ ${monthData.name} ${monthData.year} ◆◆`;
           eventsList.appendChild(monthHeader);
           
           // Events for this month
@@ -1186,15 +1186,15 @@
             `;
             
             eventDiv.innerHTML = `
-              ${event.cancelled ? '<div style="color: #ff5252; font-weight: bold; margin-bottom: 0.5rem;">? ABGESAGT</div>' : ''}
+              ${event.cancelled ? '<div style="color: #ff5252; font-weight: bold; margin-bottom: 0.5rem;">❌ ABGESAGT</div>' : ''}
               <div style="color: #4CAF50; font-weight: bold; margin-bottom: 0.3rem;">
-                ?? ${eventDate.getDate()}.${(eventDate.getMonth() + 1).toString().padStart(2, '0')}.${eventDate.getFullYear()}
+                📅 ${eventDate.getDate()}.${(eventDate.getMonth() + 1).toString().padStart(2, '0')}.${eventDate.getFullYear()}
                 ${event.time ? ` um ${event.time} Uhr` : ''}
               </div>
               <h4 style="color: #ffffff; margin: 0.3rem 0;">${event.title}</h4>
               ${event.description ? `<p style="margin: 0.3rem 0; font-size: 0.9rem; color: #e0e0e0;">${event.description}</p>` : ''}
               ${event.registrationRequired ? `
-                <p style="margin: 0.5rem 0 0.3rem 0; font-size: 0.85rem; color: #ffa726;">?? Anmeldung erforderlich</p>
+                <p style="margin: 0.5rem 0 0.3rem 0; font-size: 0.85rem; color: #ffa726;">⚠️ Anmeldung erforderlich</p>
                 <button onclick="openRegistrationModal()" style="background: linear-gradient(135deg, #1a472a 0%, #2d5a3d 100%); color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-size: 0.85rem; margin-top: 0.5rem;">
                   Jetzt anmelden
                 </button>
@@ -1272,7 +1272,7 @@
               padding-bottom: 0.5rem;
               border-bottom: 2px solid #4CAF50;
             `;
-            monthHeader.textContent = `�� ${monthData.name} ${monthData.year} ��`;
+            monthHeader.textContent = `◆◆ ${monthData.name} ${monthData.year} ◆◆`;
             container.appendChild(monthHeader);
             
             // Events for this month
@@ -1288,15 +1288,15 @@
               `;
               
               eventDiv.innerHTML = `
-                ${event.cancelled ? '<div style="color: #ff5252; font-weight: bold; margin-bottom: 0.5rem;">? ABGESAGT</div>' : ''}
+                ${event.cancelled ? '<div style="color: #ff5252; font-weight: bold; margin-bottom: 0.5rem;">❌ ABGESAGT</div>' : ''}
                 <div style="color: #4CAF50; font-weight: bold; margin-bottom: 0.5rem; font-size: 1.1rem;">
-                  ?? ${eventDate.getDate()}.${(eventDate.getMonth() + 1).toString().padStart(2, '0')}.${eventDate.getFullYear()}
+                  📅 ${eventDate.getDate()}.${(eventDate.getMonth() + 1).toString().padStart(2, '0')}.${eventDate.getFullYear()}
                   ${event.time ? ` um ${event.time} Uhr` : ''}
                 </div>
                 <h4 style="color: #66BB6A; margin: 0.5rem 0; font-size: 1.3rem;">${event.title}</h4>
                 ${event.description ? `<p style="margin: 0.5rem 0; color: #d0d0d0;">${event.description}</p>` : ''}
                 ${event.registrationRequired ? `
-                  <p style="margin: 0.8rem 0 0.5rem 0; color: #ffa726;">?? Anmeldung erforderlich</p>
+                  <p style="margin: 0.8rem 0 0.5rem 0; color: #ffa726;">⚠️ Anmeldung erforderlich</p>
                   <button onclick="openRegistrationModal()" style="background: linear-gradient(135deg, #1a472a 0%, #2d5a3d 100%); color: white; border: none; padding: 0.6rem 1.2rem; border-radius: 6px; cursor: pointer; font-size: 0.9rem; transition: transform 0.2s;">
                     Jetzt anmelden
                   </button>
