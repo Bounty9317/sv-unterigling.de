@@ -294,18 +294,9 @@
 
     function renderPersonCards(type) {
       document.getElementById(`${type}-cards`).innerHTML = persons[type].map(p => 
-        `<div class="person-card-wrapper">
-          <div class="person-card" style="background: ${p.color}; color: white;" data-person="${p.name}" data-color="${p.color}">${p.name}</div>
-          <button class="btn-delete-person" onclick="deletePerson('${type}', '${p.id}')">×</button>
-        </div>`
+        `<div class="person-card" style="background: ${p.color}; color: white;" data-person="${p.name}" data-color="${p.color}">${p.name}</div>`
       ).join('');
     }
-
-    window.deletePerson = async (type, id) => {
-      if (!confirm('Möchten Sie diesen Helfer wirklich löschen?')) return;
-      await deleteDoc(doc(db, `${type}-persons`, id));
-      await loadPersons(type);
-    };
 
     function renderCalendar(type) {
       const cal = document.getElementById(`${type}-calendar`);
