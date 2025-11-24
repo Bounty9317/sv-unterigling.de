@@ -351,14 +351,18 @@
       currentSwapRequest = null;
     };
 
-    // PDF Export Function
+    // PDF Export Function v2.0
     window.downloadList = async (type) => {
+      console.log('PDF Download gestartet für:', type);
+      
       // Prüfe ob jsPDF bereits geladen ist
       if (!window.jspdf) {
+        console.log('Lade jsPDF...');
         const script = document.createElement('script');
         script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
         document.head.appendChild(script);
         await new Promise(resolve => script.onload = resolve);
+        console.log('jsPDF geladen');
       }
       
       const { jsPDF } = window.jspdf;
@@ -489,7 +493,9 @@
         }
         
         // PDF speichern
+        console.log('Speichere PDF...');
         doc.save(`${type}-liste-${new Date().toISOString().split('T')[0]}.pdf`);
+        console.log('PDF gespeichert!');
       };
       
       // Versuche Logo zu laden
