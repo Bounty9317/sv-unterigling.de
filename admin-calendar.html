@@ -552,9 +552,8 @@
       loadSwapRequests(type); 
     });
 
-    // PDF Export Function
+    // PDF Export Function - Optimiert für Hochformat
     window.downloadList = async (type) => {
-      // Prüfe ob jsPDF bereits geladen ist
       if (!window.jspdf) {
         const script = document.createElement('script');
         script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
@@ -598,7 +597,7 @@
         // Samstag Schießabend
         if (slots.schiessabend) {
           saturdayEvening.push({ ...slots.schiessabend, dateStr, isHoliday });
-        } else if (dayOfWeek === 6 && slots.default) {
+        } else if (dayOfWeek === 6 && slots.default && !slots.fruehschoppen) {
           saturdayEvening.push({ ...slots.default, dateStr, isHoliday });
         }
         
@@ -607,7 +606,7 @@
           sundayMorning.push({ ...slots.fruehschoppen, dateStr, isHoliday, isSaturdayMorning: dayOfWeek === 6 });
         } else if (dayOfWeek === 0 && slots.default) {
           sundayMorning.push({ ...slots.default, dateStr, isHoliday });
-        } else if (isHoliday && slots.default && dayOfWeek !== 6) {
+        } else if (isHoliday && slots.default && dayOfWeek !== 6 && dayOfWeek !== 0) {
           sundayMorning.push({ ...slots.default, dateStr, isHoliday });
         }
       });
@@ -632,179 +631,196 @@
       };
 
       const createPDF = (withLogo = false, logoData = null) => {
-        const doc = new jsPDF('portrait', 'mm', 'a4'); // Hochformat!
+        const doc = new jsPDF('portrait', 'mm', 'a4'); // Hochformat A4: 210x297mm
         
-        // Logo hinzufügen wenn vorhanden (zentriert oben)
+        // Logo zentriert oben
         if (withLogo && logoData) {
-          const logoWidth = 50;
+          const logoWidth = 40;
           const logoHeight = logoWidth / 1.664;
           doc.addImage(logoData, 'PNG', (210 - logoWidth) / 2, 10, logoWidth, logoHeight);
         }
-          
+        
         // Überschrift
-        doc.setFontSize(18);
+        const startY = withLogo ? 40 : 15;
+        doc.setFontSize(16);
         doc.setFont('helvetica', 'bold');
-        const title = type === 'wirte' ? 'Wirte Liste' : 'Schießaufsicht Liste';
-        const subtitle = type === 'wirte' ? 'Samstag / Sonntag' : 'Samstag';
-        doc.text(title, 105, withLogo ? 45 : 20, { align: 'center' });
-        doc.setFontSize(12);
-        doc.text(subtitle, 105, withLogo ? 52 : 27, { align: 'center' });
-        
-        // Datum
-        doc.setFontSize(9);
+        doc.text(type === 'wirte' ? 'Wirte Liste' : 'Schießaufsicht Liste', 105, startY, { align: 'center' });
+        doc.setFontSize(10);
         doc.setFont('helvetica', 'normal');
-        doc.text(`Erstellt am: ${new Date().toLocaleDateString('de-DE')}`, 105, withLogo ? 58 : 33, { align: 'center' });
+        doc.text(`Erstellt am: ${new Date().toLocaleDateString('de-DE')}`, 105, startY + 6, { align: 'center' });
         
-        // Tabellen-Startposition
-        let startY = withLogo ? 65 : 40;
+        let yPos = startY + 15;
+        const rowHeight = 6.5;
+        const colWidths = [18, 38, 74]; // Tag, Datum, Name
+        const startX = 15;
+        
+        if (type === 'wirte') {
+          // Samstag Schießabend Tabelle
+          doc.setFontSize(11);
+          doc.setFont('helvetica', 'bold');
+          doc.text('Samstag Schießabend (19:30-24:00)', 105, yPos, { align: 'center' });
+          yPos += 7;
           
-          if (type === 'wirte') {
-            // Samstag Schießabend Tabelle
-            doc.setFontSize(11);
+          // Header
+          doc.setFontSize(9);
+          doc.setFont('helvetica', 'bold');
+          doc.rect(startX, yPos, colWidths[0], rowHeight);
+          doc.rect(startX + colWidths[0], yPos, colWidths[1], rowHeight);
+          doc.rect(startX + colWidths[0] + colWidths[1], yPos, colWidths[2], rowHeight);
+          doc.text('Tag', startX + colWidths[0]/2, yPos + 4.5, { align: 'center' });
+          doc.text('Datum', startX + colWidths[0] + colWidths[1]/2, yPos + 4.5, { align: 'center' });
+          doc.text('Name', startX + colWidths[0] + colWidths[1] + colWidths[2]/2, yPos + 4.5, { align: 'center' });
+          yPos += rowHeight;
+          
+          // Daten
+          doc.setFont('helvetica', 'normal');
+          saturdayEvening.forEach(a => {
+            const date = new Date(a.dateStr);
+            const dayName = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'][date.getDay()];
+            const dateStr = date.toLocaleDateString('de-DE');
+            const name = a.swappedWith ? `${a.swappedWith} (für ${shortenName(a.originalPerson)})` : a.person;
+            
+            // Hintergrund
+            if (a.color) {
+              const rgb = hexToRgb(a.color);
+              doc.setFillColor(rgb.r, rgb.g, rgb.b);
+              doc.rect(startX, yPos, colWidths[0] + colWidths[1] + colWidths[2], rowHeight, 'F');
+            }
+            
+            // Rahmen
+            doc.setDrawColor(0);
+            doc.rect(startX, yPos, colWidths[0], rowHeight);
+            doc.rect(startX + colWidths[0], yPos, colWidths[1], rowHeight);
+            doc.rect(startX + colWidths[0] + colWidths[1], yPos, colWidths[2], rowHeight);
+            
+            // Text weiß
+            doc.setTextColor(255, 255, 255);
+            doc.text(dayName, startX + colWidths[0]/2, yPos + 4.5, { align: 'center' });
             doc.setFont('helvetica', 'bold');
-            doc.text('Samstag Schießabend (19:30-24:00)', 105, startY, { align: 'center' });
-            
-            // Tabellen-Header
-            doc.setFontSize(10);
-            doc.rect(20, startY + 5, 30, 8);
-            doc.rect(50, startY + 5, 40, 8);
-            doc.rect(90, startY + 5, 50, 8);
-            doc.text('Tag', 35, startY + 10, { align: 'center' });
-            doc.text('Datum', 70, startY + 10, { align: 'center' });
-            doc.text('Name', 115, startY + 10, { align: 'center' });
-            
-            // Samstag Daten
+            doc.text(dateStr, startX + colWidths[0] + colWidths[1]/2, yPos + 4.5, { align: 'center' });
+            doc.setFont('helvetica', 'bold'); // Namen fett
+            doc.text(name, startX + colWidths[0] + colWidths[1] + 2, yPos + 4.5);
             doc.setFont('helvetica', 'normal');
-            let yPos = startY + 13;
-            saturdays.forEach(a => {
-              const date = new Date(a.date);
-              const dayName = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'][date.getDay()];
-              const dateStr = date.toLocaleDateString('de-DE');
-              const name = a.swappedWith ? `${a.swappedWith} (für ${shortenName(a.originalPerson)})` : a.person;
-              
-              // Hintergrundfarbe setzen
-              if (a.color) {
-                const rgb = hexToRgb(a.color);
-                doc.setFillColor(rgb.r, rgb.g, rgb.b);
-                doc.rect(20, yPos, 30, 8, 'F');
-                doc.rect(50, yPos, 40, 8, 'F');
-                doc.rect(90, yPos, 50, 8, 'F');
-              }
-              
-              // Rahmen zeichnen
-              doc.setDrawColor(0);
-              doc.rect(20, yPos, 30, 8);
-              doc.rect(50, yPos, 40, 8);
-              doc.rect(90, yPos, 50, 8);
-              
-              // Text in Weiß wenn Hintergrund dunkel
-              doc.setTextColor(255, 255, 255);
-              doc.text(dayName, 35, yPos + 5, { align: 'center' });
+            doc.setTextColor(0, 0, 0);
+            
+            yPos += rowHeight;
+          });
+            
+          // Sonntag / Frühschoppen / Feiertage Tabelle
+          yPos += 8;
+          doc.setFontSize(11);
+          doc.setFont('helvetica', 'bold');
+          doc.text('Sonntag / Frühschoppen / Feiertage (10:00-12:00)', 105, yPos, { align: 'center' });
+          yPos += 7;
+          
+          // Header
+          doc.setFontSize(9);
+          doc.rect(startX, yPos, colWidths[0], rowHeight);
+          doc.rect(startX + colWidths[0], yPos, colWidths[1], rowHeight);
+          doc.rect(startX + colWidths[0] + colWidths[1], yPos, colWidths[2], rowHeight);
+          doc.text('Tag', startX + colWidths[0]/2, yPos + 4.5, { align: 'center' });
+          doc.text('Datum', startX + colWidths[0] + colWidths[1]/2, yPos + 4.5, { align: 'center' });
+          doc.text('Name', startX + colWidths[0] + colWidths[1] + colWidths[2]/2, yPos + 4.5, { align: 'center' });
+          yPos += rowHeight;
+          
+          // Daten
+          doc.setFont('helvetica', 'normal');
+          sundayMorning.forEach(a => {
+            const date = new Date(a.dateStr);
+            const dayOfWeek = date.getDay();
+            const dayName = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'][dayOfWeek];
+            const dateStr = date.toLocaleDateString('de-DE');
+            const name = a.swappedWith ? `${a.swappedWith} (für ${shortenName(a.originalPerson)})` : a.person;
+            
+            // Prüfe ob unregelmäßig (Feiertag oder Samstag-Frühschoppen)
+            const isIrregular = a.isHoliday || a.isSaturdayMorning;
+            
+            // Hintergrund
+            if (a.color) {
+              const rgb = hexToRgb(a.color);
+              doc.setFillColor(rgb.r, rgb.g, rgb.b);
+              doc.rect(startX, yPos, colWidths[0] + colWidths[1] + colWidths[2], rowHeight, 'F');
+            }
+            
+            // Rahmen
+            doc.setDrawColor(0);
+            doc.rect(startX, yPos, colWidths[0], rowHeight);
+            doc.rect(startX + colWidths[0], yPos, colWidths[1], rowHeight);
+            doc.rect(startX + colWidths[0] + colWidths[1], yPos, colWidths[2], rowHeight);
+            
+            // Text weiß
+            doc.setTextColor(255, 255, 255);
+            
+            // Tag fett wenn unregelmäßig
+            if (isIrregular) {
               doc.setFont('helvetica', 'bold');
-              doc.text(dateStr, 70, yPos + 5, { align: 'center' });
-              doc.setFont('helvetica', 'normal');
-              doc.text(name, 92, yPos + 5);
-              doc.setTextColor(0, 0, 0);
-              
-              yPos += 8;
-            });
+            }
+            doc.text(dayName, startX + colWidths[0]/2, yPos + 4.5, { align: 'center' });
             
-            // Sonntag Tabelle (rechts)
+            // Datum immer fett
             doc.setFont('helvetica', 'bold');
-            doc.text('Sonntag', 200, startY);
+            doc.text(dateStr, startX + colWidths[0] + colWidths[1]/2, yPos + 4.5, { align: 'center' });
             
-            // Tabellen-Header
-            doc.rect(157, startY + 5, 30, 8);
-            doc.rect(187, startY + 5, 40, 8);
-            doc.rect(227, startY + 5, 50, 8);
-            doc.text('Tag', 172, startY + 10, { align: 'center' });
-            doc.text('Datum', 207, startY + 10, { align: 'center' });
-            doc.text('Name', 252, startY + 10, { align: 'center' });
-            
-            // Sonntag Daten
-            doc.setFont('helvetica', 'normal');
-            yPos = startY + 13;
-            sundays.forEach(a => {
-              const date = new Date(a.date);
-              const dayName = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'][date.getDay()];
-              const dateStr = date.toLocaleDateString('de-DE');
-              const name = a.swappedWith ? `${a.swappedWith} (für ${shortenName(a.originalPerson)})` : a.person;
-              
-              // Hintergrundfarbe setzen
-              if (a.color) {
-                const rgb = hexToRgb(a.color);
-                doc.setFillColor(rgb.r, rgb.g, rgb.b);
-                doc.rect(157, yPos, 30, 8, 'F');
-                doc.rect(187, yPos, 40, 8, 'F');
-                doc.rect(227, yPos, 50, 8, 'F');
-              }
-              
-              // Rahmen zeichnen
-              doc.setDrawColor(0);
-              doc.rect(157, yPos, 30, 8);
-              doc.rect(187, yPos, 40, 8);
-              doc.rect(227, yPos, 50, 8);
-              
-              // Text in Weiß wenn Hintergrund dunkel
-              doc.setTextColor(255, 255, 255);
-              doc.text(dayName, 172, yPos + 5, { align: 'center' });
-              doc.setFont('helvetica', 'bold');
-              doc.text(dateStr, 207, yPos + 5, { align: 'center' });
-              doc.setFont('helvetica', 'normal');
-              doc.text(name, 229, yPos + 5);
-              doc.setTextColor(0, 0, 0);
-              
-              yPos += 8;
-            });
-          } else {
-            // Nur Samstag Tabelle (zentriert)
-            doc.setFontSize(12);
+            // Name fett
             doc.setFont('helvetica', 'bold');
-            doc.text('Samstag', 148, startY, { align: 'center' });
+            doc.text(name, startX + colWidths[0] + colWidths[1] + 2, yPos + 4.5);
             
-            // Tabellen-Header
-            doc.setFontSize(10);
-            doc.rect(80, startY + 5, 30, 8);
-            doc.rect(110, startY + 5, 50, 8);
-            doc.rect(160, startY + 5, 60, 8);
-            doc.text('Tag', 95, startY + 10, { align: 'center' });
-            doc.text('Datum', 135, startY + 10, { align: 'center' });
-            doc.text('Name', 190, startY + 10, { align: 'center' });
-            
-            // Daten
             doc.setFont('helvetica', 'normal');
-            let yPos = startY + 13;
-            saturdays.forEach(a => {
-              const date = new Date(a.date);
-              const dayName = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'][date.getDay()];
-              const dateStr = date.toLocaleDateString('de-DE');
-              const name = a.swappedWith ? `${a.swappedWith} (für ${a.originalPerson})` : a.person;
-              
-              // Hintergrundfarbe setzen
-              if (a.color) {
-                const rgb = hexToRgb(a.color);
-                doc.setFillColor(rgb.r, rgb.g, rgb.b);
-                doc.rect(80, yPos, 30, 8, 'F');
-                doc.rect(110, yPos, 50, 8, 'F');
-                doc.rect(160, yPos, 60, 8, 'F');
-              }
-              
-              // Rahmen zeichnen
-              doc.setDrawColor(0);
-              doc.rect(80, yPos, 30, 8);
-              doc.rect(110, yPos, 50, 8);
-              doc.rect(160, yPos, 60, 8);
-              
-              // Text in Weiß wenn Hintergrund dunkel
-              doc.setTextColor(255, 255, 255);
-              doc.text(dayName, 95, yPos + 5, { align: 'center' });
-              doc.text(dateStr, 135, yPos + 5, { align: 'center' });
-              doc.text(name, 162, yPos + 5);
-              doc.setTextColor(0, 0, 0);
-              
-              yPos += 8;
-            });
-          }
+            doc.setTextColor(0, 0, 0);
+            
+            yPos += rowHeight;
+          });
+        } else {
+          // Schießaufsicht - nur Samstag
+          doc.setFontSize(11);
+          doc.setFont('helvetica', 'bold');
+          doc.text('Samstag (19:30-21:00)', 105, yPos, { align: 'center' });
+          yPos += 7;
+          
+          // Header
+          doc.setFontSize(9);
+          doc.rect(startX, yPos, colWidths[0], rowHeight);
+          doc.rect(startX + colWidths[0], yPos, colWidths[1], rowHeight);
+          doc.rect(startX + colWidths[0] + colWidths[1], yPos, colWidths[2], rowHeight);
+          doc.text('Tag', startX + colWidths[0]/2, yPos + 4.5, { align: 'center' });
+          doc.text('Datum', startX + colWidths[0] + colWidths[1]/2, yPos + 4.5, { align: 'center' });
+          doc.text('Name', startX + colWidths[0] + colWidths[1] + colWidths[2]/2, yPos + 4.5, { align: 'center' });
+          yPos += rowHeight;
+          
+          // Daten
+          doc.setFont('helvetica', 'normal');
+          saturdayEvening.forEach(a => {
+            const date = new Date(a.dateStr);
+            const dayName = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'][date.getDay()];
+            const dateStr = date.toLocaleDateString('de-DE');
+            const name = a.swappedWith ? `${a.swappedWith} (für ${shortenName(a.originalPerson)})` : a.person;
+            
+            // Hintergrund
+            if (a.color) {
+              const rgb = hexToRgb(a.color);
+              doc.setFillColor(rgb.r, rgb.g, rgb.b);
+              doc.rect(startX, yPos, colWidths[0] + colWidths[1] + colWidths[2], rowHeight, 'F');
+            }
+            
+            // Rahmen
+            doc.setDrawColor(0);
+            doc.rect(startX, yPos, colWidths[0], rowHeight);
+            doc.rect(startX + colWidths[0], yPos, colWidths[1], rowHeight);
+            doc.rect(startX + colWidths[0] + colWidths[1], yPos, colWidths[2], rowHeight);
+            
+            // Text weiß
+            doc.setTextColor(255, 255, 255);
+            doc.text(dayName, startX + colWidths[0]/2, yPos + 4.5, { align: 'center' });
+            doc.setFont('helvetica', 'bold');
+            doc.text(dateStr, startX + colWidths[0] + colWidths[1]/2, yPos + 4.5, { align: 'center' });
+            doc.setFont('helvetica', 'bold'); // Namen fett
+            doc.text(name, startX + colWidths[0] + colWidths[1] + 2, yPos + 4.5);
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor(0, 0, 0);
+            
+            yPos += rowHeight;
+          });
+        }
         
         // PDF speichern
         doc.save(`${type}-liste-${new Date().toISOString().split('T')[0]}.pdf`);
