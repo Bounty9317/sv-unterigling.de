@@ -248,6 +248,7 @@
           const data = d.data();
           dayNotes[type][data.date] = { ...data, id: d.id };
         });
+        console.log('Notizen geladen für', type, ':', dayNotes[type]);
         renderCalendar(type);
       } catch (error) {
         console.log('Fehler beim Laden der Notizen:', error);
@@ -605,6 +606,7 @@
       const existing = dayNotes[type][date]?.note || '';
       const note = prompt('Info für diesen Tag eingeben:\n(z.B. "Anfangsschießen")\n\nLeer lassen zum Löschen:', existing);
       if (note !== null) {
+        console.log('Speichere Notiz:', { type, date, note });
         await saveDayNote(type, date, note);
       }
     };
