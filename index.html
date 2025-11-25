@@ -1432,17 +1432,19 @@
         header.appendChild(lightsContainer);
       }
       
-      // Weihnachtsbanner - KOMPLETT NEU mit festem Position
+      // Weihnachtsbanner - KOMPLETT NEU mit festem Position OHNE transform
       const christmasBanner = document.createElement('div');
       christmasBanner.id = 'fixed-christmas-banner-2025';
       christmasBanner.innerHTML = '🎄 Der Schützenverein Unterigling wünscht<br>schöne Weihnachten und einen Guten Rutsch ins neue Jahr! 🎄';
       
-      // Setze Position auf fixed - OHNE Scroll
+      // Setze Position auf fixed - OHNE transform (das kann fixed brechen)
       Object.assign(christmasBanner.style, {
         position: 'fixed',
         top: '180px',
-        left: '50%',
-        transform: 'translateX(-50%)',
+        left: '0',
+        right: '0',
+        marginLeft: 'auto',
+        marginRight: 'auto',
         zIndex: '999999',
         background: 'linear-gradient(135deg, #c41e3a 0%, #8b0000 100%)',
         color: '#ffd700',
@@ -1456,7 +1458,6 @@
         fontSize: '1rem',
         width: 'fit-content',
         maxWidth: '90%',
-        margin: '0',
         display: 'block'
       });
       
