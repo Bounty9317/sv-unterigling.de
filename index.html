@@ -1423,6 +1423,34 @@
           ornaments.appendChild(ornament);
         }
         header.appendChild(ornaments);
+        
+        // Girlanden die ins Hero-Bild hängen
+        for (let i = 0; i < 4; i++) {
+          const garland = document.createElement('div');
+          garland.className = 'garland';
+          
+          // Rote Beeren auf den Girlanden
+          for (let j = 0; j < 8; j++) {
+            const berry = document.createElement('div');
+            berry.className = 'garland-berry';
+            berry.style.left = (j * 12 + 10) + '%';
+            berry.style.top = (Math.random() * 30 + 20) + 'px';
+            garland.appendChild(berry);
+          }
+          
+          // Sterne auf den Girlanden
+          for (let k = 0; k < 3; k++) {
+            const star = document.createElement('div');
+            star.className = 'garland-star';
+            star.innerHTML = '⭐';
+            star.style.left = (k * 35 + 15) + '%';
+            star.style.top = (Math.random() * 40 + 15) + 'px';
+            star.style.animationDelay = (k * 0.5) + 's';
+            garland.appendChild(star);
+          }
+          
+          header.appendChild(garland);
+        }
       }
       
       // Weihnachtsbanner - direkt nach Header einfügen

@@ -20,220 +20,9 @@
   }
 }
 
-/* Winterlandschaft mit Dorf */
-.snow-ground {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 200px;
-  z-index: 1000;
-  pointer-events: none;
-}
 
-/* Berge im Hintergrund */
-.snow-ground::before {
-  content: '';
-  position: absolute;
-  bottom: 80px;
-  left: 0;
-  right: 0;
-  height: 120px;
-  background: 
-    linear-gradient(to bottom right, transparent 49%, #d0d0d0 50%, #e8e8e8 60%, #f0f0f0 100%),
-    linear-gradient(to bottom left, transparent 49%, #c8c8c8 50%, #e0e0e0 60%, #f0f0f0 100%);
-  background-position: 0 0, 40% 0;
-  background-size: 30% 100%, 35% 100%;
-  background-repeat: no-repeat;
-  opacity: 0.6;
-  z-index: 1;
-}
 
-/* Schnee am Boden */
-.snow-ground::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 80px;
-  background: 
-    radial-gradient(ellipse at 20% 100%, rgba(255,255,255,0.95) 0%, transparent 40%),
-    radial-gradient(ellipse at 50% 100%, rgba(255,255,255,0.9) 0%, transparent 45%),
-    radial-gradient(ellipse at 80% 100%, rgba(255,255,255,0.95) 0%, transparent 40%),
-    linear-gradient(to top, 
-      rgba(255,255,255,0.98) 0%, 
-      rgba(255,255,255,0.95) 30%,
-      rgba(255,255,255,0.85) 50%,
-      rgba(255,255,255,0.6) 70%,
-      rgba(255,255,255,0.3) 85%,
-      transparent 100%
-    );
-  box-shadow: 0 -10px 30px rgba(255,255,255,0.3);
-  z-index: 3;
-}
-
-/* Dorf-Container */
-.winter-village {
-  position: absolute;
-  bottom: 80px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 600px;
-  height: 100px;
-  z-index: 2;
-}
-
-/* Häuser */
-.village-house {
-  position: absolute;
-  bottom: 0;
-}
-
-/* Haus 1 - Links */
-.village-house:nth-child(1) {
-  left: 50px;
-  width: 60px;
-  height: 50px;
-  background: linear-gradient(to bottom, #8B4513 0%, #654321 100%);
-  border-radius: 2px;
-}
-
-.village-house:nth-child(1)::before {
-  content: '';
-  position: absolute;
-  top: -30px;
-  left: -5px;
-  width: 0;
-  height: 0;
-  border-left: 35px solid transparent;
-  border-right: 35px solid transparent;
-  border-bottom: 30px solid #c41e3a;
-  filter: drop-shadow(0 -2px 3px rgba(0,0,0,0.2));
-}
-
-.village-house:nth-child(1)::after {
-  content: '';
-  position: absolute;
-  top: 15px;
-  left: 20px;
-  width: 15px;
-  height: 20px;
-  background: #FFD700;
-  border: 2px solid #8B4513;
-  box-shadow: 0 0 10px rgba(255,215,0,0.6);
-}
-
-/* Kirche - Mitte */
-.village-house:nth-child(2) {
-  left: 50%;
-  transform: translateX(-50%);
-  width: 70px;
-  height: 70px;
-  background: linear-gradient(to bottom, #f5f5f5 0%, #e0e0e0 100%);
-  border-radius: 2px;
-}
-
-.village-house:nth-child(2)::before {
-  content: '';
-  position: absolute;
-  top: -35px;
-  left: -5px;
-  width: 0;
-  height: 0;
-  border-left: 40px solid transparent;
-  border-right: 40px solid transparent;
-  border-bottom: 35px solid #8B0000;
-  filter: drop-shadow(0 -2px 3px rgba(0,0,0,0.2));
-}
-
-/* Kirchturm */
-.village-house:nth-child(2)::after {
-  content: '✝';
-  position: absolute;
-  top: -60px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 20px;
-  height: 25px;
-  background: #d0d0d0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-  color: #8B0000;
-  border-radius: 2px 2px 0 0;
-}
-
-/* Haus 2 - Rechts */
-.village-house:nth-child(3) {
-  right: 80px;
-  width: 55px;
-  height: 45px;
-  background: linear-gradient(to bottom, #A0522D 0%, #8B4513 100%);
-  border-radius: 2px;
-}
-
-.village-house:nth-child(3)::before {
-  content: '';
-  position: absolute;
-  top: -28px;
-  left: -5px;
-  width: 0;
-  height: 0;
-  border-left: 32px solid transparent;
-  border-right: 32px solid transparent;
-  border-bottom: 28px solid #654321;
-  filter: drop-shadow(0 -2px 3px rgba(0,0,0,0.2));
-}
-
-.village-house:nth-child(3)::after {
-  content: '';
-  position: absolute;
-  top: 12px;
-  left: 15px;
-  width: 12px;
-  height: 18px;
-  background: #FFD700;
-  border: 2px solid #654321;
-  box-shadow: 0 0 10px rgba(255,215,0,0.6);
-}
-
-/* Haus 3 - Ganz links klein */
-.village-house:nth-child(4) {
-  left: 150px;
-  width: 45px;
-  height: 40px;
-  background: linear-gradient(to bottom, #CD853F 0%, #A0522D 100%);
-  border-radius: 2px;
-}
-
-.village-house:nth-child(4)::before {
-  content: '';
-  position: absolute;
-  top: -25px;
-  left: -5px;
-  width: 0;
-  height: 0;
-  border-left: 27px solid transparent;
-  border-right: 27px solid transparent;
-  border-bottom: 25px solid #8B0000;
-  filter: drop-shadow(0 -2px 3px rgba(0,0,0,0.2));
-}
-
-.village-house:nth-child(4)::after {
-  content: '';
-  position: absolute;
-  top: 10px;
-  left: 12px;
-  width: 10px;
-  height: 15px;
-  background: #FFD700;
-  border: 2px solid #654321;
-  box-shadow: 0 0 8px rgba(255,215,0,0.6);
-}
-
-/* Lichterkette im Header */
+/* Lichterkette im Header mit Kabel */
 .christmas-lights {
   position: absolute;
   bottom: -15px;
@@ -246,11 +35,43 @@
   z-index: 1001;
 }
 
+/* Kabel für die Lichterkette */
+.christmas-lights::before {
+  content: '';
+  position: absolute;
+  top: 5px;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: repeating-linear-gradient(
+    90deg,
+    #2d5a3d 0px,
+    #2d5a3d 2px,
+    #1a472a 2px,
+    #1a472a 4px
+  );
+  border-radius: 2px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+}
+
 .light {
   width: 10px;
   height: 15px;
   border-radius: 50% 50% 40% 40%;
   animation: blink 1.5s infinite;
+  position: relative;
+}
+
+/* Verbindung vom Kabel zur Lampe */
+.light::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  height: 8px;
+  background: #1a472a;
 }
 
 .light:nth-child(1) { background: #ff0000; animation-delay: 0s; }
@@ -311,17 +132,104 @@
   50% { transform: rotate(5deg); }
 }
 
-/* Weihnachtsbanner - direkt unter Header im DOM */
+/* Girlanden die ins Hero-Bild hängen */
+.garland {
+  position: absolute;
+  bottom: -80px;
+  width: 150px;
+  height: 100px;
+  pointer-events: none;
+  z-index: 1001;
+}
+
+.garland::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  height: 100%;
+  background: 
+    radial-gradient(circle at 10% 20%, #1a472a 8%, transparent 8%),
+    radial-gradient(circle at 20% 35%, #2d5a3d 8%, transparent 8%),
+    radial-gradient(circle at 30% 25%, #1a472a 8%, transparent 8%),
+    radial-gradient(circle at 40% 40%, #2d5a3d 8%, transparent 8%),
+    radial-gradient(circle at 50% 30%, #1a472a 8%, transparent 8%),
+    radial-gradient(circle at 60% 40%, #2d5a3d 8%, transparent 8%),
+    radial-gradient(circle at 70% 25%, #1a472a 8%, transparent 8%),
+    radial-gradient(circle at 80% 35%, #2d5a3d 8%, transparent 8%),
+    radial-gradient(circle at 90% 20%, #1a472a 8%, transparent 8%);
+  filter: drop-shadow(0 2px 3px rgba(0,0,0,0.3));
+}
+
+/* Girlanden-Kette */
+.garland::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: #1a472a;
+  border-radius: 2px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+}
+
+/* Rote Beeren auf den Girlanden */
+.garland-berry {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: radial-gradient(circle at 30% 30%, #ff4444, #cc0000);
+  border-radius: 50%;
+  animation: berryGlow 2s ease-in-out infinite;
+}
+
+@keyframes berryGlow {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+/* Positionierung der Girlanden */
+.garland:nth-child(1) {
+  left: 15%;
+}
+
+.garland:nth-child(2) {
+  left: 35%;
+}
+
+.garland:nth-child(3) {
+  left: 55%;
+}
+
+.garland:nth-child(4) {
+  left: 75%;
+}
+
+/* Sterne auf den Girlanden */
+.garland-star {
+  position: absolute;
+  color: #ffd700;
+  font-size: 12px;
+  animation: starTwinkle 1.5s ease-in-out infinite;
+  text-shadow: 0 0 5px #ffd700;
+}
+
+/* Weihnachtsbanner - über Hero-Bild */
 .christmas-banner {
-  position: relative;
-  margin: 0 auto;
+  position: fixed;
+  top: 140px;
+  left: 50%;
+  transform: translateX(-50%);
   background: linear-gradient(135deg, #c41e3a 0%, #8b0000 100%);
   color: #ffd700;
   padding: 1rem 3rem;
   width: fit-content;
-  border-radius: 0 0 15px 15px;
+  border-radius: 15px;
   box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-  z-index: 999;
+  z-index: 1002;
   pointer-events: none;
   text-align: center;
   font-weight: bold;
@@ -332,11 +240,11 @@
 
 @keyframes bannerSlide {
   from {
-    transform: translateY(-100px);
+    transform: translateX(-50%) translateY(-100px);
     opacity: 0;
   }
   to {
-    transform: translateY(0);
+    transform: translateX(-50%) translateY(0);
     opacity: 1;
   }
 }
@@ -379,6 +287,11 @@
   }
 }
 
+@keyframes starTwinkle {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(0.8); }
+}
+
 /* Mobile Anpassungen */
 @media (max-width: 768px) {
   .christmas-tree {
@@ -399,9 +312,12 @@
     font-size: 0.9rem;
     padding: 0.8rem 1.5rem;
     max-width: 90%;
+    top: 120px;
   }
   
-  .snow-ground {
-    height: 50px;
+  .garland {
+    width: 80px;
+    height: 60px;
+    bottom: -50px;
   }
 }
