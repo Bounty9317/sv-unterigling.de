@@ -425,12 +425,11 @@
         if (!isAllowed) {
           cellClass += ' disabled';
         } else if (hasMultiSlots) {
-          if (fruehschoppenAssignment && schiessabendAssignment) {
+          // Bei Wirte-Samstag: mindestens EIN Slot muss belegt sein
+          if (fruehschoppenAssignment || schiessabendAssignment) {
             cellClass += ' assigned';
-          } else if (fruehschoppenAssignment || schiessabendAssignment) {
-            cellClass += ' missing';
           } else {
-            cellClass += ' missing';
+            cellClass += ' missing'; // Kein Slot eingeteilt
           }
         } else if (assignment) {
           cellClass += ' assigned';
