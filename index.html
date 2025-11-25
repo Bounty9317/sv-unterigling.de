@@ -1428,32 +1428,7 @@
     function createChristmasTree(position) {
       const tree = document.createElement('div');
       tree.className = `christmas-tree ${position}`;
-      
-      // Stern
-      const star = document.createElement('div');
-      star.className = 'tree-star';
-      star.innerHTML = '⭐';
-      tree.appendChild(star);
-      
-      // 4 Baumschichten für realistischeren Look
-      for (let i = 0; i < 4; i++) {
-        const layer = document.createElement('div');
-        layer.className = 'tree-layer';
-        tree.appendChild(layer);
-      }
-      
-      // 6 Christbaumkugeln
-      for (let i = 0; i < 6; i++) {
-        const ornament = document.createElement('div');
-        ornament.className = 'tree-ornament';
-        tree.appendChild(ornament);
-      }
-      
-      // Stamm
-      const trunk = document.createElement('div');
-      trunk.className = 'tree-trunk';
-      tree.appendChild(trunk);
-      
+      // Baum wird als Hintergrundbild über CSS angezeigt
       document.body.appendChild(tree);
     }
 

@@ -143,15 +143,19 @@
   }
 }
 
-/* Weihnachtsbäume - Realistischer */
+/* Weihnachtsbäume - Bild */
 .christmas-tree {
   position: fixed;
   bottom: 80px;
-  width: 140px;
-  height: 220px;
+  width: 200px;
+  height: 250px;
   z-index: 998;
   pointer-events: none;
-  filter: drop-shadow(5px 5px 10px rgba(0,0,0,0.5));
+  background-image: url('christmas-tree.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center bottom;
+  filter: drop-shadow(5px 5px 15px rgba(0,0,0,0.4));
 }
 
 .christmas-tree.left {
@@ -164,141 +168,7 @@
   animation: treeSlideIn 1s ease-out;
 }
 
-/* Baumstamm mit Textur */
-.tree-trunk {
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 25px;
-  height: 35px;
-  background: linear-gradient(to right, #654321 0%, #8B4513 50%, #654321 100%);
-  border-radius: 4px;
-  box-shadow: inset -2px 0 5px rgba(0,0,0,0.3);
-}
-
-/* Baumkrone - 4 realistische Schichten */
-.tree-layer {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 0;
-  height: 0;
-  filter: drop-shadow(0 2px 3px rgba(0,0,0,0.3));
-}
-
-.tree-layer:nth-child(2) {
-  bottom: 30px;
-  border-left: 60px solid transparent;
-  border-right: 60px solid transparent;
-  border-bottom: 70px solid #1a5c1a;
-}
-
-.tree-layer:nth-child(3) {
-  bottom: 75px;
-  border-left: 52px solid transparent;
-  border-right: 52px solid transparent;
-  border-bottom: 65px solid #1e6b1e;
-}
-
-.tree-layer:nth-child(4) {
-  bottom: 115px;
-  border-left: 42px solid transparent;
-  border-right: 42px solid transparent;
-  border-bottom: 55px solid #228b22;
-}
-
-.tree-layer:nth-child(5) {
-  bottom: 145px;
-  border-left: 28px solid transparent;
-  border-right: 28px solid transparent;
-  border-bottom: 40px solid #2e8b2e;
-}
-
-/* Stern oben - realistischer */
-.tree-star {
-  position: absolute;
-  top: -20px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 2.5rem;
-  filter: drop-shadow(0 0 10px #ffd700);
-  animation: starTwinkle 1.5s infinite;
-}
-
-@keyframes starTwinkle {
-  0%, 100% { 
-    opacity: 1; 
-    transform: translateX(-50%) scale(1) rotate(0deg);
-    filter: drop-shadow(0 0 10px #ffd700);
-  }
-  50% { 
-    opacity: 0.8; 
-    transform: translateX(-50%) scale(1.15) rotate(20deg);
-    filter: drop-shadow(0 0 20px #ffd700);
-  }
-}
-
-/* Christbaumkugeln - realistischer mit Glanz */
-.tree-ornament {
-  position: absolute;
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  animation: ornamentGlow 2s infinite;
-  box-shadow: inset -2px -2px 4px rgba(0,0,0,0.3), inset 2px 2px 4px rgba(255,255,255,0.3);
-}
-
-.tree-ornament::before {
-  content: '';
-  position: absolute;
-  top: 2px;
-  left: 3px;
-  width: 4px;
-  height: 4px;
-  background: rgba(255,255,255,0.6);
-  border-radius: 50%;
-}
-
-.tree-ornament:nth-child(6) { 
-  bottom: 45px; left: 25%; 
-  background: radial-gradient(circle at 30% 30%, #ff6666, #cc0000);
-  animation-delay: 0s; 
-}
-.tree-ornament:nth-child(7) { 
-  bottom: 55px; right: 20%; 
-  background: radial-gradient(circle at 30% 30%, #ffeb3b, #ffa000);
-  animation-delay: 0.3s; 
-}
-.tree-ornament:nth-child(8) { 
-  bottom: 85px; left: 30%; 
-  background: radial-gradient(circle at 30% 30%, #64b5f6, #1565c0);
-  animation-delay: 0.6s; 
-}
-.tree-ornament:nth-child(9) { 
-  bottom: 95px; right: 25%; 
-  background: radial-gradient(circle at 30% 30%, #ba68c8, #7b1fa2);
-  animation-delay: 0.9s; 
-}
-.tree-ornament:nth-child(10) { 
-  bottom: 125px; left: 35%; 
-  background: radial-gradient(circle at 30% 30%, #81c784, #2e7d32);
-  animation-delay: 1.2s; 
-}
-.tree-ornament:nth-child(11) { 
-  bottom: 135px; right: 32%; 
-  background: radial-gradient(circle at 30% 30%, #ff8a80, #d32f2f);
-  animation-delay: 1.5s; 
-}
-
-@keyframes ornamentGlow {
-  0%, 100% { 
-    box-shadow: inset -2px -2px 4px rgba(0,0,0,0.3), inset 2px 2px 4px rgba(255,255,255,0.3), 0 0 8px currentColor; 
-  }
-  50% { 
-    box-shadow: inset -2px -2px 4px rgba(0,0,0,0.3), inset 2px 2px 4px rgba(255,255,255,0.3), 0 0 18px currentColor; 
-  }
-}
+/* Alle CSS-Baum-Elemente werden nicht mehr benötigt, da wir ein Bild verwenden */
 
 @keyframes treeSlideIn {
   from {
