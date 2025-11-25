@@ -1,7 +1,5 @@
 /* Wintermodus Dekorationen */
-.winter-mode-active {
-  /* position: relative entfernt - bricht position: fixed */
-}
+/* .winter-mode-active hatte position: relative - das wurde entfernt weil es position: fixed bricht */
 
 /* Schneefall Animation */
 .snowflake {
