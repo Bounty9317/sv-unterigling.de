@@ -1390,10 +1390,15 @@
       // Lichterkette + Kugeln an Navigation
       const header = document.querySelector('header');
       if (header) {
-        // Header braucht relative für die Lichterketten
-        header.style.position = 'relative';
+        // Header NICHT auf relative setzen - behält sticky
         const container = document.createElement('div');
         container.className = 'xmas-lights-container';
+        container.style.position = 'fixed';
+        container.style.top = '130px';
+        container.style.left = '0';
+        container.style.right = '0';
+        container.style.height = '60px';
+        container.style.zIndex = '1001';
 
         // SVG Kabel
         const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
