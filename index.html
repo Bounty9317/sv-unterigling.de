@@ -1385,9 +1385,20 @@
         createSnowflake();
       }
       
-      // Schnee am Boden
+      // Schnee am Boden mit Dorf
       const snowGround = document.createElement('div');
       snowGround.className = 'snow-ground';
+      
+      // Winterdorf erstellen
+      const village = document.createElement('div');
+      village.className = 'winter-village';
+      for (let i = 0; i < 4; i++) {
+        const house = document.createElement('div');
+        house.className = 'village-house';
+        village.appendChild(house);
+      }
+      snowGround.appendChild(village);
+      
       document.body.appendChild(snowGround);
       
       // Lichterkette im Header
