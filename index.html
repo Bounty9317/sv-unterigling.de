@@ -1355,20 +1355,25 @@
 
     async function checkWinterMode() {
       try {
+        console.log('Checking winter mode...');
         const settingsSnap = await getDocs(collection(db, 'settings'));
+        console.log('Settings loaded, docs:', settingsSnap.size);
         let winterModeEnabled = false;
         
         settingsSnap.forEach(d => {
+          console.log('Setting doc:', d.id, d.data());
           if (d.id === 'winterMode' && d.data().enabled) {
             winterModeEnabled = true;
           }
         });
         
+        console.log('Winter mode enabled:', winterModeEnabled);
         if (winterModeEnabled) {
+          console.log('Activating winter mode!');
           activateWinterMode();
         }
       } catch (error) {
-        console.log('Winter mode check:', error);
+        console.error('Winter mode check error:', error);
       }
     }
 
