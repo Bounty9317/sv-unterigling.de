@@ -1435,15 +1435,15 @@
       star.innerHTML = '⭐';
       tree.appendChild(star);
       
-      // 3 Baumschichten
-      for (let i = 0; i < 3; i++) {
+      // 4 Baumschichten für realistischeren Look
+      for (let i = 0; i < 4; i++) {
         const layer = document.createElement('div');
         layer.className = 'tree-layer';
         tree.appendChild(layer);
       }
       
-      // Christbaumkugeln
-      for (let i = 0; i < 5; i++) {
+      // 6 Christbaumkugeln
+      for (let i = 0; i < 6; i++) {
         const ornament = document.createElement('div');
         ornament.className = 'tree-ornament';
         tree.appendChild(ornament);
