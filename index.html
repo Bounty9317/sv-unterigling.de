@@ -1385,61 +1385,85 @@
         createSnowflake();
       }
       
-      // Lichterkette im Header
+      // Durchhängende Tannengirlande mit Lichterkette
       const header = document.querySelector('header');
       if (header) {
         header.style.position = 'relative';
-        const lights = document.createElement('div');
-        lights.className = 'christmas-lights';
-        for (let i = 0; i < 10; i++) {
-          const light = document.createElement('div');
-          light.className = 'light';
-          lights.appendChild(light);
-        }
         
-        // Eiszapfen an der Lichterkette
-        const iciclePositions = [15, 35, 55, 75, 90];
-        for (let i = 0; i < iciclePositions.length; i++) {
-          const icicle = document.createElement('div');
-          icicle.className = 'icicle';
-          icicle.style.left = iciclePositions[i] + '%';
-          icicle.style.animationDelay = (i * 0.6) + 's';
-          lights.appendChild(icicle);
-        }
-        
-        header.appendChild(lights);
-        
-        // Christbaumkugeln
-        const ornaments = document.createElement('div');
-        ornaments.className = 'ornaments';
-        for (let i = 0; i < 5; i++) {
-          const ornament = document.createElement('div');
-          ornament.className = 'ornament';
-          ornaments.appendChild(ornament);
-        }
-        header.appendChild(ornaments);
-        
-        // Horizontale Tannengirlande von links nach rechts
+        // Durchhängende Tannengirlande von links nach rechts
         const garland = document.createElement('div');
         garland.className = 'garland-horizontal';
         
-        // Rote Beeren gleichmäßig verteilt
-        for (let i = 0; i < 15; i++) {
+        // Wellenpositionen für realistische Durchhängung (x%, y%)
+        const wavePositions = [
+          {x: 0, y: 20}, {x: 10, y: 35}, {x: 20, y: 45}, {x: 30, y: 40},
+          {x: 40, y: 30}, {x: 50, y: 50}, {x: 60, y: 45}, {x: 70, y: 35},
+          {x: 80, y: 40}, {x: 90, y: 30}, {x: 100, y: 20}
+        ];
+        
+        // Rote Beeren entlang der Wellenlinie
+        for (let i = 0; i < 18; i++) {
           const berry = document.createElement('div');
           berry.className = 'garland-berry';
-          berry.style.left = (i * 6.5 + 3) + '%';
+          const xPos = i * 5.5 + 2;
+          // Berechne Y-Position basierend auf der Wellenlinie
+          const yPos = 20 + Math.sin(xPos * 0.08) * 15 + Math.cos(xPos * 0.12) * 8;
+          berry.style.left = xPos + '%';
+          berry.style.top = yPos + '%';
           berry.style.animationDelay = (i * 0.1) + 's';
           garland.appendChild(berry);
         }
         
-        // Kleine goldene Sterne verteilt
-        for (let i = 0; i < 8; i++) {
+        // Kleine goldene Sterne entlang der Wellenlinie
+        for (let i = 0; i < 10; i++) {
           const star = document.createElement('div');
           star.className = 'garland-star';
           star.innerHTML = '⭐';
-          star.style.left = (i * 12 + 6) + '%';
+          const xPos = i * 10 + 5;
+          // Berechne Y-Position basierend auf der Wellenlinie
+          const yPos = 20 + Math.sin(xPos * 0.08) * 15 + Math.cos(xPos * 0.12) * 8;
+          star.style.left = xPos + '%';
+          star.style.top = yPos + '%';
           star.style.animationDelay = (i * 0.2) + 's';
           garland.appendChild(star);
+        }
+        
+        // Schwarzes Kabel entlang der Girlande (viele kleine Punkte für durchgehende Linie)
+        for (let i = 0; i < 100; i++) {
+          const cable = document.createElement('div');
+          cable.className = 'garland-cable';
+          const xPos = i;
+          const yPos = 20 + Math.sin(xPos * 0.08) * 15 + Math.cos(xPos * 0.12) * 8;
+          cable.style.left = xPos + '%';
+          cable.style.top = yPos + '%';
+          garland.appendChild(cable);
+        }
+        
+        // Lichterkette entlang der Girlande
+        const lightColors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff', '#ff8800', '#ff0088', '#88ff00', '#0088ff'];
+        for (let i = 0; i < 12; i++) {
+          const light = document.createElement('div');
+          light.className = 'light';
+          light.style.background = lightColors[i % lightColors.length];
+          light.style.animationDelay = (i * 0.3) + 's';
+          const xPos = i * 8.5 + 2;
+          const yPos = 20 + Math.sin(xPos * 0.08) * 15 + Math.cos(xPos * 0.12) * 8;
+          light.style.left = xPos + '%';
+          light.style.top = yPos + '%';
+          garland.appendChild(light);
+        }
+        
+        // Eiszapfen an der Girlande
+        const iciclePositions = [15, 35, 55, 75, 90];
+        for (let i = 0; i < iciclePositions.length; i++) {
+          const icicle = document.createElement('div');
+          icicle.className = 'icicle';
+          const xPos = iciclePositions[i];
+          const yPos = 20 + Math.sin(xPos * 0.08) * 15 + Math.cos(xPos * 0.12) * 8;
+          icicle.style.left = xPos + '%';
+          icicle.style.top = yPos + '%';
+          icicle.style.animationDelay = (i * 0.6) + 's';
+          garland.appendChild(icicle);
         }
         
         header.appendChild(garland);
