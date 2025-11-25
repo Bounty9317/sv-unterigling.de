@@ -1390,56 +1390,31 @@
       if (header) {
         header.style.position = 'relative';
         
-        // Durchhängende Tannengirlande von links nach rechts
-        const garland = document.createElement('div');
-        garland.className = 'garland-horizontal';
+        // Lichterketten-Container
+        const lightsContainer = document.createElement('div');
+        lightsContainer.className = 'lights-container';
         
-        // Wellenpositionen für realistische Durchhängung (x%, y%)
-        const wavePositions = [
-          {x: 0, y: 20}, {x: 10, y: 35}, {x: 20, y: 45}, {x: 30, y: 40},
-          {x: 40, y: 30}, {x: 50, y: 50}, {x: 60, y: 45}, {x: 70, y: 35},
-          {x: 80, y: 40}, {x: 90, y: 30}, {x: 100, y: 20}
-        ];
+        // SVG für durchhängendes schwarzes Kabel
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('class', 'cable-svg');
+        svg.setAttribute('viewBox', '0 0 100 60');
+        svg.setAttribute('preserveAspectRatio', 'none');
         
-        // Rote Beeren entlang der Wellenlinie
-        for (let i = 0; i < 18; i++) {
-          const berry = document.createElement('div');
-          berry.className = 'garland-berry';
-          const xPos = i * 5.5 + 2;
-          // Berechne Y-Position basierend auf der Wellenlinie
-          const yPos = 20 + Math.sin(xPos * 0.08) * 15 + Math.cos(xPos * 0.12) * 8;
-          berry.style.left = xPos + '%';
-          berry.style.top = yPos + '%';
-          berry.style.animationDelay = (i * 0.1) + 's';
-          garland.appendChild(berry);
+        // Pfad für wellenförmiges Kabel
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        let pathData = 'M 0,12';
+        for (let i = 0; i <= 100; i++) {
+          const yPos = 12 + Math.sin(i * 0.08) * 9 + Math.cos(i * 0.12) * 5;
+          pathData += ` L ${i},${yPos}`;
         }
+        path.setAttribute('d', pathData);
+        path.setAttribute('stroke', '#1a1a1a');
+        path.setAttribute('stroke-width', '0.5');
+        path.setAttribute('fill', 'none');
+        svg.appendChild(path);
+        lightsContainer.appendChild(svg);
         
-        // Kleine goldene Sterne entlang der Wellenlinie
-        for (let i = 0; i < 10; i++) {
-          const star = document.createElement('div');
-          star.className = 'garland-star';
-          star.innerHTML = '⭐';
-          const xPos = i * 10 + 5;
-          // Berechne Y-Position basierend auf der Wellenlinie
-          const yPos = 20 + Math.sin(xPos * 0.08) * 15 + Math.cos(xPos * 0.12) * 8;
-          star.style.left = xPos + '%';
-          star.style.top = yPos + '%';
-          star.style.animationDelay = (i * 0.2) + 's';
-          garland.appendChild(star);
-        }
-        
-        // Schwarzes Kabel entlang der Girlande (viele kleine Punkte für durchgehende Linie)
-        for (let i = 0; i < 100; i++) {
-          const cable = document.createElement('div');
-          cable.className = 'garland-cable';
-          const xPos = i;
-          const yPos = 20 + Math.sin(xPos * 0.08) * 15 + Math.cos(xPos * 0.12) * 8;
-          cable.style.left = xPos + '%';
-          cable.style.top = yPos + '%';
-          garland.appendChild(cable);
-        }
-        
-        // Lichterkette entlang der Girlande
+        // Lichterkette entlang des Kabels
         const lightColors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff', '#ff8800', '#ff0088', '#88ff00', '#0088ff'];
         for (let i = 0; i < 12; i++) {
           const light = document.createElement('div');
@@ -1450,10 +1425,10 @@
           const yPos = 20 + Math.sin(xPos * 0.08) * 15 + Math.cos(xPos * 0.12) * 8;
           light.style.left = xPos + '%';
           light.style.top = yPos + '%';
-          garland.appendChild(light);
+          lightsContainer.appendChild(light);
         }
         
-        // Eiszapfen an der Girlande
+        // Eiszapfen am Kabel
         const iciclePositions = [15, 35, 55, 75, 90];
         for (let i = 0; i < iciclePositions.length; i++) {
           const icicle = document.createElement('div');
@@ -1463,21 +1438,22 @@
           icicle.style.left = xPos + '%';
           icicle.style.top = yPos + '%';
           icicle.style.animationDelay = (i * 0.6) + 's';
-          garland.appendChild(icicle);
+          lightsContainer.appendChild(icicle);
         }
         
-        header.appendChild(garland);
+        header.appendChild(lightsContainer);
       }
       
-      // Weihnachtsbanner - direkt nach Header einfügen
+      // Weihnachtsbanner - fest positioniert
       const banner = document.createElement('div');
       banner.className = 'christmas-banner';
       banner.innerHTML = '🎄 Der Schützenverein Unterigling wünscht<br>schöne Weihnachten und einen Guten Rutsch! 🎄';
-      if (header && header.nextSibling) {
-        header.parentNode.insertBefore(banner, header.nextSibling);
-      } else {
-        document.body.insertBefore(banner, document.body.firstChild.nextSibling);
-      }
+      banner.style.position = 'fixed';
+      banner.style.top = '150px';
+      banner.style.left = '50%';
+      banner.style.transform = 'translateX(-50%)';
+      banner.style.zIndex = '10000';
+      document.body.appendChild(banner);
       
       // Weihnachtsbäume - CSS gezeichnet
       createChristmasTree('left');
