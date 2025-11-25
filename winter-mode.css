@@ -110,16 +110,15 @@
   50% { transform: rotate(5deg); }
 }
 
-/* Weihnachtsbanner - sticky unter Header */
+/* Weihnachtsbanner - fixed direkt unter Header */
 .christmas-banner {
-  position: sticky;
-  top: 0;
+  position: fixed;
+  top: 120px;
   left: 50%;
   transform: translateX(-50%);
   background: linear-gradient(135deg, #c41e3a 0%, #8b0000 100%);
   color: #ffd700;
   padding: 1rem 3rem;
-  margin: 0 auto;
   width: fit-content;
   border-radius: 0 0 15px 15px;
   box-shadow: 0 4px 15px rgba(0,0,0,0.5);
@@ -134,11 +133,11 @@
 
 @keyframes bannerDrop {
   from {
-    top: -100px;
+    top: 0;
     opacity: 0;
   }
   to {
-    top: 0;
+    top: 120px;
     opacity: 1;
   }
 }
