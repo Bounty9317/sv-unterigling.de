@@ -1399,25 +1399,7 @@
         const lightsContainer = document.createElement('div');
         lightsContainer.className = 'lights-container';
         
-        // SVG für durchhängendes schwarzes Kabel
-        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-        svg.setAttribute('class', 'cable-svg');
-        svg.setAttribute('viewBox', '0 0 100 60');
-        svg.setAttribute('preserveAspectRatio', 'none');
-        
-        // Pfad für wellenförmiges Kabel
-        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        let pathData = 'M 0,12';
-        for (let i = 0; i <= 100; i++) {
-          const yPos = 12 + Math.sin(i * 0.08) * 9 + Math.cos(i * 0.12) * 5;
-          pathData += ` L ${i},${yPos}`;
-        }
-        path.setAttribute('d', pathData);
-        path.setAttribute('stroke', '#1a1a1a');
-        path.setAttribute('stroke-width', '0.5');
-        path.setAttribute('fill', 'none');
-        svg.appendChild(path);
-        lightsContainer.appendChild(svg);
+
         
         // Lichterkette entlang des Kabels
         const lightColors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff', '#ff8800', '#ff0088', '#88ff00', '#0088ff'];
