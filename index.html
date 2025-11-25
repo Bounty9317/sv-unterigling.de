@@ -1448,11 +1448,7 @@
       const banner = document.createElement('div');
       banner.className = 'christmas-banner';
       banner.innerHTML = '🎄 Der Schützenverein Unterigling wünscht<br>schöne Weihnachten und einen Guten Rutsch! 🎄';
-      banner.style.position = 'fixed';
-      banner.style.top = '150px';
-      banner.style.left = '50%';
-      banner.style.transform = 'translateX(-50%)';
-      banner.style.zIndex = '10000';
+      banner.style.cssText = 'position: fixed !important; top: 150px !important; left: 50% !important; transform: translateX(-50%) !important; z-index: 10000 !important;';
       document.body.appendChild(banner);
       
       // Weihnachtsbäume - CSS gezeichnet
