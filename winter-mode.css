@@ -1,11 +1,5 @@
 /* === WINTERMODUS - NEU === */
 
-/* Sicherstellen dass fixed positioning funktioniert */
-html, body {
-  position: static !important;
-  transform: none !important;
-}
-
 /* Schneefall */
 .snowflake {
   position: fixed;
