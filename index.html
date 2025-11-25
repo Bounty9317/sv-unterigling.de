@@ -1383,13 +1383,7 @@
       // Banner FEST - verwende das vorhandene HTML-Element
       const banner = document.getElementById('xmas-banner');
       if (banner) {
-        banner.style.display = 'block';
-        // Sicherstellen dass Banner wirklich fixed ist
-        banner.style.position = 'fixed';
-        banner.style.top = '210px';
-        banner.style.left = '50%';
-        banner.style.transform = 'translateX(-50%)';
-        banner.style.zIndex = '10000';
+        banner.style.cssText = 'display: block !important; position: fixed !important; top: 210px !important; left: 50% !important; transform: translateX(-50%) !important; z-index: 10000 !important; background: linear-gradient(135deg, #c41e3a 0%, #8b0000 100%) !important; color: #ffd700 !important; padding: 0.8rem 2rem !important; border-radius: 12px !important; box-shadow: 0 4px 15px rgba(0,0,0,0.5) !important; border: 3px solid #ffd700 !important; pointer-events: none !important; text-align: center !important; font-weight: bold !important; font-size: 1rem !important; width: fit-content !important; max-width: 90% !important;';
       }
 
       // Lichterkette + Kugeln an Navigation
