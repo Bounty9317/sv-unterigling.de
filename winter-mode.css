@@ -142,28 +142,28 @@
   }
 }
 
-/* Weihnachtsbäume - Bild */
+/* Weihnachtsbäume - Bild (größer) */
 .christmas-tree {
   position: fixed;
   bottom: 80px;
-  width: 200px;
-  height: 250px;
+  width: 350px;
+  height: 450px;
   z-index: 998;
   pointer-events: none;
   background-image: url('christmas-tree.png');
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center bottom;
-  filter: drop-shadow(5px 5px 15px rgba(0,0,0,0.4));
+  filter: drop-shadow(8px 8px 20px rgba(0,0,0,0.5));
 }
 
 .christmas-tree.left {
-  left: 20px;
+  left: 10px;
   animation: treeSlideIn 1s ease-out;
 }
 
 .christmas-tree.right {
-  right: 20px;
+  right: 10px;
   animation: treeSlideIn 1s ease-out;
 }
 
@@ -183,9 +183,8 @@
 /* Mobile Anpassungen */
 @media (max-width: 768px) {
   .christmas-tree {
-    font-size: 4rem;
-    width: 80px;
-    height: 120px;
+    width: 150px;
+    height: 200px;
     bottom: 60px;
   }
   
