@@ -110,15 +110,17 @@
   50% { transform: rotate(5deg); }
 }
 
-/* Weihnachtsbanner */
+/* Weihnachtsbanner - sticky unter Header */
 .christmas-banner {
-  position: fixed;
-  top: 80px;
+  position: sticky;
+  top: 0;
   left: 50%;
   transform: translateX(-50%);
   background: linear-gradient(135deg, #c41e3a 0%, #8b0000 100%);
   color: #ffd700;
   padding: 1rem 3rem;
+  margin: 0 auto;
+  width: fit-content;
   border-radius: 0 0 15px 15px;
   box-shadow: 0 4px 15px rgba(0,0,0,0.5);
   z-index: 999;
@@ -136,21 +138,19 @@
     opacity: 0;
   }
   to {
-    top: 80px;
+    top: 0;
     opacity: 1;
   }
 }
 
-/* Weihnachtsbäume */
+/* Weihnachtsbäume - CSS gezeichnet */
 .christmas-tree {
   position: fixed;
   bottom: 80px;
-  width: 150px;
-  height: 200px;
+  width: 120px;
+  height: 180px;
   z-index: 998;
   pointer-events: none;
-  font-size: 8rem;
-  line-height: 1;
 }
 
 .christmas-tree.left {
@@ -161,6 +161,88 @@
 .christmas-tree.right {
   right: 20px;
   animation: treeSlideIn 1s ease-out;
+}
+
+/* Baumstamm */
+.tree-trunk {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 20px;
+  height: 30px;
+  background: #8B4513;
+  border-radius: 3px;
+}
+
+/* Baumkrone - 3 Dreiecke */
+.tree-layer {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 50px solid transparent;
+  border-right: 50px solid transparent;
+  border-bottom: 60px solid #0B6623;
+}
+
+.tree-layer:nth-child(2) {
+  bottom: 30px;
+  border-left-width: 50px;
+  border-right-width: 50px;
+  border-bottom-width: 60px;
+}
+
+.tree-layer:nth-child(3) {
+  bottom: 70px;
+  border-left-width: 45px;
+  border-right-width: 45px;
+  border-bottom-width: 55px;
+  border-bottom-color: #0A5520;
+}
+
+.tree-layer:nth-child(4) {
+  bottom: 105px;
+  border-left-width: 35px;
+  border-right-width: 35px;
+  border-bottom-width: 45px;
+  border-bottom-color: #094D1D;
+}
+
+/* Stern oben */
+.tree-star {
+  position: absolute;
+  top: -15px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 2rem;
+  animation: starTwinkle 1.5s infinite;
+}
+
+@keyframes starTwinkle {
+  0%, 100% { opacity: 1; transform: translateX(-50%) scale(1); }
+  50% { opacity: 0.7; transform: translateX(-50%) scale(1.2); }
+}
+
+/* Christbaumkugeln am Baum */
+.tree-ornament {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  animation: ornamentGlow 2s infinite;
+}
+
+.tree-ornament:nth-child(5) { bottom: 40px; left: 30%; background: #ff0000; animation-delay: 0s; }
+.tree-ornament:nth-child(6) { bottom: 50px; right: 25%; background: #ffd700; animation-delay: 0.3s; }
+.tree-ornament:nth-child(7) { bottom: 80px; left: 35%; background: #0000ff; animation-delay: 0.6s; }
+.tree-ornament:nth-child(8) { bottom: 90px; right: 30%; background: #ff00ff; animation-delay: 0.9s; }
+.tree-ornament:nth-child(9) { bottom: 115px; left: 40%; background: #00ff00; animation-delay: 1.2s; }
+
+@keyframes ornamentGlow {
+  0%, 100% { box-shadow: 0 0 5px currentColor; }
+  50% { box-shadow: 0 0 15px currentColor; }
 }
 
 @keyframes treeSlideIn {

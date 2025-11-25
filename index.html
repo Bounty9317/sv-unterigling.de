@@ -1420,16 +1420,41 @@
       banner.innerHTML = '🎄 Der Schützenverein Unterigling wünscht<br>schöne Weihnachten und einen Guten Rutsch! 🎄';
       document.body.appendChild(banner);
       
-      // Weihnachtsbäume
-      const treeLeft = document.createElement('div');
-      treeLeft.className = 'christmas-tree left';
-      treeLeft.innerHTML = '🎄';
-      document.body.appendChild(treeLeft);
+      // Weihnachtsbäume - CSS gezeichnet
+      createChristmasTree('left');
+      createChristmasTree('right');
+    }
+
+    function createChristmasTree(position) {
+      const tree = document.createElement('div');
+      tree.className = `christmas-tree ${position}`;
       
-      const treeRight = document.createElement('div');
-      treeRight.className = 'christmas-tree right';
-      treeRight.innerHTML = '🎄';
-      document.body.appendChild(treeRight);
+      // Stern
+      const star = document.createElement('div');
+      star.className = 'tree-star';
+      star.innerHTML = '⭐';
+      tree.appendChild(star);
+      
+      // 3 Baumschichten
+      for (let i = 0; i < 3; i++) {
+        const layer = document.createElement('div');
+        layer.className = 'tree-layer';
+        tree.appendChild(layer);
+      }
+      
+      // Christbaumkugeln
+      for (let i = 0; i < 5; i++) {
+        const ornament = document.createElement('div');
+        ornament.className = 'tree-ornament';
+        tree.appendChild(ornament);
+      }
+      
+      // Stamm
+      const trunk = document.createElement('div');
+      trunk.className = 'tree-trunk';
+      tree.appendChild(trunk);
+      
+      document.body.appendChild(tree);
     }
 
     function createSnowflake() {
