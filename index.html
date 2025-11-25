@@ -615,7 +615,7 @@
 
   <!-- Weihnachtsbanner (wird nur im Wintermodus angezeigt) -->
   <div id="xmas-banner" class="xmas-banner" style="display: none;">
-    🎄 Der Schützenverein Unterigling wünscht schöne Weihnachten und einen Guten Rutsch ins neue Jahr! 🎄
+    🎄 Der Schützenverein Unterigling wünscht euch schöne Weihnachten und einen Guten Rutsch ins neue Jahr! 🎄
   </div>
 
   <!-- Startseite -->
@@ -1434,20 +1434,25 @@
           container.appendChild(light);
         }
 
-        // Christbaumkugeln
+        // Christbaumkugeln - mehr Kugeln hinzufügen
         const kugelColors = [
           'linear-gradient(145deg, #ff0000, #cc0000)',
           'linear-gradient(145deg, #ffd700, #ffaa00)',
           'linear-gradient(145deg, #0000ff, #0000cc)',
           'linear-gradient(145deg, #00ff00, #00cc00)',
-          'linear-gradient(145deg, #ff00ff, #cc00cc)'
+          'linear-gradient(145deg, #ff00ff, #cc00cc)',
+          'linear-gradient(145deg, #ff6b6b, #cc0000)',
+          'linear-gradient(145deg, #4ecdc4, #0088cc)',
+          'linear-gradient(145deg, #ffe66d, #ffaa00)',
+          'linear-gradient(145deg, #a8e6cf, #00cc00)',
+          'linear-gradient(145deg, #ff8b94, #cc00cc)'
         ];
-        for (let i = 0; i < 5; i++) {
+        for (let i = 0; i < 10; i++) {
           const kugel = document.createElement('div');
           kugel.className = 'xmas-ornament';
           kugel.style.background = kugelColors[i];
-          kugel.style.animationDelay = (i * 0.5) + 's';
-          const x = i * 20 + 10;
+          kugel.style.animationDelay = (i * 0.3) + 's';
+          const x = i * 10 + 5;
           const y = 20 + Math.sin(x * 0.08) * 15 + Math.cos(x * 0.12) * 8;
           kugel.style.left = x + '%';
           kugel.style.top = y + '%';
