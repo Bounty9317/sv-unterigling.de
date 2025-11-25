@@ -102,12 +102,12 @@
 }
 
 /* Banner FEST unter Navigation */
-.xmas-banner {
+#xmas-banner {
   position: fixed !important;
-  top: 210px !important;
+  top: 160px !important;
   left: 50% !important;
   transform: translateX(-50%) !important;
-  z-index: 10000 !important;
+  z-index: 9999 !important;
   background: linear-gradient(135deg, #c41e3a 0%, #8b0000 100%) !important;
   color: #ffd700 !important;
   padding: 0.8rem 2rem !important;
@@ -136,9 +136,9 @@
     bottom: -40px;
   }
   
-  .xmas-banner {
+  #xmas-banner {
     font-size: 0.85rem;
     padding: 0.6rem 1rem;
-    top: 200px !important;
+    top: 150px !important;
   }
 }
