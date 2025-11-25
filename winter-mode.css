@@ -105,7 +105,7 @@
 /* Banner FEST unter Navigation */
 .xmas-banner {
   position: fixed !important;
-  top: 150px !important;
+  top: 180px !important;
   left: 50% !important;
   transform: translateX(-50%) !important;
   z-index: 10000 !important;
@@ -139,6 +139,6 @@
   .xmas-banner {
     font-size: 0.85rem;
     padding: 0.6rem 1rem;
-    top: 140px !important;
+    top: 170px !important;
   }
 }
