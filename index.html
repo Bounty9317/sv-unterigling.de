@@ -1389,7 +1389,7 @@
       // Lichterkette + Kugeln an Navigation
       const header = document.querySelector('header');
       if (header) {
-        header.style.position = 'relative';
+        // NICHT position: relative setzen - behält sticky
         const container = document.createElement('div');
         container.className = 'xmas-lights-container';
 
