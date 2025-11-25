@@ -507,7 +507,10 @@
 
     function openSwapModal(type, date, assignment) {
       currentSwapRequest = { type, date, assignment };
-      document.getElementById('swap-modal-title').textContent = `Tausch-Anfrage für ${new Date(date).toLocaleDateString('de-DE')}`;
+      // Datum korrekt formatieren (YYYY-MM-DD zu DD.MM.YYYY)
+      const [year, month, day] = date.split('-');
+      const formattedDate = `${day}.${month}.${year}`;
+      document.getElementById('swap-modal-title').textContent = `Tausch-Anfrage für ${formattedDate}`;
       document.getElementById('swap-modal-info').textContent = `Du bist eingeteilt: ${assignment.person}`;
       
       const helperSelect = document.getElementById('helper-select');
