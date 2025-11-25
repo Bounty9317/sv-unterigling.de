@@ -625,7 +625,6 @@
       <p>Tradition trifft Präzision – Seit Generationen vereint durch Leidenschaft für den Schießsport</p>
     </div>
     <div class="container">
-      <h2 style="margin-top: 2rem; text-align: center;">Kommende Veranstaltungen</h2>
       <div style="display: flex; align-items: flex-start; justify-content: center; gap: 1.5rem; margin: 2rem auto; max-width: 1200px; padding: 0 2rem;">
         <!-- QR Code links - sticky beim Scrollen -->
         <div style="flex-shrink: 0; text-align: center; align-self: flex-start; max-width: 170px; position: sticky; top: 300px;">
@@ -637,9 +636,11 @@
           </a>
         </div>
         
-        <!-- Bild mit Overlay -->
-        <div style="position: relative; max-width: 900px; flex: 1;">
-          <img src="veranstaltungen.jpeg" alt="Veranstaltungen" style="width: 100%; height: auto; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">
+        <!-- Bild mit Überschrift und Overlay - zentriert -->
+        <div style="max-width: 900px; flex: 1;">
+          <h2 style="margin-top: 0; margin-bottom: 2rem; text-align: center;">Kommende Veranstaltungen</h2>
+          <div style="position: relative;">
+            <img src="veranstaltungen.jpeg" alt="Veranstaltungen" style="width: 100%; height: auto; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">
           
           <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 85%; height: 85%;">
             <div style="background: rgba(30, 30, 30, 0.65); backdrop-filter: blur(8px); border-radius: 12px; padding: 2rem; box-shadow: 0 8px 32px rgba(0,0,0,0.4); height: 100%; overflow-y: auto; border: 2px solid rgba(76, 175, 80, 0.6);">
@@ -649,6 +650,7 @@
                 <p style="color: #999; text-align: center;">Lade Veranstaltungen...</p>
               </div>
             </div>
+          </div>
           </div>
         </div>
       </div>
