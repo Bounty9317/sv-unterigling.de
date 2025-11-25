@@ -1432,37 +1432,37 @@
         header.appendChild(lightsContainer);
       }
       
-      // Weihnachtsbanner - KOMPLETT NEU mit festem Position OHNE transform
+      // Weihnachtsbanner - mit Wrapper für garantiertes fixed positioning
+      const bannerWrapper = document.createElement('div');
+      bannerWrapper.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 0; z-index: 999999; pointer-events: none;';
+      
       const christmasBanner = document.createElement('div');
       christmasBanner.id = 'fixed-christmas-banner-2025';
       christmasBanner.innerHTML = '🎄 Der Schützenverein Unterigling wünscht<br>schöne Weihnachten und einen Guten Rutsch ins neue Jahr! 🎄';
       
-      // Setze Position auf fixed - OHNE transform (das kann fixed brechen)
       Object.assign(christmasBanner.style, {
-        position: 'fixed',
+        position: 'absolute',
         top: '180px',
-        left: '0',
-        right: '0',
-        marginLeft: 'auto',
-        marginRight: 'auto',
-        zIndex: '999999',
+        left: '50%',
+        transform: 'translateX(-50%)',
         background: 'linear-gradient(135deg, #c41e3a 0%, #8b0000 100%)',
         color: '#ffd700',
         padding: '0.8rem 2rem',
         borderRadius: '12px',
         boxShadow: '0 4px 15px rgba(0,0,0,0.5)',
         border: '3px solid #ffd700',
-        pointerEvents: 'none',
+        pointerEvents: 'auto',
         textAlign: 'center',
         fontWeight: 'bold',
         fontSize: '1rem',
         width: 'fit-content',
         maxWidth: '90%',
-        display: 'block'
+        display: 'block',
+        whiteSpace: 'nowrap'
       });
       
-      // Hänge direkt an body - ganz am Ende
-      document.body.appendChild(christmasBanner);
+      bannerWrapper.appendChild(christmasBanner);
+      document.body.appendChild(bannerWrapper);
       
       // Weihnachtsbäume - CSS gezeichnet
       createChristmasTree('left');
