@@ -1404,55 +1404,77 @@
         }, 100);
       }, 500);
       
-      // Schneefall erstellen
+      // Schneefall
       for (let i = 0; i < 50; i++) {
         createSnowflake();
       }
-      
-      // Durchhängende Tannengirlande mit Lichterkette
+
+      // Lichterkette mit Kabel und Kugeln
       const header = document.querySelector('header');
       if (header) {
         header.style.position = 'relative';
-        
-        // Lichterketten-Container
-        const lightsContainer = document.createElement('div');
-        lightsContainer.className = 'lights-container';
-        
+        const container = document.createElement('div');
+        container.className = 'lights-container';
 
+        // SVG für schwarzes wellenförmiges Kabel
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('class', 'cable-line');
+        svg.setAttribute('viewBox', '0 0 100 60');
+        svg.setAttribute('preserveAspectRatio', 'none');
+        svg.style.cssText = 'position: absolute; top: 0; left: 0; width: 100%; height: 100%;';
         
-        // Lichterkette entlang des Kabels
-        const lightColors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff', '#ff8800', '#ff0088', '#88ff00', '#0088ff'];
+        let pathData = 'M 0,12';
+        for (let i = 0; i <= 100; i++) {
+          const y = 12 + Math.sin(i * 0.08) * 9 + Math.cos(i * 0.12) * 5;
+          pathData += ` L ${i},${y}`;
+        }
+        
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        path.setAttribute('d', pathData);
+        path.setAttribute('stroke', '#000');
+        path.setAttribute('stroke-width', '0.5');
+        path.setAttribute('fill', 'none');
+        svg.appendChild(path);
+        container.appendChild(svg);
+
+        // Bunte Lichter
+        const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff', '#ff8800', '#ff0088', '#88ff00', '#0088ff'];
         for (let i = 0; i < 12; i++) {
           const light = document.createElement('div');
           light.className = 'light';
-          light.style.background = lightColors[i % lightColors.length];
+          light.style.background = colors[i % colors.length];
           light.style.animationDelay = (i * 0.3) + 's';
-          const xPos = i * 8.5 + 2;
-          const yPos = 20 + Math.sin(xPos * 0.08) * 15 + Math.cos(xPos * 0.12) * 8;
-          light.style.left = xPos + '%';
-          light.style.top = yPos + '%';
-          lightsContainer.appendChild(light);
+          const x = i * 8.5 + 2;
+          const y = 20 + Math.sin(x * 0.08) * 15 + Math.cos(x * 0.12) * 8;
+          light.style.left = x + '%';
+          light.style.top = y + '%';
+          container.appendChild(light);
         }
-        
-        // Eiszapfen am Kabel
-        const iciclePositions = [15, 35, 55, 75, 90];
-        for (let i = 0; i < iciclePositions.length; i++) {
-          const icicle = document.createElement('div');
-          icicle.className = 'icicle';
-          const xPos = iciclePositions[i];
-          const yPos = 20 + Math.sin(xPos * 0.08) * 15 + Math.cos(xPos * 0.12) * 8;
-          icicle.style.left = xPos + '%';
-          icicle.style.top = yPos + '%';
-          icicle.style.animationDelay = (i * 0.6) + 's';
-          lightsContainer.appendChild(icicle);
+
+        // Christbaumkugeln
+        const kugelColors = [
+          'linear-gradient(145deg, #ff0000, #cc0000)',
+          'linear-gradient(145deg, #ffd700, #ffaa00)',
+          'linear-gradient(145deg, #0000ff, #0000cc)',
+          'linear-gradient(145deg, #00ff00, #00cc00)',
+          'linear-gradient(145deg, #ff00ff, #cc00cc)'
+        ];
+        for (let i = 0; i < 5; i++) {
+          const ornament = document.createElement('div');
+          ornament.className = 'ornament';
+          ornament.style.background = kugelColors[i];
+          ornament.style.animationDelay = (i * 0.5) + 's';
+          const x = i * 20 + 10;
+          const y = 20 + Math.sin(x * 0.08) * 15 + Math.cos(x * 0.12) * 8;
+          ornament.style.left = x + '%';
+          ornament.style.top = y + '%';
+          container.appendChild(ornament);
         }
-        
-        header.appendChild(lightsContainer);
+
+        header.appendChild(container);
       }
       
-
-      
-      // Weihnachtsbäume - CSS gezeichnet
+      // Weihnachtsbäume
       createChristmasTree('left');
       createChristmasTree('right');
     }

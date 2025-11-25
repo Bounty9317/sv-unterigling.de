@@ -1,7 +1,6 @@
-/* Wintermodus Dekorationen */
-/* .winter-mode-active hatte position: relative - das wurde entfernt weil es position: fixed bricht */
+/* Wintermodus - Komplett neu */
 
-/* Schneefall Animation */
+/* Schneefall */
 .snowflake {
   position: fixed;
   top: -10px;
@@ -18,66 +17,7 @@
   }
 }
 
-
-
-/* Lichterkette entlang der Girlande */
-.light {
-  position: absolute;
-  width: 10px;
-  height: 15px;
-  border-radius: 50% 50% 40% 40%;
-  animation: blink 1.5s infinite;
-  z-index: 1002;
-}
-
-/* Schwarze Verbindung vom Kabel zur Lampe */
-.light::before {
-  content: '';
-  position: absolute;
-  top: -8px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 2px;
-  height: 8px;
-  background: #1a1a1a;
-}
-
-.light:nth-of-type(1) { background: #ff0000; }
-.light:nth-of-type(2) { background: #00ff00; }
-.light:nth-of-type(3) { background: #0000ff; }
-.light:nth-of-type(4) { background: #ffff00; }
-.light:nth-of-type(5) { background: #ff00ff; }
-.light:nth-of-type(6) { background: #00ffff; }
-.light:nth-of-type(7) { background: #ff8800; }
-.light:nth-of-type(8) { background: #ff0088; }
-.light:nth-of-type(9) { background: #88ff00; }
-.light:nth-of-type(10) { background: #0088ff; }
-.light:nth-of-type(11) { background: #ff0000; }
-.light:nth-of-type(12) { background: #00ff00; }
-
-@keyframes blink {
-  0%, 100% { opacity: 1; box-shadow: 0 0 10px currentColor; }
-  50% { opacity: 0.3; }
-}
-
-
-
-/* Lichterketten-Container */
-.lights-container {
-  position: absolute;
-  bottom: -50px;
-  left: 0;
-  right: 0;
-  height: 60px;
-  pointer-events: none;
-  z-index: 1001;
-}
-
-
-
-
-
-/* Weihnachtsbäume - größer am unteren Rand */
+/* Weihnachtsbäume */
 .christmas-tree {
   position: fixed;
   bottom: 0;
@@ -94,73 +34,87 @@
 
 .christmas-tree.left {
   left: 0;
-  animation: treeSlideIn 1s ease-out;
 }
 
 .christmas-tree.right {
   right: 0;
-  animation: treeSlideIn 1s ease-out;
 }
 
-/* Alle CSS-Baum-Elemente werden nicht mehr benötigt, da wir ein Bild verwenden */
-
-@keyframes treeSlideIn {
-  from {
-    transform: translateY(300px);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-
-@keyframes starTwinkle {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.6; transform: scale(0.8); }
-}
-
-/* Eiszapfen an der Lichterkette */
-.icicle {
+/* Lichterketten-Container */
+.lights-container {
   position: absolute;
-  bottom: -20px;
-  width: 0;
-  height: 0;
-  border-left: 4px solid transparent;
-  border-right: 4px solid transparent;
-  border-top: 20px solid rgba(200, 230, 255, 0.8);
-  filter: drop-shadow(0 2px 3px rgba(0,0,0,0.2));
-  animation: icicleShine 3s ease-in-out infinite;
+  bottom: -50px;
+  left: 0;
+  right: 0;
+  height: 60px;
+  pointer-events: none;
+  z-index: 1001;
 }
 
-@keyframes icicleShine {
-  0%, 100% { opacity: 0.8; }
-  50% { opacity: 1; }
+/* Schwarzes wellenförmiges Kabel */
+.cable-line {
+  position: absolute;
+  width: 100%;
+  height: 100%;
 }
 
-/* Mobile Anpassungen */
+/* Lichter an der Kette */
+.light {
+  position: absolute;
+  width: 10px;
+  height: 15px;
+  border-radius: 50% 50% 40% 40%;
+  animation: blink 1.5s infinite;
+  z-index: 1002;
+}
+
+.light::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  height: 8px;
+  background: #000;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; box-shadow: 0 0 10px currentColor; }
+  50% { opacity: 0.3; }
+}
+
+/* Christbaumkugeln */
+.ornament {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  animation: swing 3s ease-in-out infinite;
+  z-index: 1002;
+}
+
+.ornament::before {
+  content: '';
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  height: 10px;
+  background: #666;
+}
+
+@keyframes swing {
+  0%, 100% { transform: rotate(-5deg); }
+  50% { transform: rotate(5deg); }
+}
+
+/* Mobile */
 @media (max-width: 768px) {
   .christmas-tree {
     width: 180px;
     height: 230px;
-    bottom: 0;
-  }
-  
-  .christmas-tree.left {
-    left: 0;
-  }
-  
-  .christmas-tree.right {
-    right: 0;
-  }
-  
-
-  
-  .icicle {
-    border-left: 3px solid transparent;
-    border-right: 3px solid transparent;
-    border-top: 15px solid rgba(200, 230, 255, 0.8);
-    bottom: -15px;
   }
   
   .lights-container {
