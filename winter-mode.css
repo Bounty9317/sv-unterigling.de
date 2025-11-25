@@ -35,7 +35,7 @@
   z-index: 1001;
 }
 
-/* Kabel für die Lichterkette */
+/* Schwarzes Kabel für die Lichterkette */
 .christmas-lights::before {
   content: '';
   position: absolute;
@@ -43,15 +43,9 @@
   left: 0;
   right: 0;
   height: 3px;
-  background: repeating-linear-gradient(
-    90deg,
-    #2d5a3d 0px,
-    #2d5a3d 2px,
-    #1a472a 2px,
-    #1a472a 4px
-  );
+  background: #1a1a1a;
   border-radius: 2px;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.5);
 }
 
 .light {
@@ -62,7 +56,7 @@
   position: relative;
 }
 
-/* Verbindung vom Kabel zur Lampe */
+/* Schwarze Verbindung vom Kabel zur Lampe */
 .light::before {
   content: '';
   position: absolute;
@@ -71,7 +65,7 @@
   transform: translateX(-50%);
   width: 2px;
   height: 8px;
-  background: #1a472a;
+  background: #1a1a1a;
 }
 
 .light:nth-child(1) { background: #ff0000; animation-delay: 0s; }
@@ -132,57 +126,72 @@
   50% { transform: rotate(5deg); }
 }
 
-/* Girlanden die ins Hero-Bild hängen */
-.garland {
+/* Horizontale Tannengirlande von links nach rechts */
+.garland-horizontal {
   position: absolute;
-  bottom: -80px;
-  width: 150px;
-  height: 100px;
-  pointer-events: none;
-  z-index: 1001;
-}
-
-.garland::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 100%;
-  height: 100%;
-  background: 
-    radial-gradient(circle at 10% 20%, #1a472a 8%, transparent 8%),
-    radial-gradient(circle at 20% 35%, #2d5a3d 8%, transparent 8%),
-    radial-gradient(circle at 30% 25%, #1a472a 8%, transparent 8%),
-    radial-gradient(circle at 40% 40%, #2d5a3d 8%, transparent 8%),
-    radial-gradient(circle at 50% 30%, #1a472a 8%, transparent 8%),
-    radial-gradient(circle at 60% 40%, #2d5a3d 8%, transparent 8%),
-    radial-gradient(circle at 70% 25%, #1a472a 8%, transparent 8%),
-    radial-gradient(circle at 80% 35%, #2d5a3d 8%, transparent 8%),
-    radial-gradient(circle at 90% 20%, #1a472a 8%, transparent 8%);
-  filter: drop-shadow(0 2px 3px rgba(0,0,0,0.3));
-}
-
-/* Girlanden-Kette */
-.garland::after {
-  content: '';
-  position: absolute;
-  top: 0;
+  bottom: -35px;
   left: 0;
   right: 0;
-  height: 3px;
-  background: #1a472a;
-  border-radius: 2px;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+  height: 35px;
+  pointer-events: none;
+  z-index: 1001;
+  display: flex;
+  align-items: center;
 }
 
-/* Rote Beeren auf den Girlanden */
+/* Tannenzweig-Basis */
+.garland-horizontal::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  left: 0;
+  right: 0;
+  height: 8px;
+  background: linear-gradient(90deg, 
+    #1a472a 0%, #2d5a3d 10%, #1a472a 20%, 
+    #2d5a3d 30%, #1a472a 40%, #2d5a3d 50%,
+    #1a472a 60%, #2d5a3d 70%, #1a472a 80%,
+    #2d5a3d 90%, #1a472a 100%
+  );
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+/* Tannenzweige die nach unten hängen */
+.garland-horizontal::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 100%;
+  background-image: 
+    radial-gradient(ellipse 15px 20px at 5% 50%, #2d5a3d 40%, transparent 40%),
+    radial-gradient(ellipse 12px 18px at 12% 50%, #1a472a 40%, transparent 40%),
+    radial-gradient(ellipse 15px 22px at 20% 50%, #2d5a3d 40%, transparent 40%),
+    radial-gradient(ellipse 13px 19px at 28% 50%, #1a472a 40%, transparent 40%),
+    radial-gradient(ellipse 16px 21px at 36% 50%, #2d5a3d 40%, transparent 40%),
+    radial-gradient(ellipse 14px 20px at 44% 50%, #1a472a 40%, transparent 40%),
+    radial-gradient(ellipse 15px 22px at 52% 50%, #2d5a3d 40%, transparent 40%),
+    radial-gradient(ellipse 13px 18px at 60% 50%, #1a472a 40%, transparent 40%),
+    radial-gradient(ellipse 16px 21px at 68% 50%, #2d5a3d 40%, transparent 40%),
+    radial-gradient(ellipse 14px 19px at 76% 50%, #1a472a 40%, transparent 40%),
+    radial-gradient(ellipse 15px 20px at 84% 50%, #2d5a3d 40%, transparent 40%),
+    radial-gradient(ellipse 13px 21px at 92% 50%, #1a472a 40%, transparent 40%);
+  background-repeat: no-repeat;
+  filter: drop-shadow(0 2px 3px rgba(0,0,0,0.2));
+}
+
+/* Rote Beeren auf der Girlande */
 .garland-berry {
   position: absolute;
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
   background: radial-gradient(circle at 30% 30%, #ff4444, #cc0000);
   border-radius: 50%;
+  top: 50%;
+  transform: translateY(-50%);
   animation: berryGlow 2s ease-in-out infinite;
 }
 
@@ -191,49 +200,35 @@
   50% { opacity: 0.7; }
 }
 
-/* Positionierung der Girlanden */
-.garland:nth-child(1) {
-  left: 15%;
-}
-
-.garland:nth-child(2) {
-  left: 35%;
-}
-
-.garland:nth-child(3) {
-  left: 55%;
-}
-
-.garland:nth-child(4) {
-  left: 75%;
-}
-
-/* Sterne auf den Girlanden */
+/* Kleine goldene Sterne auf der Girlande */
 .garland-star {
   position: absolute;
   color: #ffd700;
-  font-size: 12px;
+  font-size: 10px;
+  top: 50%;
+  transform: translateY(-50%);
   animation: starTwinkle 1.5s ease-in-out infinite;
   text-shadow: 0 0 5px #ffd700;
 }
 
-/* Weihnachtsbanner - über Hero-Bild */
+/* Weihnachtsbanner - fest unter der Navigation */
 .christmas-banner {
   position: fixed;
-  top: 140px;
+  top: 130px;
   left: 50%;
   transform: translateX(-50%);
   background: linear-gradient(135deg, #c41e3a 0%, #8b0000 100%);
   color: #ffd700;
-  padding: 1rem 3rem;
+  padding: 0.8rem 2rem;
   width: fit-content;
-  border-radius: 15px;
+  max-width: 90%;
+  border-radius: 12px;
   box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-  z-index: 1002;
+  z-index: 999;
   pointer-events: none;
   text-align: center;
   font-weight: bold;
-  font-size: 1.1rem;
+  font-size: 1rem;
   border: 3px solid #ffd700;
   animation: bannerSlide 1s ease-out;
 }
@@ -249,28 +244,28 @@
   }
 }
 
-/* Weihnachtsbäume - Bild (doppelt so groß) */
+/* Weihnachtsbäume - klein und ganz unten */
 .christmas-tree {
   position: fixed;
-  bottom: 100px;
-  width: 700px;
-  height: 900px;
-  z-index: 1001;
+  bottom: 0;
+  width: 200px;
+  height: 250px;
+  z-index: 10;
   pointer-events: none;
   background-image: url('christmas-tree.png');
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center bottom;
-  filter: drop-shadow(10px 10px 25px rgba(0,0,0,0.6));
+  filter: drop-shadow(3px 3px 10px rgba(0,0,0,0.5));
 }
 
 .christmas-tree.left {
-  left: 0;
+  left: 10px;
   animation: treeSlideIn 1s ease-out;
 }
 
 .christmas-tree.right {
-  right: 0;
+  right: 10px;
   animation: treeSlideIn 1s ease-out;
 }
 
@@ -292,12 +287,30 @@
   50% { opacity: 0.6; transform: scale(0.8); }
 }
 
+/* Eiszapfen an der Lichterkette */
+.icicle {
+  position: absolute;
+  bottom: -20px;
+  width: 0;
+  height: 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 20px solid rgba(200, 230, 255, 0.8);
+  filter: drop-shadow(0 2px 3px rgba(0,0,0,0.2));
+  animation: icicleShine 3s ease-in-out infinite;
+}
+
+@keyframes icicleShine {
+  0%, 100% { opacity: 0.8; }
+  50% { opacity: 1; }
+}
+
 /* Mobile Anpassungen */
 @media (max-width: 768px) {
   .christmas-tree {
-    width: 150px;
-    height: 200px;
-    bottom: 60px;
+    width: 100px;
+    height: 130px;
+    bottom: 0;
   }
   
   .christmas-tree.left {
@@ -309,15 +322,30 @@
   }
   
   .christmas-banner {
-    font-size: 0.9rem;
-    padding: 0.8rem 1.5rem;
-    max-width: 90%;
+    font-size: 0.85rem;
+    padding: 0.6rem 1rem;
+    max-width: 95%;
     top: 120px;
   }
   
-  .garland {
-    width: 80px;
-    height: 60px;
-    bottom: -50px;
+  .icicle {
+    border-left: 3px solid transparent;
+    border-right: 3px solid transparent;
+    border-top: 15px solid rgba(200, 230, 255, 0.8);
+    bottom: -15px;
+  }
+  
+  .garland-horizontal {
+    height: 25px;
+    bottom: -25px;
+  }
+  
+  .garland-star {
+    font-size: 8px;
+  }
+  
+  .garland-berry {
+    width: 4px;
+    height: 4px;
   }
 }
