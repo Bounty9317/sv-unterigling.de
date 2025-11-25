@@ -1384,12 +1384,19 @@
       const banner = document.getElementById('test-banner');
       if (banner) {
         banner.style.display = 'block';
+        // Sicherstellen dass Banner wirklich fixed ist
+        banner.style.position = 'fixed';
+        banner.style.top = '150px';
+        banner.style.left = '50%';
+        banner.style.transform = 'translateX(-50%)';
+        banner.style.zIndex = '10000';
       }
 
       // Lichterkette + Kugeln an Navigation
       const header = document.querySelector('header');
       if (header) {
-        // NICHT position: relative setzen - behält sticky
+        // Header braucht relative für die Lichterketten
+        header.style.position = 'relative';
         const container = document.createElement('div');
         container.className = 'xmas-lights-container';
 
