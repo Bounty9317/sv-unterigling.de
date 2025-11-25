@@ -613,10 +613,7 @@
     </nav>
   </header>
 
-  <!-- Weihnachtsbanner - fest positioniert -->
-  <div id="winter-banner" style="display: none; position: fixed; top: 180px; left: 50%; transform: translateX(-50%); z-index: 999999; background: linear-gradient(135deg, #c41e3a 0%, #8b0000 100%); color: #ffd700; padding: 0.8rem 2rem; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); border: 3px solid #ffd700; pointer-events: none; text-align: center; font-weight: bold; font-size: 1rem; width: fit-content; max-width: 90%;">
-    🎄 Der Schützenverein Unterigling wünscht<br>schöne Weihnachten und einen Guten Rutsch! 🎄
-  </div>
+
 
   <!-- Startseite -->
   <section id="startseite" class="content-section active">
@@ -1435,18 +1432,31 @@
         header.appendChild(lightsContainer);
       }
       
-
-      
-      // Weihnachtsbanner anzeigen - DIREKT an body hängen
-      const winterBanner = document.getElementById('winter-banner');
-      if (winterBanner) {
-        // Entferne aus aktuellem Parent
-        winterBanner.remove();
-        // Hänge direkt an body
-        document.body.appendChild(winterBanner);
-        // Setze alle Styles neu
-        winterBanner.style.cssText = 'display: block !important; position: fixed !important; top: 180px !important; left: 50% !important; transform: translateX(-50%) !important; z-index: 999999 !important; background: linear-gradient(135deg, #c41e3a 0%, #8b0000 100%) !important; color: #ffd700 !important; padding: 0.8rem 2rem !important; border-radius: 12px !important; box-shadow: 0 4px 15px rgba(0,0,0,0.5) !important; border: 3px solid #ffd700 !important; pointer-events: none !important; text-align: center !important; font-weight: bold !important; font-size: 1rem !important; width: fit-content !important; max-width: 90% !important; margin: 0 !important;';
-      }
+      // Weihnachtsbanner komplett neu erstellen
+      const banner = document.createElement('div');
+      banner.innerHTML = '🎄 Der Schützenverein Unterigling wünscht<br>schöne Weihnachten und einen Guten Rutsch! 🎄';
+      banner.style.cssText = `
+        position: fixed !important;
+        top: 180px !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        z-index: 999999 !important;
+        background: linear-gradient(135deg, #c41e3a 0%, #8b0000 100%) !important;
+        color: #ffd700 !important;
+        padding: 0.8rem 2rem !important;
+        border-radius: 12px !important;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.5) !important;
+        border: 3px solid #ffd700 !important;
+        pointer-events: none !important;
+        text-align: center !important;
+        font-weight: bold !important;
+        font-size: 1rem !important;
+        width: fit-content !important;
+        max-width: 90% !important;
+        margin: 0 !important;
+        display: block !important;
+      `;
+      document.body.appendChild(banner);
       
       // Weihnachtsbäume - CSS gezeichnet
       createChristmasTree('left');
