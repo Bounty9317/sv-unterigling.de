@@ -1444,12 +1444,14 @@
         header.appendChild(lightsContainer);
       }
       
-      // Weihnachtsbanner - fest positioniert
-      const banner = document.createElement('div');
-      banner.className = 'christmas-banner';
-      banner.innerHTML = '🎄 Der Schützenverein Unterigling wünscht<br>schöne Weihnachten und einen Guten Rutsch! 🎄';
-      banner.style.cssText = 'position: fixed !important; top: 150px !important; left: 50% !important; transform: translateX(-50%) !important; z-index: 10000 !important;';
-      document.body.appendChild(banner);
+      // Weihnachtsbanner - fest positioniert (mit Timeout um sicherzustellen dass es nach allem anderen kommt)
+      setTimeout(() => {
+        const banner = document.createElement('div');
+        banner.className = 'christmas-banner';
+        banner.innerHTML = '🎄 Der Schützenverein Unterigling wünscht<br>schöne Weihnachten und einen Guten Rutsch! 🎄';
+        banner.setAttribute('style', 'position: fixed !important; top: 150px !important; left: 50% !important; transform: translateX(-50%) !important; z-index: 99999 !important; background: linear-gradient(135deg, #c41e3a 0%, #8b0000 100%) !important; color: #ffd700 !important; padding: 0.8rem 2rem !important; border-radius: 12px !important; box-shadow: 0 4px 15px rgba(0,0,0,0.5) !important; border: 3px solid #ffd700 !important; pointer-events: none !important; text-align: center !important; font-weight: bold !important; font-size: 1rem !important; width: fit-content !important; max-width: 90% !important;');
+        document.body.appendChild(banner);
+      }, 100);
       
       // Weihnachtsbäume - CSS gezeichnet
       createChristmasTree('left');
