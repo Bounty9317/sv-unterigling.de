@@ -85,37 +85,7 @@
   z-index: 1000;
 }
 
-/* Weihnachtsbanner - fest unter der Navigation */
-.christmas-banner {
-  position: fixed !important;
-  top: 150px !important;
-  left: 50% !important;
-  transform: translateX(-50%) !important;
-  background: linear-gradient(135deg, #c41e3a 0%, #8b0000 100%);
-  color: #ffd700;
-  padding: 0.8rem 2rem;
-  width: fit-content;
-  max-width: 90%;
-  border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-  z-index: 10000 !important;
-  pointer-events: none;
-  text-align: center;
-  font-weight: bold;
-  font-size: 1rem;
-  border: 3px solid #ffd700;
-}
 
-@keyframes bannerSlide {
-  from {
-    transform: translateX(-50%) translateY(-100px);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(-50%) translateY(0);
-    opacity: 1;
-  }
-}
 
 /* Weihnachtsbäume - größer am unteren Rand */
 .christmas-tree {
@@ -194,12 +164,7 @@
     right: 0;
   }
   
-  .christmas-banner {
-    font-size: 0.85rem;
-    padding: 0.6rem 1rem;
-    max-width: 95%;
-    top: 140px;
-  }
+
   
   .icicle {
     border-left: 3px solid transparent;
