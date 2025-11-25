@@ -344,7 +344,7 @@
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
     import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-    import { getFirestore, collection, addDoc, getDocs, deleteDoc, updateDoc, doc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+    import { getFirestore, collection, addDoc, getDocs, deleteDoc, updateDoc, doc, setDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
     // Firebase Config
     const firebaseConfig = {
@@ -388,24 +388,21 @@
 
     // Winter Mode Toggle
     async function toggleWinterMode() {
-      const settingsRef = doc(db, 'settings', 'winterMode');
-      const settingsSnap = await getDocs(collection(db, 'settings'));
-      let currentMode = false;
-      
-      settingsSnap.forEach(d => {
-        if (d.id === 'winterMode') {
-          currentMode = d.data().enabled || false;
-        }
-      });
-      
-      const newMode = !currentMode;
-      
       try {
-        if (settingsSnap.size === 0 || !settingsSnap.docs.find(d => d.id === 'winterMode')) {
-          await addDoc(collection(db, 'settings'), { enabled: newMode });
-        } else {
-          await updateDoc(settingsRef, { enabled: newMode });
-        }
+        const settingsRef = doc(db, 'settings', 'winterMode');
+        const settingsSnap = await getDocs(collection(db, 'settings'));
+        let currentMode = false;
+        
+        settingsSnap.forEach(d => {
+          if (d.id === 'winterMode') {
+            currentMode = d.data().enabled || false;
+          }
+        });
+        
+        const newMode = !currentMode;
+        
+        // Verwende setDoc um sicherzustellen dass die ID "winterMode" ist
+        await setDoc(settingsRef, { enabled: newMode }, { merge: true });
         
         const btn = document.getElementById('winter-mode-btn');
         btn.textContent = newMode ? '❄️ Wintermodus AN' : '❄️ Wintermodus AUS';
@@ -413,7 +410,7 @@
         alert(newMode ? 'Wintermodus aktiviert! 🎄❄️' : 'Wintermodus deaktiviert');
       } catch (error) {
         console.error('Fehler beim Umschalten:', error);
-        alert('Fehler beim Umschalten des Wintermodus');
+        alert('Fehler beim Umschalten des Wintermodus: ' + error.message);
       }
     }
     
