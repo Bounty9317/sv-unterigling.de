@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Schützenverein Unterigling</title>
+  <link rel="stylesheet" href="winter-mode.css">
   <style>
     * {
       margin: 0;
@@ -1335,6 +1336,116 @@
     // Load events when page loads
     loadHomeEvents();
     loadEventsPage();
+  </script>
+
+  <!-- Winter Mode Script -->
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+    import { getFirestore, collection, getDocs } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+    const app = initializeApp({
+      apiKey: "AIzaSyA6hD3scwCcytwkAoNhbNq6-lrYUcl8Fjk",
+      authDomain: "schuetzenverein-12cfa.firebaseapp.com",
+      projectId: "schuetzenverein-12cfa",
+      storageBucket: "schuetzenverein-12cfa.firebasestorage.app",
+      messagingSenderId: "791385091582",
+      appId: "1:791385091582:web:b4c5aae9ddb155f10ee4af"
+    });
+    const db = getFirestore(app, 'vorstandschaftschuetzen');
+
+    async function checkWinterMode() {
+      try {
+        const settingsSnap = await getDocs(collection(db, 'settings'));
+        let winterModeEnabled = false;
+        
+        settingsSnap.forEach(d => {
+          if (d.id === 'winterMode' && d.data().enabled) {
+            winterModeEnabled = true;
+          }
+        });
+        
+        if (winterModeEnabled) {
+          activateWinterMode();
+        }
+      } catch (error) {
+        console.log('Winter mode check:', error);
+      }
+    }
+
+    function activateWinterMode() {
+      document.body.classList.add('winter-mode-active');
+      
+      // Schneefall erstellen
+      for (let i = 0; i < 50; i++) {
+        createSnowflake();
+      }
+      
+      // Schnee am Boden
+      const snowGround = document.createElement('div');
+      snowGround.className = 'snow-ground';
+      document.body.appendChild(snowGround);
+      
+      // Lichterkette im Header
+      const header = document.querySelector('header');
+      if (header) {
+        header.style.position = 'relative';
+        const lights = document.createElement('div');
+        lights.className = 'christmas-lights';
+        for (let i = 0; i < 10; i++) {
+          const light = document.createElement('div');
+          light.className = 'light';
+          lights.appendChild(light);
+        }
+        header.appendChild(lights);
+        
+        // Christbaumkugeln
+        const ornaments = document.createElement('div');
+        ornaments.className = 'ornaments';
+        for (let i = 0; i < 5; i++) {
+          const ornament = document.createElement('div');
+          ornament.className = 'ornament';
+          ornaments.appendChild(ornament);
+        }
+        header.appendChild(ornaments);
+      }
+      
+      // Weihnachtsbanner
+      const banner = document.createElement('div');
+      banner.className = 'christmas-banner';
+      banner.innerHTML = '🎄 Der Schützenverein Unterigling wünscht<br>schöne Weihnachten und einen Guten Rutsch! 🎄';
+      document.body.appendChild(banner);
+      
+      // Weihnachtsbäume
+      const treeLeft = document.createElement('div');
+      treeLeft.className = 'christmas-tree left';
+      treeLeft.innerHTML = '🎄';
+      document.body.appendChild(treeLeft);
+      
+      const treeRight = document.createElement('div');
+      treeRight.className = 'christmas-tree right';
+      treeRight.innerHTML = '🎄';
+      document.body.appendChild(treeRight);
+    }
+
+    function createSnowflake() {
+      const snowflake = document.createElement('div');
+      snowflake.className = 'snowflake';
+      snowflake.innerHTML = '❄';
+      snowflake.style.left = Math.random() * 100 + '%';
+      snowflake.style.animationDuration = (Math.random() * 3 + 2) + 's';
+      snowflake.style.opacity = Math.random();
+      snowflake.style.fontSize = (Math.random() * 1 + 0.5) + 'em';
+      document.body.appendChild(snowflake);
+      
+      // Schneeflocke nach Animation entfernen und neu erstellen
+      setTimeout(() => {
+        snowflake.remove();
+        createSnowflake();
+      }, parseFloat(snowflake.style.animationDuration) * 1000);
+    }
+
+    // Winter Mode beim Laden prüfen
+    checkWinterMode();
   </script>
 </body>
 </html>

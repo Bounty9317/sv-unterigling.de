@@ -65,6 +65,12 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
     
+    // Settings - Public read, Admin write (for winter mode)
+    match /settings/{document} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
     // Default: Deny all other access
     match /{document=**} {
       allow read, write: if false;

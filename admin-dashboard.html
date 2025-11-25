@@ -263,7 +263,10 @@
 <body>
   <div class="header">
     <h1>Vorstandsbereich - Dashboard</h1>
-    <button class="logout-btn" id="logout-btn">Abmelden</button>
+    <div style="display: flex; gap: 1rem; align-items: center;">
+      <button class="logout-btn" id="winter-mode-btn" style="background: #4CAF50;">❄️ Wintermodus</button>
+      <button class="logout-btn" id="logout-btn">Abmelden</button>
+    </div>
   </div>
 
   <div class="container">
@@ -382,6 +385,52 @@
         loadPersons('aufsicht');
       }
     });
+
+    // Winter Mode Toggle
+    async function toggleWinterMode() {
+      const settingsRef = doc(db, 'settings', 'winterMode');
+      const settingsSnap = await getDocs(collection(db, 'settings'));
+      let currentMode = false;
+      
+      settingsSnap.forEach(d => {
+        if (d.id === 'winterMode') {
+          currentMode = d.data().enabled || false;
+        }
+      });
+      
+      const newMode = !currentMode;
+      
+      try {
+        if (settingsSnap.size === 0 || !settingsSnap.docs.find(d => d.id === 'winterMode')) {
+          await addDoc(collection(db, 'settings'), { enabled: newMode });
+        } else {
+          await updateDoc(settingsRef, { enabled: newMode });
+        }
+        
+        const btn = document.getElementById('winter-mode-btn');
+        btn.textContent = newMode ? '❄️ Wintermodus AN' : '❄️ Wintermodus AUS';
+        btn.style.background = newMode ? '#2196F3' : '#4CAF50';
+        alert(newMode ? 'Wintermodus aktiviert! 🎄❄️' : 'Wintermodus deaktiviert');
+      } catch (error) {
+        console.error('Fehler beim Umschalten:', error);
+        alert('Fehler beim Umschalten des Wintermodus');
+      }
+    }
+    
+    document.getElementById('winter-mode-btn').addEventListener('click', toggleWinterMode);
+    
+    // Load winter mode status
+    async function loadWinterModeStatus() {
+      const settingsSnap = await getDocs(collection(db, 'settings'));
+      settingsSnap.forEach(d => {
+        if (d.id === 'winterMode' && d.data().enabled) {
+          const btn = document.getElementById('winter-mode-btn');
+          btn.textContent = '❄️ Wintermodus AN';
+          btn.style.background = '#2196F3';
+        }
+      });
+    }
+    loadWinterModeStatus();
 
     // Logout
     document.getElementById('logout-btn').addEventListener('click', async () => {
