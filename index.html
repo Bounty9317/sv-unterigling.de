@@ -616,15 +616,20 @@
     </div>
     <div class="container">
       <h2 style="margin-top: 2rem; text-align: center;">Kommende Veranstaltungen</h2>
-      <div style="display: flex; align-items: center; justify-content: center; gap: 2rem; margin: 2rem auto; max-width: 1100px;">
-        <div style="text-align: center; flex-shrink: 0;">
-          <a href="https://whatsapp.com/channel/0029Vb0dG73JENy7YI5ce10p" target="_blank" style="display: block; text-decoration: none;">
-            <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://whatsapp.com/channel/0029Vb0dG73JENy7YI5ce10p" alt="WhatsApp Kanal QR Code" style="width: 150px; height: 150px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); background: white; padding: 10px;">
-            <p style="color: #4CAF50; font-weight: 600; margin-top: 0.5rem; font-size: 0.9rem;">📱 WhatsApp Kanal</p>
-          </a>
-        </div>
+      <div style="display: flex; align-items: flex-start; justify-content: center; gap: 1.5rem; margin: 2rem auto; max-width: 1100px;">
         <div style="position: relative; max-width: 900px; flex: 1;">
           <img src="veranstaltungen.jpeg" alt="Veranstaltungen" style="width: 100%; height: auto; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">
+          
+          <!-- QR Code links neben dem Bild -->
+          <div style="position: absolute; left: -170px; top: 0; bottom: 0; display: flex; align-items: center;">
+            <div style="text-align: center;">
+              <a href="https://whatsapp.com/channel/0029Vb0dG73JENy7YI5ce10p" target="_blank" style="display: block; text-decoration: none;">
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://whatsapp.com/channel/0029Vb0dG73JENy7YI5ce10p" alt="WhatsApp Kanal QR Code" style="width: 150px; height: 150px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); background: white; padding: 10px;">
+                <p style="color: #4CAF50; font-weight: 600; margin-top: 0.5rem; font-size: 0.9rem;">📱 WhatsApp Kanal</p>
+              </a>
+            </div>
+          </div>
+          
           <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 85%; height: 85%;">
             <div style="background: rgba(30, 30, 30, 0.65); backdrop-filter: blur(8px); border-radius: 12px; padding: 2rem; box-shadow: 0 8px 32px rgba(0,0,0,0.4); height: 100%; overflow-y: auto; border: 2px solid rgba(76, 175, 80, 0.6);">
               <h3 style="color: #4CAF50; margin-top: 0; text-align: center; margin-bottom: 1.5rem; font-size: 1.8rem;">📅 Termine 2025</h3>
