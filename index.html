@@ -1457,16 +1457,12 @@
         header.appendChild(container);
       }
 
-      // Bäume (scrollen mit)
-      const hero = document.querySelector('.hero');
-      if (hero) {
-        hero.style.position = 'relative';
-        ['left', 'right'].forEach(pos => {
-          const tree = document.createElement('div');
-          tree.className = `xmas-tree ${pos}`;
-          hero.appendChild(tree);
-        });
-      }
+      // Bäume (fixed am unteren Rand)
+      ['left', 'right'].forEach(pos => {
+        const tree = document.createElement('div');
+        tree.className = `xmas-tree ${pos}`;
+        document.body.appendChild(tree);
+      });
     }
 
     function createSnow() {

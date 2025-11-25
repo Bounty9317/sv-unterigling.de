@@ -17,9 +17,9 @@
   }
 }
 
-/* Weihnachtsbäume - scrollen mit */
+/* Weihnachtsbäume - scrollen mit bis zum Ende der Seite */
 .xmas-tree {
-  position: absolute;
+  position: fixed;
   width: 400px;
   height: 500px;
   pointer-events: none;
@@ -29,16 +29,15 @@
   background-position: center bottom;
   filter: drop-shadow(5px 5px 15px rgba(0,0,0,0.6));
   z-index: 5;
+  bottom: 0;
 }
 
 .xmas-tree.left {
   left: 0;
-  top: 400px;
 }
 
 .xmas-tree.right {
   right: 0;
-  top: 400px;
 }
 
 /* Lichterketten-Container an Navigation */
@@ -129,6 +128,7 @@
   .xmas-tree {
     width: 180px;
     height: 230px;
+    bottom: 0;
   }
   
   .xmas-lights-container {
