@@ -20,14 +20,26 @@
   }
 }
 
-/* Schnee am Boden */
+/* Schnee am Boden - realistischer */
 .snow-ground {
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
-  height: 80px;
-  background: linear-gradient(to top, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.7) 50%, transparent 100%);
+  height: 120px;
+  background: 
+    radial-gradient(ellipse at 20% 100%, rgba(255,255,255,0.95) 0%, transparent 40%),
+    radial-gradient(ellipse at 50% 100%, rgba(255,255,255,0.9) 0%, transparent 45%),
+    radial-gradient(ellipse at 80% 100%, rgba(255,255,255,0.95) 0%, transparent 40%),
+    linear-gradient(to top, 
+      rgba(255,255,255,0.98) 0%, 
+      rgba(255,255,255,0.95) 20%,
+      rgba(255,255,255,0.85) 40%,
+      rgba(255,255,255,0.6) 60%,
+      rgba(255,255,255,0.3) 80%,
+      transparent 100%
+    );
+  box-shadow: 0 -10px 30px rgba(255,255,255,0.3);
   z-index: 1000;
   pointer-events: none;
 }
@@ -110,12 +122,10 @@
   50% { transform: rotate(5deg); }
 }
 
-/* Weihnachtsbanner - fixed direkt unter Header */
+/* Weihnachtsbanner - direkt unter Header im DOM */
 .christmas-banner {
-  position: fixed;
-  top: 120px;
-  left: 50%;
-  transform: translateX(-50%);
+  position: relative;
+  margin: 0 auto;
   background: linear-gradient(135deg, #c41e3a 0%, #8b0000 100%);
   color: #ffd700;
   padding: 1rem 3rem;
@@ -128,42 +138,42 @@
   font-weight: bold;
   font-size: 1.1rem;
   border: 3px solid #ffd700;
-  animation: bannerDrop 1s ease-out;
+  animation: bannerSlide 1s ease-out;
 }
 
-@keyframes bannerDrop {
+@keyframes bannerSlide {
   from {
-    top: 0;
+    transform: translateY(-100px);
     opacity: 0;
   }
   to {
-    top: 120px;
+    transform: translateY(0);
     opacity: 1;
   }
 }
 
-/* Weihnachtsbäume - Bild (größer) */
+/* Weihnachtsbäume - Bild (doppelt so groß) */
 .christmas-tree {
   position: fixed;
-  bottom: 80px;
-  width: 350px;
-  height: 450px;
-  z-index: 998;
+  bottom: 100px;
+  width: 700px;
+  height: 900px;
+  z-index: 1001;
   pointer-events: none;
   background-image: url('christmas-tree.png');
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center bottom;
-  filter: drop-shadow(8px 8px 20px rgba(0,0,0,0.5));
+  filter: drop-shadow(10px 10px 25px rgba(0,0,0,0.6));
 }
 
 .christmas-tree.left {
-  left: 10px;
+  left: 0;
   animation: treeSlideIn 1s ease-out;
 }
 
 .christmas-tree.right {
-  right: 10px;
+  right: 0;
   animation: treeSlideIn 1s ease-out;
 }
 
