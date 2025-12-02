@@ -613,8 +613,8 @@
     </nav>
   </header>
 
-  <!-- Weihnachtsbanner - direkt im HTML mit exakt den gleichen Einstellungen wie Test-Banner -->
-  <div id="xmas-banner" style="display: none; position: fixed; top: 240px; left: 50%; transform: translateX(-50%); z-index: 99999; background: linear-gradient(135deg, #c41e3a 0%, #8b0000 100%); color: #ffd700; padding: 0.8rem 2rem; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); border: 3px solid #ffd700; pointer-events: none; text-align: center; font-weight: bold; font-size: 1rem; width: fit-content; max-width: 90%;">
+  <!-- Weihnachtsbanner - sticky wie Header -->
+  <div id="xmas-banner" style="display: none; position: sticky; top: 150px; z-index: 999; background: linear-gradient(135deg, #c41e3a 0%, #8b0000 100%); color: #ffd700; padding: 0.8rem 2rem; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); border: 3px solid #ffd700; pointer-events: none; text-align: center; font-weight: bold; font-size: 1rem; width: fit-content; max-width: 90%; margin: 0 auto;">
     🎄 Der Schützenverein Unterigling wünscht euch schöne Weihnachten und einen Guten Rutsch ins neue Jahr! 🎄
   </div>
 
@@ -1390,14 +1390,14 @@
         banner.style.display = 'block';
       }
 
-      // Lichterkette + Kugeln an Navigation
+      // Lichterkette + Kugeln an Navigation - als Teil des Headers
       const header = document.querySelector('header');
       if (header) {
-        // Header NICHT auf relative setzen - behält sticky
+        header.style.position = 'relative';
         const container = document.createElement('div');
         container.className = 'xmas-lights-container';
-        container.style.position = 'fixed';
-        container.style.top = '210px';
+        container.style.position = 'absolute';
+        container.style.bottom = '-50px';
         container.style.left = '0';
         container.style.right = '0';
         container.style.height = '60px';
