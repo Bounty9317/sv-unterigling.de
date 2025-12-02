@@ -436,6 +436,10 @@
         display: none !important;
       }
 
+      #xmas-banner {
+        display: none !important;
+      }
+
       header {
         position: relative;
       }
@@ -527,6 +531,18 @@
       /* Gallery */
       .gallery {
         grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      }
+
+      /* QR Code und Events - Stack auf Mobile */
+      #startseite .container > div[style*="display: flex"] {
+        flex-direction: column !important;
+        align-items: center !important;
+      }
+
+      #startseite .container > div[style*="display: flex"] > div:first-child {
+        position: static !important;
+        max-width: 100% !important;
+        margin-bottom: 2rem !important;
       }
     }
 
