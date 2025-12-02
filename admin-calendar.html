@@ -50,6 +50,7 @@
       <div class="dashboard-grid">
         <div class="calendar-section">
           <button class="btn" onclick="downloadList('wirte')" style="margin-bottom: 1rem; background: #2d5a3d;">📥 Wirteliste herunterladen</button>
+          <button class="btn" onclick="openRotationModal('wirte')" style="margin-bottom: 1rem; margin-left: 1rem; background: #1a472a;">🔄 Auto-Rotation</button>
           <h2>Wirte-Kalender</h2>
           <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem; gap: 1rem;">
             <button class="btn" onclick="previousMonth('wirte')" style="padding: 0.5rem 1rem; font-size: 1.2rem;">◀</button>
@@ -69,6 +70,7 @@
       <div class="dashboard-grid">
         <div class="calendar-section">
           <button class="btn" onclick="downloadList('aufsicht')" style="margin-bottom: 1rem; background: #2d5a3d;">📥 Schießaufsichtsliste herunterladen</button>
+          <button class="btn" onclick="openRotationModal('aufsicht')" style="margin-bottom: 1rem; margin-left: 1rem; background: #1a472a;">🔄 Auto-Rotation</button>
           <h2>Schießaufsicht-Kalender</h2>
           <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem; gap: 1rem;">
             <button class="btn" onclick="previousMonth('aufsicht')" style="padding: 0.5rem 1rem; font-size: 1.2rem;">◀</button>
@@ -82,6 +84,35 @@
           <h2>💬 Tausch-Anfragen</h2>
           <div id="aufsicht-chat"><p style="color: #999;">Keine Anfragen</p></div>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Rotation Modal -->
+  <div id="rotation-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; overflow-y: auto;">
+    <div style="background: #2a2a2a; max-width: 600px; margin: 5% auto; padding: 2rem; border-radius: 12px; position: relative;">
+      <button onclick="closeRotationModal()" style="position: absolute; top: 1rem; right: 1rem; background: transparent; border: none; color: #999; font-size: 2rem; cursor: pointer;">&times;</button>
+      <h2 style="color: #4CAF50; margin-bottom: 1.5rem;">🔄 Automatische Rotation</h2>
+      
+      <div style="margin-bottom: 1.5rem;">
+        <label style="display: block; margin-bottom: 0.5rem; color: #4CAF50; font-weight: 600;">Start-Datum:</label>
+        <input type="date" id="rotation-start" style="width: 100%; padding: 0.8rem; background: #1a1a1a; border: 2px solid #3a3a3a; border-radius: 6px; color: #e0e0e0; font-size: 1rem;">
+      </div>
+      
+      <div style="margin-bottom: 1.5rem;">
+        <label style="display: block; margin-bottom: 0.5rem; color: #4CAF50; font-weight: 600;">End-Datum:</label>
+        <input type="date" id="rotation-end" style="width: 100%; padding: 0.8rem; background: #1a1a1a; border: 2px solid #3a3a3a; border-radius: 6px; color: #e0e0e0; font-size: 1rem;">
+      </div>
+      
+      <div style="margin-bottom: 1.5rem;">
+        <label style="display: block; margin-bottom: 0.5rem; color: #4CAF50; font-weight: 600;">Rotations-Reihenfolge:</label>
+        <p style="color: #999; font-size: 0.9rem; margin-bottom: 1rem;">Ziehe die Personen in die gewünschte Reihenfolge</p>
+        <div id="rotation-list" style="background: #1a1a1a; padding: 1rem; border-radius: 6px; min-height: 200px;"></div>
+      </div>
+      
+      <div style="display: flex; gap: 1rem;">
+        <button onclick="startRotation()" style="flex: 1; background: #4CAF50; color: white; border: none; padding: 1rem; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 1rem;">✓ Rotation starten</button>
+        <button onclick="closeRotationModal()" style="flex: 1; background: #c62828; color: white; border: none; padding: 1rem; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 1rem;">✗ Abbrechen</button>
       </div>
     </div>
   </div>
@@ -993,6 +1024,142 @@
       logo.onload = () => createPDF(true, logo);
       logo.onerror = () => createPDF(false);
       logo.src = 'logo.png';
+    };
+
+    // === ROTATION FUNKTIONEN ===
+    let currentRotationType = null;
+    let rotationPersons = [];
+
+    window.openRotationModal = (type) => {
+      currentRotationType = type;
+      document.getElementById('rotation-modal').style.display = 'block';
+      
+      // Setze Standard-Daten (aktuelles Datum bis Ende nächstes Jahr)
+      const today = new Date();
+      document.getElementById('rotation-start').value = today.toISOString().split('T')[0];
+      const nextYear = new Date(today.getFullYear() + 1, 11, 31);
+      document.getElementById('rotation-end').value = nextYear.toISOString().split('T')[0];
+      
+      // Lade Personen
+      loadRotationPersons(type);
+    };
+
+    window.closeRotationModal = () => {
+      document.getElementById('rotation-modal').style.display = 'none';
+    };
+
+    async function loadRotationPersons(type) {
+      const snapshot = await getDocs(collection(db, `${type}-persons`));
+      rotationPersons = [];
+      snapshot.forEach(doc => {
+        rotationPersons.push({ id: doc.id, ...doc.data() });
+      });
+      
+      renderRotationList();
+    }
+
+    function renderRotationList() {
+      const list = document.getElementById('rotation-list');
+      list.innerHTML = '';
+      
+      rotationPersons.forEach((person, index) => {
+        const item = document.createElement('div');
+        item.style.cssText = `background: ${person.color}; padding: 0.8rem; margin-bottom: 0.5rem; border-radius: 6px; cursor: move; display: flex; justify-content: space-between; align-items: center; font-weight: 600;`;
+        item.draggable = true;
+        item.dataset.index = index;
+        
+        item.innerHTML = `
+          <span>${index + 1}. ${person.name}</span>
+          <span style="opacity: 0.7;">☰</span>
+        `;
+        
+        item.addEventListener('dragstart', (e) => {
+          e.dataTransfer.effectAllowed = 'move';
+          e.dataTransfer.setData('text/plain', index);
+        });
+        
+        item.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          e.dataTransfer.dropEffect = 'move';
+        });
+        
+        item.addEventListener('drop', (e) => {
+          e.preventDefault();
+          const fromIndex = parseInt(e.dataTransfer.getData('text/plain'));
+          const toIndex = parseInt(e.currentTarget.dataset.index);
+          
+          if (fromIndex !== toIndex) {
+            const [movedPerson] = rotationPersons.splice(fromIndex, 1);
+            rotationPersons.splice(toIndex, 0, movedPerson);
+            renderRotationList();
+          }
+        });
+        
+        list.appendChild(item);
+      });
+    }
+
+    window.startRotation = async () => {
+      const startDate = new Date(document.getElementById('rotation-start').value);
+      const endDate = new Date(document.getElementById('rotation-end').value);
+      
+      if (!startDate || !endDate || startDate > endDate) {
+        alert('Bitte gültige Start- und End-Daten eingeben!');
+        return;
+      }
+      
+      if (rotationPersons.length === 0) {
+        alert('Keine Personen verfügbar!');
+        return;
+      }
+      
+      if (!confirm(`Rotation von ${startDate.toLocaleDateString('de-DE')} bis ${endDate.toLocaleDateString('de-DE')} starten?\n\nAlle bestehenden Einteilungen in diesem Zeitraum werden überschrieben!`)) {
+        return;
+      }
+      
+      // Sammle alle Samstage + 26.12. im Zeitraum
+      const dates = [];
+      const current = new Date(startDate);
+      
+      while (current <= endDate) {
+        const dayOfWeek = current.getDay();
+        const dateStr = `${current.getFullYear()}-${String(current.getMonth() + 1).padStart(2, '0')}-${String(current.getDate()).padStart(2, '0')}`;
+        
+        // Samstag ODER 26.12.
+        if (dayOfWeek === 6 || dateStr.endsWith('-12-26')) {
+          dates.push(dateStr);
+        }
+        
+        current.setDate(current.getDate() + 1);
+      }
+      
+      // Rotation durchführen
+      let personIndex = 0;
+      for (const dateStr of dates) {
+        const person = rotationPersons[personIndex % rotationPersons.length];
+        
+        // Lösche bestehende Einteilung
+        const existingSnapshot = await getDocs(collection(db, `${currentRotationType}-assignments`));
+        for (const doc of existingSnapshot.docs) {
+          if (doc.data().date === dateStr) {
+            await deleteDoc(doc.ref);
+          }
+        }
+        
+        // Neue Einteilung erstellen
+        await addDoc(collection(db, `${currentRotationType}-assignments`), {
+          person: person.name,
+          color: person.color,
+          date: dateStr
+        });
+        
+        personIndex++;
+      }
+      
+      alert(`✓ Rotation abgeschlossen!\n${dates.length} Tage eingeteilt.`);
+      closeRotationModal();
+      await loadAssignments(currentRotationType);
+      renderCalendar(currentRotationType);
     };
   </script>
 </body>
