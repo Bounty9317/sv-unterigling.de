@@ -371,7 +371,9 @@
         const isHoliday = allHolidays.includes(dateStr);
         
         if (type === 'aufsicht') {
-          isAllowed = dayOfWeek === 6; // Nur Samstag
+          // Samstag ODER 26.12. (2. Weihnachtsfeiertag)
+          const is26Dec = dateStr.endsWith('-12-26');
+          isAllowed = dayOfWeek === 6 || is26Dec;
         } else if (type === 'wirte') {
           isAllowed = dayOfWeek === 0 || dayOfWeek === 6 || isHoliday; // Samstag, Sonntag oder Feiertag
         }
