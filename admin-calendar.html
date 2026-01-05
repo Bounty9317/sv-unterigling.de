@@ -941,17 +941,21 @@
             rightYPos += rowHeight;
           });
         } else {
-          // Schießaufsicht - nur Samstag (zentriert)
-          const centerStartX = 85;
-          const centerColWidths = [10, 22, 38, 22];
+          // Schießaufsicht - nur Samstag (zentriert) - GLEICHES DESIGN WIE WIRTELISTE
+          const centerStartX = 98; // Zentriert für eine Tabelle
+          const centerColWidths = [11, 24, 42, 24]; // Gleiche Spaltenbreiten wie Wirteliste
           
-          doc.setFontSize(10);
+          doc.setFontSize(11);
           doc.setFont('helvetica', 'bold');
-          doc.text('Samstag (19:30-21:00)', 148.5, yPos, { align: 'center' });
-          yPos += 6;
+          const tableWidth = centerColWidths[0] + centerColWidths[1] + centerColWidths[2] + centerColWidths[3];
+          doc.text('Samstag', centerStartX + tableWidth/2, yPos, { align: 'center' });
+          doc.setFontSize(9);
+          doc.setFont('helvetica', 'normal');
+          doc.text('(19:30-21:00)', centerStartX + tableWidth/2, yPos + 5, { align: 'center' });
+          yPos += 11;
           
           // Header
-          doc.setFontSize(9);
+          doc.setFontSize(8);
           doc.setFont('helvetica', 'bold');
           doc.rect(centerStartX, yPos, centerColWidths[0], rowHeight);
           doc.rect(centerStartX + centerColWidths[0], yPos, centerColWidths[1], rowHeight);

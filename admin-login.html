@@ -138,8 +138,8 @@
 
     <form id="login-form">
       <div class="form-group">
-        <label for="email">E-Mail</label>
-        <input type="email" id="email" required>
+        <label for="username">Benutzername oder E-Mail</label>
+        <input type="text" id="username" required placeholder="VorstandLamm oder E-Mail">
       </div>
 
       <div class="form-group">
@@ -179,7 +179,7 @@
     document.getElementById('login-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       
-      const email = document.getElementById('email').value;
+      const usernameInput = document.getElementById('username').value.trim();
       const password = document.getElementById('password').value;
       const loginBtn = document.getElementById('login-btn');
       const errorMsg = document.getElementById('error-message');
@@ -189,9 +189,24 @@
       errorMsg.style.display = 'none';
 
       try {
+        // Prüfe ob Benutzername oder Email eingegeben wurde
+        let email = usernameInput;
+        
+        // Wenn kein @ enthalten ist, nehme an es ist der Benutzername "VorstandLamm"
+        if (!usernameInput.includes('@')) {
+          // Konvertiere Benutzername zu Email-Format
+          if (usernameInput.toLowerCase() === 'vorstandlamm') {
+            email = 'vorstand@lamm.schuetzenverein.local';
+          } else {
+            // Ungültiger Benutzername
+            throw new Error('Ungültiger Benutzername');
+          }
+        }
+        
         await signInWithEmailAndPassword(auth, email, password);
         window.location.href = 'admin-dashboard.html';
       } catch (error) {
+        console.error('Login error:', error);
         errorMsg.textContent = 'Anmeldung fehlgeschlagen. Bitte überprüfen Sie Ihre Zugangsdaten.';
         errorMsg.style.display = 'block';
         loginBtn.disabled = false;
