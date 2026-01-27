@@ -199,6 +199,7 @@
     .person-cards { display: flex; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap; }
     .person-card { padding: 0.8rem 1.2rem; border-radius: 6px; cursor: move; font-weight: 600; }
     .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; background: #1a1a1a; width: 100%; }
+    .calendar-header-day { background: #1a472a; color: white; padding: 0.8rem; text-align: center; font-weight: 600; }
     .calendar-day { background: #2a2a2a; min-height: 100px; padding: 0.5rem; border: 2px solid transparent; font-size: 0.85rem; }
     .calendar-day.disabled { background: #1a1a1a; opacity: 0.5; }
     .calendar-day.assigned { border-color: #4CAF50; }
@@ -240,7 +241,7 @@
         margin: 1rem 0;
       }
       .calendar-section {
-        padding: 0.5rem 0.3rem;
+        padding: 0.3rem;
         overflow-x: visible;
         margin: 0;
         border-radius: 0;
@@ -249,6 +250,11 @@
         width: 100%;
         gap: 0;
         font-size: 0.6rem;
+      }
+      .calendar-header-day {
+        padding: 0.3rem 0.1rem;
+        font-size: 0.65rem;
+        font-weight: 600;
       }
       .calendar-day {
         min-height: 55px;
@@ -689,6 +695,7 @@
       // Header mit Wochentagen (Mo-So)
       ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'].forEach(d => { 
         const h = document.createElement('div'); 
+        h.className = 'calendar-header-day';
         h.style.cssText = 'background: #1a472a; color: white; padding: 0.8rem; text-align: center; font-weight: 600;'; 
         h.textContent = d; 
         cal.appendChild(h); 
