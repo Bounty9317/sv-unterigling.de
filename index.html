@@ -1571,8 +1571,8 @@
     updateCountdown();
     setInterval(updateCountdown, 1000);
 
-    // Load events on homepage
-    async function loadHomeEvents() {
+    // Load events on homepage - v2
+    async function loadHomeEventsV2() {
       const eventsList = document.getElementById('events-list');
       
       try {
@@ -1673,8 +1673,8 @@
       }
     }
 
-    // Load events for Veranstaltungen page
-    async function loadEventsPage() {
+    // Load events for Veranstaltungen page - v2
+    async function loadEventsPageV2() {
       const eventsListPage = document.getElementById('events-list-page');
       const eventsListKommende = document.getElementById('events-list-kommende');
       
@@ -1784,8 +1784,8 @@
     }
 
     // Load events when page loads
-    loadHomeEvents();
-    loadEventsPage();
+    loadHomeEventsV2();
+    loadEventsPageV2();
   </script>
 
   <!-- WINTERMODUS NEU -->
