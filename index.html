@@ -1404,9 +1404,24 @@
   </footer>
 
   <script type="module">
-    // Firebase imports - v2024-01-27
+    // Firebase imports - v2024-01-27-fix
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-    import { getFirestore, doc, getDoc, setDoc, updateDoc, increment, collection, getDocs, query, orderBy, where } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+    import { 
+      getFirestore, 
+      doc, 
+      getDoc, 
+      setDoc, 
+      updateDoc, 
+      increment, 
+      collection, 
+      getDocs, 
+      query, 
+      orderBy, 
+      where 
+    } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+    // Verify imports are loaded
+    console.log('Firebase imports loaded:', { query, orderBy, where, collection, getDocs });
 
     const firebaseConfig = {
       apiKey: "AIzaSyA6hD3scwCcytwkAoNhbNq6-lrYUcl8Fjk",
