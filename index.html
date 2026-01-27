@@ -484,6 +484,11 @@
         display: none !important;
       }
 
+      /* Hide login links on mobile */
+      .header-login-links {
+        display: none !important;
+      }
+
       /* Navigation - Mobile: Hamburger Menu */
       .hamburger {
         display: flex;
@@ -677,6 +682,11 @@
           <div id="xmas-banner" style="display: none; background: linear-gradient(135deg, #c41e3a 0%, #8b0000 100%); color: #ffd700; padding: 0.6rem 1rem; border-radius: 8px; font-weight: bold; font-size: 0.85rem; border: 2px solid #ffd700; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">
             🎄 Frohe Weihnachten! 🎄
           </div>
+          <!-- Login Links -->
+          <div class="header-login-links" style="display: flex; gap: 0.5rem;">
+            <a href="helfer-login.html" style="color: white; text-decoration: none; padding: 0.5rem 1rem; background: rgba(255,255,255,0.1); border-radius: 6px; font-weight: 600; font-size: 0.9rem; transition: background 0.3s; white-space: nowrap;" onmouseover="this.style.background='rgba(255,255,255,0.2)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">👥 Helfer</a>
+            <a href="admin-login.html" style="color: white; text-decoration: none; padding: 0.5rem 1rem; background: rgba(255,255,255,0.1); border-radius: 6px; font-weight: 600; font-size: 0.9rem; transition: background 0.3s; white-space: nowrap;" onmouseover="this.style.background='rgba(255,255,255,0.2)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">🔐 Vorstand</a>
+          </div>
           <button class="hamburger" id="hamburger" aria-label="Menü öffnen">
             <span></span>
             <span></span>
@@ -695,8 +705,6 @@
         <li><a href="#" onclick="showSection('sport'); closeMenu()">Sport</a></li>
         <li><a href="#" onclick="showSection('mitgliedschaft'); closeMenu()">Mitgliedschaft</a></li>
         <li><a href="#" onclick="showSection('kontakt'); closeMenu()">Kontakt</a></li>
-        <li><a href="helfer-login.html">👥 Helfer</a></li>
-        <li><a href="admin-login.html">🔐 Vorstand</a></li>
       </ul>
     </nav>
   </div>
