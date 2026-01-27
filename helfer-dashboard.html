@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
@@ -699,7 +699,9 @@
       ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'].forEach(d => { 
         const h = document.createElement('div'); 
         h.className = 'calendar-header-day';
-        h.style.cssText = 'background: #1a472a; color: white; padding: 0.8rem; text-align: center; font-weight: 600;'; 
+        // Responsive inline styles
+        const isMobile = window.innerWidth <= 768;
+        h.style.cssText = `background: #1a472a; color: white; padding: ${isMobile ? '0.3rem 0.1rem' : '0.8rem'}; text-align: center; font-weight: 600; font-size: ${isMobile ? '0.65rem' : '1rem'};`; 
         h.textContent = d; 
         cal.appendChild(h); 
       });
