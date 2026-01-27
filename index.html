@@ -1668,7 +1668,8 @@
         });
       } catch (error) {
         console.error('Error loading events:', error);
-        eventsList.innerHTML = '<p style="color: #c62828; text-align: center;">Fehler beim Laden der Veranstaltungen.</p>';
+        console.error('Error details:', error.message, error.code);
+        eventsList.innerHTML = `<p style="color: #c62828; text-align: center;">Fehler beim Laden der Veranstaltungen.</p><p style="color: #999; text-align: center; font-size: 0.8rem;">${error.message || 'Unbekannter Fehler'}</p>`;
       }
     }
 
