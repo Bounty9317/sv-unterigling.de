@@ -51,6 +51,48 @@
 
     nav {
       background: rgba(0,0,0,0.2);
+      position: relative;
+    }
+
+    /* Hamburger Menu Button */
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      justify-content: space-around;
+      width: 2rem;
+      height: 2rem;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      z-index: 10;
+      position: absolute;
+      right: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    .hamburger span {
+      width: 2rem;
+      height: 0.25rem;
+      background: white;
+      border-radius: 10px;
+      transition: all 0.3s linear;
+      position: relative;
+      transform-origin: 1px;
+    }
+
+    .hamburger.active span:nth-child(1) {
+      transform: rotate(45deg);
+    }
+
+    .hamburger.active span:nth-child(2) {
+      opacity: 0;
+      transform: translateX(20px);
+    }
+
+    .hamburger.active span:nth-child(3) {
+      transform: rotate(-45deg);
     }
 
     nav ul {
@@ -445,9 +487,29 @@
       }
 
       /* Navigation */
+      /* Mobile Navigation */
+      .hamburger {
+        display: flex;
+      }
+
       nav ul {
+        position: fixed;
+        right: -100%;
+        top: 0;
         flex-direction: column;
-        padding: 0;
+        background: linear-gradient(135deg, #1a472a 0%, #2d5a3d 100%);
+        width: 70%;
+        max-width: 300px;
+        height: 100vh;
+        padding: 5rem 0 2rem 0;
+        transition: right 0.3s ease-in-out;
+        box-shadow: -2px 0 10px rgba(0,0,0,0.5);
+        z-index: 9;
+        overflow-y: auto;
+      }
+
+      nav ul.active {
+        right: 0;
       }
 
       nav ul li {
@@ -455,8 +517,9 @@
       }
 
       nav ul li a {
-        padding: 0.8rem 1rem;
-        text-align: center;
+        padding: 1rem 1.5rem;
+        text-align: left;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
       }
 
       /* Hero */
@@ -621,14 +684,19 @@
       </div>
     </div>
     <nav>
-      <ul>
-        <li><a href="#" onclick="showSection('startseite')">Startseite</a></li>
-        <li><a href="#" onclick="showSection('ueber-uns')">Über uns</a></li>
-        <li><a href="#" onclick="showSection('chronik')">Chronik / Geschichte</a></li>
-        <li><a href="#" onclick="showSection('veranstaltungen')">Veranstaltungen</a></li>
-        <li><a href="#" onclick="showSection('sport')">Sport / Schießstände</a></li>
-        <li><a href="#" onclick="showSection('mitgliedschaft')">Mitgliedschaft</a></li>
-        <li><a href="#" onclick="showSection('kontakt')">Kontakt / Anfahrt</a></li>
+      <button class="hamburger" id="hamburger" aria-label="Menü öffnen">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <ul id="nav-menu">
+        <li><a href="#" onclick="showSection('startseite'); closeMenu()">Startseite</a></li>
+        <li><a href="#" onclick="showSection('ueber-uns'); closeMenu()">Über uns</a></li>
+        <li><a href="#" onclick="showSection('chronik'); closeMenu()">Chronik / Geschichte</a></li>
+        <li><a href="#" onclick="showSection('veranstaltungen'); closeMenu()">Veranstaltungen</a></li>
+        <li><a href="#" onclick="showSection('sport'); closeMenu()">Sport / Schießstände</a></li>
+        <li><a href="#" onclick="showSection('mitgliedschaft'); closeMenu()">Mitgliedschaft</a></li>
+        <li><a href="#" onclick="showSection('kontakt'); closeMenu()">Kontakt / Anfahrt</a></li>
       </ul>
     </nav>
   </header>
@@ -1374,6 +1442,39 @@
   </script>
 
   <script>
+    // Hamburger Menu Toggle
+    const hamburger = document.getElementById('hamburger');
+    const navMenu = document.getElementById('nav-menu');
+
+    function toggleMenu() {
+      hamburger.classList.toggle('active');
+      navMenu.classList.toggle('active');
+    }
+
+    function closeMenu() {
+      hamburger.classList.remove('active');
+      navMenu.classList.remove('active');
+    }
+
+    hamburger.addEventListener('click', toggleMenu);
+
+    // Close menu when clicking outside
+    document.addEventListener('click', (event) => {
+      const isClickInsideNav = navMenu.contains(event.target);
+      const isClickOnHamburger = hamburger.contains(event.target);
+      
+      if (!isClickInsideNav && !isClickOnHamburger && navMenu.classList.contains('active')) {
+        closeMenu();
+      }
+    });
+
+    // Close menu on escape key
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && navMenu.classList.contains('active')) {
+        closeMenu();
+      }
+    });
+
     function showSection(sectionId) {
       // Hide all sections
       const sections = document.querySelectorAll('.content-section');
