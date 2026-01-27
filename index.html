@@ -1591,15 +1591,31 @@
       const eventsList = document.getElementById('events-list');
       
       try {
-        const today = new Date().toISOString().split('T')[0];
-        const q = query(
-          collection(db, 'events'), 
-          where('date', '>=', today),
-          orderBy('date', 'asc')
-        );
-        const querySnapshot = await getDocs(q);
+        // Simple query without filters - get all events and filter in JavaScript
+        const querySnapshot = await getDocs(collection(db, 'events'));
         
         if (querySnapshot.empty) {
+          eventsList.innerHTML = '<p style="color: #999; text-align: center;">Aktuell keine kommenden Veranstaltungen.</p>';
+          return;
+        }
+
+        const today = new Date().toISOString().split('T')[0];
+        const allEvents = [];
+        
+        querySnapshot.forEach((doc) => {
+          const event = doc.data();
+          if (event.date >= today) {
+            allEvents.push({ id: doc.id, data: event, date: new Date(event.date) });
+          }
+        });
+        
+        // Sort by date
+        allEvents.sort((a, b) => a.date - b.date);
+        
+        // Take only first 10
+        const events = allEvents.slice(0, 10);
+        
+        if (events.length === 0) {
           eventsList.innerHTML = '<p style="color: #999; text-align: center;">Aktuell keine kommenden Veranstaltungen.</p>';
           return;
         }
@@ -1610,13 +1626,8 @@
         
         // Group events by month
         const eventsByMonth = {};
-        let count = 0;
         
-        querySnapshot.forEach((doc) => {
-          if (count >= 10) return; // Max 10 events
-          
-          const event = doc.data();
-          const eventDate = new Date(event.date);
+        events.forEach(({ id, data: event, date: eventDate }) => {
           const monthKey = `${eventDate.getFullYear()}-${eventDate.getMonth()}`;
           const monthName = monthNames[eventDate.getMonth()];
           
@@ -1628,8 +1639,7 @@
             };
           }
           
-          eventsByMonth[monthKey].events.push({ id: doc.id, data: event, date: eventDate });
-          count++;
+          eventsByMonth[monthKey].events.push({ id, data: event, date: eventDate });
         });
         
         // Display events grouped by month
@@ -1695,12 +1705,8 @@
       
       try {
         const today = new Date().toISOString().split('T')[0];
-        const q = query(
-          collection(db, 'events'), 
-          where('date', '>=', today),
-          orderBy('date', 'asc')
-        );
-        const querySnapshot = await getDocs(q);
+        // Simple query without filters - get all events and filter in JavaScript
+        const querySnapshot = await getDocs(collection(db, 'events'));
         
         if (querySnapshot.empty) {
           const emptyMessage = '<p style="color: #999; text-align: center;">Aktuell keine kommenden Veranstaltungen.</p>';
@@ -1712,12 +1718,29 @@
         const monthNames = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 
                            'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
         
+        // Filter and sort events in JavaScript
+        const allEvents = [];
+        querySnapshot.forEach((doc) => {
+          const event = doc.data();
+          if (event.date >= today) {
+            allEvents.push({ id: doc.id, data: event, date: new Date(event.date) });
+          }
+        });
+        
+        // Sort by date
+        allEvents.sort((a, b) => a.date - b.date);
+        
+        if (allEvents.length === 0) {
+          const emptyMessage = '<p style="color: #999; text-align: center;">Aktuell keine kommenden Veranstaltungen.</p>';
+          if (eventsListPage) eventsListPage.innerHTML = emptyMessage;
+          if (eventsListKommende) eventsListKommende.innerHTML = emptyMessage;
+          return;
+        }
+        
         // Group events by month
         const eventsByMonth = {};
         
-        querySnapshot.forEach((doc) => {
-          const event = doc.data();
-          const eventDate = new Date(event.date);
+        allEvents.forEach(({ id, data: event, date: eventDate }) => {
           const monthKey = `${eventDate.getFullYear()}-${eventDate.getMonth()}`;
           const monthName = monthNames[eventDate.getMonth()];
           
