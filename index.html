@@ -1593,23 +1593,31 @@
       const eventsList = document.getElementById('events-list');
       
       try {
+        console.log('Loading events from Firestore...');
         // Simple query without filters - get all events and filter in JavaScript
         const querySnapshot = await getDocs(collection(db, 'events'));
         
+        console.log('Total events in database:', querySnapshot.size);
+        
         if (querySnapshot.empty) {
+          console.log('No events found in database');
           eventsList.innerHTML = '<p style="color: #999; text-align: center;">Aktuell keine kommenden Veranstaltungen.</p>';
           return;
         }
 
         const today = new Date().toISOString().split('T')[0];
+        console.log('Today:', today);
         const allEvents = [];
         
         querySnapshot.forEach((doc) => {
           const event = doc.data();
+          console.log('Event:', event.title, 'Date:', event.date, 'Future?', event.date >= today);
           if (event.date >= today) {
             allEvents.push({ id: doc.id, data: event, date: new Date(event.date) });
           }
         });
+        
+        console.log('Future events:', allEvents.length);
         
         // Sort by date
         allEvents.sort((a, b) => a.date - b.date);
@@ -1618,10 +1626,12 @@
         const events = allEvents.slice(0, 10);
         
         if (events.length === 0) {
+          console.log('No future events found');
           eventsList.innerHTML = '<p style="color: #999; text-align: center;">Aktuell keine kommenden Veranstaltungen.</p>';
           return;
         }
 
+        console.log('Displaying', events.length, 'events');
         eventsList.innerHTML = '';
         const monthNames = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 
                            'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
@@ -1678,6 +1688,27 @@
               ${event.cancelled ? '<div style="color: #ff5252; font-weight: bold; margin-bottom: 0.5rem;">❌ ABGESAGT</div>' : ''}
               <div style="color: #4CAF50; font-weight: bold; margin-bottom: 0.3rem;">
                 📅 ${eventDate.getDate()}.${(eventDate.getMonth() + 1).toString().padStart(2, '0')}.${eventDate.getFullYear()}
+                ${event.time ? ` um ${event.time} Uhr` : ''}
+              </div>
+              <h4 style="color: #ffffff; margin: 0.3rem 0;">${event.title}</h4>
+              ${event.description ? `<p style="margin: 0.3rem 0; font-size: 0.9rem; color: #e0e0e0;">${event.description}</p>` : ''}
+              ${event.registrationRequired ? `
+                <p style="margin: 0.5rem 0 0.3rem 0; font-size: 0.85rem; color: #ffa726;">⚠️ Anmeldung erforderlich</p>
+                <button onclick="openRegistrationModal()" style="background: linear-gradient(135deg, #1a472a 0%, #2d5a3d 100%); color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-size: 0.85rem; margin-top: 0.5rem;">
+                  Jetzt anmelden
+                </button>
+              ` : ''}
+            `;
+            
+            eventsList.appendChild(eventDiv);
+          });
+        });
+      } catch (error) {
+        console.error('Error loading events:', error);
+        console.error('Error details:', error.message, error.code);
+        eventsList.innerHTML = `<p style="color: #c62828; text-align: center;">Fehler beim Laden der Veranstaltungen.</p><p style="color: #999; text-align: center; font-size: 0.8rem;">${error.message || 'Unbekannter Fehler'}</p>`;
+      }
+    }
                 ${event.time ? ` um ${event.time} Uhr` : ''}
               </div>
               <h4 style="color: #ffffff; margin: 0.3rem 0;">${event.title}</h4>
