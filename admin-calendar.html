@@ -2,7 +2,10 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <title>Kalender-Verwaltung</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -34,6 +37,110 @@
     .chat-message.completed { border-left-color: #4CAF50; opacity: 0.7; }
     .btn-delete-assignment { position: absolute; top: 5px; right: 5px; background: #c62828; color: white; border: none; width: 22px; height: 22px; border-radius: 50%; cursor: pointer; font-size: 0.9rem; line-height: 1; opacity: 0.8; transition: all 0.2s; z-index: 10; }
     .btn-delete-assignment:hover { opacity: 1; transform: scale(1.1); box-shadow: 0 2px 8px rgba(198, 40, 40, 0.5); }
+    .calendar-header-day { background: #1a472a; color: white; padding: 0.8rem; text-align: center; font-weight: 600; }
+
+    /* Responsive Layout */
+    @media (max-width: 1024px) {
+      .dashboard-grid { 
+        grid-template-columns: 1fr; 
+        gap: 1.5rem; 
+      }
+      .chat-section { 
+        position: static; 
+        max-height: none; 
+      }
+      .calendar-section {
+        padding: 1rem;
+      }
+      .calendar-day {
+        min-height: 80px;
+        padding: 0.3rem;
+        font-size: 0.75rem;
+      }
+      .assigned-person {
+        font-size: 0.75rem;
+        padding: 0.3rem;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 0;
+        max-width: 100vw;
+        margin: 0;
+        overflow-x: hidden;
+      }
+      .calendar-section {
+        padding: 0.2rem;
+        overflow-x: hidden;
+        margin: 0;
+        border-radius: 0;
+        width: 100vw;
+      }
+      .calendar-grid {
+        width: 100%;
+        gap: 0;
+        font-size: 0.5rem;
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+      }
+      .calendar-header-day {
+        padding: 0.2rem 0;
+        font-size: 0.55rem;
+        font-weight: 600;
+        overflow: hidden;
+      }
+      .calendar-day {
+        min-height: 45px;
+        max-height: 45px;
+        padding: 0.1rem;
+        font-size: 0.5rem;
+        border: 1px solid #1a1a1a;
+        overflow: hidden;
+      }
+      .person-cards {
+        gap: 0.3rem;
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        padding: 0.3rem;
+        margin: 0;
+      }
+      .person-card {
+        padding: 0.3rem 0.5rem;
+        font-size: 0.7rem;
+        white-space: nowrap;
+      }
+      h2 {
+        font-size: 1rem;
+        padding: 0.3rem;
+      }
+      .assigned-person {
+        font-size: 0.5rem;
+        padding: 0.1rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        line-height: 1.1;
+      }
+      .btn {
+        font-size: 0.7rem;
+        padding: 0.3rem 0.5rem;
+        margin: 0.3rem;
+      }
+      .chat-section {
+        margin: 0.5rem 0.2rem;
+        padding: 0.5rem;
+      }
+      h3 {
+        font-size: 0.9rem !important;
+        min-width: 120px !important;
+      }
+      .btn-delete-assignment {
+        width: 18px;
+        height: 18px;
+        font-size: 0.7rem;
+      }
+    }
   </style>
 </head>
 <body>
@@ -367,7 +474,10 @@
       // Header mit Wochentagen (Mo-So)
       ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'].forEach(d => { 
         const h = document.createElement('div'); 
-        h.style.cssText = 'background: #1a472a; color: white; padding: 0.8rem; text-align: center; font-weight: 600;'; 
+        h.className = 'calendar-header-day';
+        // Responsive inline styles
+        const isMobile = window.innerWidth <= 768;
+        h.style.cssText = `background: #1a472a; color: white; padding: ${isMobile ? '0.2rem 0' : '0.8rem'}; text-align: center; font-weight: 600; font-size: ${isMobile ? '0.55rem' : '1rem'}; overflow: hidden;`; 
         h.textContent = d; 
         cal.appendChild(h); 
       });
