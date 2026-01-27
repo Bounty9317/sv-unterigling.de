@@ -236,28 +236,51 @@
     @media (max-width: 768px) {
       .container {
         padding: 0 0.5rem;
+        max-width: 100%;
       }
       .calendar-section {
         padding: 0.5rem;
         overflow-x: auto;
+        margin: 0 -0.5rem;
       }
       .calendar-grid {
-        min-width: 600px;
+        min-width: 100%;
+        max-width: 100%;
+        font-size: 0.65rem;
       }
       .calendar-day {
-        min-height: 70px;
+        min-height: 60px;
         padding: 0.2rem;
+        font-size: 0.65rem;
+      }
+      .calendar-day .day-number {
         font-size: 0.7rem;
+        margin-bottom: 0.2rem;
       }
       .person-cards {
         gap: 0.5rem;
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        padding-bottom: 0.5rem;
       }
       .person-card {
         padding: 0.5rem 0.8rem;
-        font-size: 0.85rem;
+        font-size: 0.8rem;
+        white-space: nowrap;
       }
       h2 {
-        font-size: 1.3rem;
+        font-size: 1.2rem;
+      }
+      .assigned-person {
+        font-size: 0.65rem;
+        padding: 0.2rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .btn {
+        font-size: 0.85rem;
+        padding: 0.5rem 0.8rem;
       }
     }
     .btn-approve { background: #4CAF50; color: white; border: none; padding: 0.4rem 0.8rem; border-radius: 4px; cursor: pointer; margin-right: 0.5rem; }
