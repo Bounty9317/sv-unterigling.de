@@ -246,7 +246,52 @@ export const adminUnapproveImages = onRequest(
 );
 
 /**
- * (D) Public: Freigegebene Bilder für ein Event
+ * (D) Public: Liste aller Event-Ordner
+ * GET /listEventFolders
+ */
+export const listEventFolders = onRequest(
+  {
+    region: "europe-west1",
+    secrets: [CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET],
+  },
+  (req, res) => {
+    cors(req, res, async () => {
+      try {
+        // Nur GET erlaubt
+        if (req.method !== "GET") {
+          res.status(405).json({error: "Method not allowed"});
+          return;
+        }
+
+        // Cloudinary konfigurieren
+        configureCloudinary();
+
+        // Liste alle Ordner unter "events/"
+        const result = await cloudinary.api.sub_folders("events");
+
+        // Formatiere Response
+        const folders = result.folders.map((folder: any) => ({
+          name: folder.name,
+          path: folder.path,
+        }));
+
+        res.status(200).json({
+          success: true,
+          total: folders.length,
+          folders,
+        });
+      } catch (error: any) {
+        console.error("Error in listEventFolders:", error);
+        res.status(500).json({
+          error: error.message || "Internal server error",
+        });
+      }
+    });
+  }
+);
+
+/**
+ * (E) Public: Freigegebene Bilder für ein Event
  * GET /publicApprovedImages?event=<eventSlug>
  */
 export const publicApprovedImages = onRequest(
