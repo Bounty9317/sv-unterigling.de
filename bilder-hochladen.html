@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bilder hochladen - Schützenverein Unterigling</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #1a1a1a;
+      color: #e0e0e0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background: linear-gradient(135deg, #1a472a 0%, #2d5a3d 100%);
+      color: white;
+      padding: 1.5rem 2rem;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .logo h1 {
+      font-size: 1.8rem;
+      font-weight: bold;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 3rem auto;
+      padding: 0 2rem;
+      flex: 1;
+    }
+
+    .card {
+      background: #2a2a2a;
+      padding: 3rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+
+    h2 {
+      color: #4CAF50;
+      margin-bottom: 1.5rem;
+      font-size: 2rem;
+    }
+
+    p {
+      color: #d0d0d0;
+      margin-bottom: 1.5rem;
+      line-height: 1.6;
+    }
+
+    .form-group {
+      margin-bottom: 2rem;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      color: #4CAF50;
+    }
+
+    select {
+      width: 100%;
+      padding: 1rem;
+      background: #1a1a1a;
+      border: 2px solid #2d5a3d;
+      border-radius: 6px;
+      color: white;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    select:focus {
+      outline: none;
+      border-color: #4CAF50;
+    }
+
+    .upload-btn {
+      background: linear-gradient(135deg, #1a472a 0%, #2d5a3d 100%);
+      color: white;
+      border: none;
+      padding: 1.2rem 2rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1.1rem;
+      font-weight: 600;
+      width: 100%;
+      transition: transform 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .upload-btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .upload-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .info-box {
+      background: rgba(76, 175, 80, 0.1);
+      border-left: 4px solid #4CAF50;
+      padding: 1.5rem;
+      border-radius: 6px;
+      margin-bottom: 2rem;
+    }
+
+    .info-box h3 {
+      color: #4CAF50;
+      margin-bottom: 0.5rem;
+    }
+
+    .info-box ul {
+      margin-left: 1.5rem;
+      color: #d0d0d0;
+    }
+
+    .info-box li {
+      margin-bottom: 0.5rem;
+    }
+
+    .success-message {
+      background: rgba(76, 175, 80, 0.2);
+      border: 2px solid #4CAF50;
+      padding: 1rem;
+      border-radius: 6px;
+      margin-top: 1rem;
+      display: none;
+      color: #4CAF50;
+      font-weight: 600;
+    }
+
+    footer {
+      background: #1a472a;
+      color: white;
+      text-align: center;
+      padding: 2rem;
+      margin-top: 4rem;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 0 1rem;
+        margin: 2rem auto;
+      }
+
+      .card {
+        padding: 2rem 1.5rem;
+      }
+
+      h2 {
+        font-size: 1.5rem;
+      }
+
+      .logo h1 {
+        font-size: 1.2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">
+      <img src="logo.png" alt="Schützenverein Logo" style="height: 60px; width: auto;">
+      <h1>Schützenverein Unterigling e.V.</h1>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="card">
+      <h2>📸 Bilder hochladen</h2>
+      
+      <p>Teile deine Bilder von unseren Veranstaltungen! Der Vorstand wird die Bilder prüfen und für die Galerie freigeben.</p>
+
+      <div class="info-box">
+        <h3>ℹ️ Hinweise:</h3>
+        <ul>
+          <li>Wähle zuerst die Veranstaltung aus</li>
+          <li>Du kannst mehrere Bilder gleichzeitig hochladen</li>
+          <li>Erlaubte Formate: JPG, PNG, GIF</li>
+          <li>Maximale Dateigröße: 10 MB pro Bild</li>
+          <li>Die Bilder werden nach Prüfung durch den Vorstand in der Galerie angezeigt</li>
+        </ul>
+      </div>
+
+      <div class="form-group">
+        <label for="event-select">Veranstaltung auswählen:</label>
+        <select id="event-select">
+          <option value="">-- Bitte wählen --</option>
+          <option value="fasching-2026">Fasching 2026</option>
+          <option value="koenigschiessen-2025">Königsschießen 2025</option>
+          <option value="sommerfest-2025">Sommerfest 2025</option>
+        </select>
+      </div>
+
+      <button id="upload-btn" class="upload-btn" disabled>
+        📤 Bilder auswählen und hochladen
+      </button>
+
+      <div id="success-message" class="success-message">
+        ✅ Bilder erfolgreich hochgeladen! Der Vorstand wird sie prüfen und freigeben.
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <p>&copy; 2025 Schützenverein Unterigling e.V. - Alle Rechte vorbehalten</p>
+  </footer>
+
+  <!-- Cloudinary Upload Widget -->
+  <script src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript"></script>
+  
+  <script>
+    const eventSelect = document.getElementById('event-select');
+    const uploadBtn = document.getElementById('upload-btn');
+    const successMessage = document.getElementById('success-message');
+
+    let selectedEvent = '';
+    let uploadWidget = null;
+
+    // Event-Auswahl
+    eventSelect.addEventListener('change', (e) => {
+      selectedEvent = e.target.value;
+      uploadBtn.disabled = !selectedEvent;
+      successMessage.style.display = 'none';
+    });
+
+    // Cloudinary Upload Widget initialisieren
+    uploadBtn.addEventListener('click', () => {
+      if (!selectedEvent) {
+        alert('Bitte wähle zuerst eine Veranstaltung aus!');
+        return;
+      }
+
+      // Widget erstellen (nur einmal)
+      if (!uploadWidget) {
+        uploadWidget = cloudinary.createUploadWidget({
+          cloudName: 'dk88ltcce',
+          uploadPreset: 'schuetzenverein_events',
+          folder: `events/${selectedEvent}`,
+          sources: ['local', 'camera'],
+          multiple: true,
+          maxFiles: 20,
+          maxFileSize: 10000000, // 10 MB
+          clientAllowedFormats: ['jpg', 'jpeg', 'png', 'gif'],
+          language: 'de',
+          text: {
+            de: {
+              or: 'oder',
+              back: 'Zurück',
+              advanced: 'Erweitert',
+              close: 'Schließen',
+              no_results: 'Keine Ergebnisse',
+              search_placeholder: 'Suchen...',
+              about_uw: 'Über Upload Widget',
+              menu: {
+                files: 'Meine Dateien',
+                web: 'Web-Adresse',
+                camera: 'Kamera'
+              },
+              local: {
+                browse: 'Durchsuchen',
+                dd_title_single: 'Ziehe ein Bild hierher',
+                dd_title_multi: 'Ziehe Bilder hierher',
+                drop_title_single: 'Loslassen zum Hochladen',
+                drop_title_multiple: 'Loslassen zum Hochladen'
+              },
+              camera: {
+                capture: 'Foto aufnehmen',
+                cancel: 'Abbrechen',
+                take_pic: 'Foto aufnehmen und hochladen',
+                explanation: 'Stelle sicher, dass deine Kamera angeschlossen und aktiviert ist.',
+                camera_error: 'Kamera-Fehler',
+                retry: 'Kamera-Berechtigungen erneut anfordern',
+                file_name: 'Kamera_{{time}}'
+              }
+            }
+          },
+          styles: {
+            palette: {
+              window: '#2a2a2a',
+              windowBorder: '#2d5a3d',
+              tabIcon: '#4CAF50',
+              menuIcons: '#4CAF50',
+              textDark: '#e0e0e0',
+              textLight: '#ffffff',
+              link: '#4CAF50',
+              action: '#2d5a3d',
+              inactiveTabIcon: '#999',
+              error: '#c62828',
+              inProgress: '#4CAF50',
+              complete: '#4CAF50',
+              sourceBg: '#1a1a1a'
+            },
+            fonts: {
+              default: null,
+              "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif": {
+                url: null,
+                active: true
+              }
+            }
+          }
+        }, (error, result) => {
+          if (!error && result && result.event === "success") {
+            console.log('Upload erfolgreich:', result.info);
+          }
+          
+          if (result && result.event === "close") {
+            // Widget geschlossen - prüfe ob Uploads erfolgreich waren
+            if (result.info && result.info.files && result.info.files.length > 0) {
+              successMessage.style.display = 'block';
+              setTimeout(() => {
+                successMessage.style.display = 'none';
+              }, 5000);
+            }
+          }
+        });
+      }
+
+      // Ordner für aktuelles Event setzen
+      uploadWidget.update({
+        folder: `events/${selectedEvent}`
+      });
+
+      // Widget öffnen
+      uploadWidget.open();
+    });
+  </script>
+</body>
+</html>

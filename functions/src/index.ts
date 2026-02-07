@@ -20,11 +20,14 @@ const CLOUDINARY_CLOUD_NAME = defineSecret("CLOUDINARY_CLOUD_NAME");
 const CLOUDINARY_API_KEY = defineSecret("CLOUDINARY_API_KEY");
 const CLOUDINARY_API_SECRET = defineSecret("CLOUDINARY_API_SECRET");
 
+// Export Admin Claim Function
+export {setAdminClaimByUid} from "./setAdminClaimFunction";
+
 // Cloudinary Configuration aus Firebase Secrets
 const configureCloudinary = () => {
-  const cloudName = CLOUDINARY_CLOUD_NAME.value();
-  const apiKey = CLOUDINARY_API_KEY.value();
-  const apiSecret = CLOUDINARY_API_SECRET.value();
+  const cloudName = CLOUDINARY_CLOUD_NAME.value()?.trim();
+  const apiKey = CLOUDINARY_API_KEY.value()?.trim();
+  const apiSecret = CLOUDINARY_API_SECRET.value()?.trim();
 
   if (!cloudName || !apiKey || !apiSecret) {
     throw new Error("Cloudinary credentials not configured");
@@ -94,8 +97,9 @@ export const adminListImages = onRequest(
         // Cloudinary konfigurieren
         configureCloudinary();
 
-        // Suche nach Bildern mit event_<eventSlug> Tag
-        const searchExpression = `tags:event_${eventSlug} AND resource_type:image`;
+        // Suche nach Bildern im Ordner events/<eventSlug> ODER mit Tag event_<eventSlug>
+        const folderPath = `events/${eventSlug}`;
+        const searchExpression = `(folder:${folderPath} OR tags:event_${eventSlug}) AND resource_type:image`;
 
         const result = await cloudinary.search
           .expression(searchExpression)
@@ -269,9 +273,10 @@ export const publicApprovedImages = onRequest(
         // Cloudinary konfigurieren
         configureCloudinary();
 
-        // Suche nur nach freigegebenen Bildern
+        // Suche nur nach freigegebenen Bildern im Ordner oder mit Tags
+        const folderPath = `events/${eventSlug}`;
         const searchExpression =
-          `tags:event_${eventSlug} AND tags:approved AND resource_type:image`;
+          `(folder:${folderPath} OR tags:event_${eventSlug}) AND tags:approved AND resource_type:image`;
 
         const result = await cloudinary.search
           .expression(searchExpression)

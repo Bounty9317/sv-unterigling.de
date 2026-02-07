@@ -433,6 +433,64 @@
     .btn-add:hover {
       background: #45a049;
     }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    .admin-gallery-item {
+      position: relative;
+      aspect-ratio: 1;
+      overflow: hidden;
+      border-radius: 8px;
+      background: #1a1a1a;
+      border: 3px solid transparent;
+      transition: all 0.3s;
+    }
+    
+    .admin-gallery-item.selected {
+      border-color: #4CAF50;
+      box-shadow: 0 0 15px rgba(76, 175, 80, 0.5);
+    }
+    
+    .admin-gallery-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      cursor: pointer;
+    }
+    
+    .admin-gallery-item-checkbox {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      width: 30px;
+      height: 30px;
+      cursor: pointer;
+      z-index: 10;
+      accent-color: #4CAF50;
+    }
+    
+    .admin-gallery-item-status {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(0,0,0,0.8);
+      color: white;
+      padding: 0.5rem 0.8rem;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      z-index: 10;
+    }
+    
+    .admin-gallery-item-status.approved {
+      background: rgba(76, 175, 80, 0.9);
+    }
+    
+    .admin-gallery-item-status.pending {
+      background: rgba(255, 152, 0, 0.9);
+    }
   </style>
 </head>
 <body>
@@ -453,6 +511,7 @@
         <li><a href="index.html">🏠 Startseite</a></li>
         <li><a href="#" onclick="showTab('events')">📅 Veranstaltungen</a></li>
         <li><a href="#" onclick="showTab('protocols')">📋 Protokolle</a></li>
+        <li><a href="#" onclick="showTab('galerie')">📸 Galerie</a></li>
         <li><a href="#" onclick="showTab('wirte')">🍺 Wirte</a></li>
         <li><a href="#" onclick="showTab('aufsicht')">🎯 Schießaufsicht</a></li>
         <li><a href="#" id="winter-mode-btn" style="color: #4CAF50;">❄️ Wintermodus</a></li>
@@ -485,6 +544,53 @@
         <button class="btn-primary" onclick="window.location.href='admin-protocols.html'">
           Protokoll hochladen
         </button>
+      </div>
+    </div>
+
+    <!-- Galerie Tab -->
+    <div id="galerie-tab" class="tab-content">
+      <div class="card">
+        <h2>📸 Galerie verwalten</h2>
+        
+        <p style="margin-bottom: 2rem; color: #d0d0d0;">Hier kannst du Bilder von Veranstaltungen freigeben oder die Freigabe entfernen.</p>
+
+        <!-- Event Auswahl -->
+        <div style="margin-bottom: 2rem;">
+          <label for="admin-event-select" style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #4CAF50;">Veranstaltung auswählen:</label>
+          <select id="admin-event-select" onchange="loadAdminGalleryImages()" style="width: 100%; max-width: 400px; padding: 0.8rem; background: #1a1a1a; color: white; border: 2px solid #2d5a3d; border-radius: 6px; font-size: 1rem;">
+            <option value="">-- Bitte wählen --</option>
+            <option value="fasching-2026">Fasching 2026</option>
+            <option value="koenigschiessen-2025">Königsschießen 2025</option>
+            <option value="sommerfest-2025">Sommerfest 2025</option>
+          </select>
+        </div>
+
+        <!-- Action Buttons -->
+        <div id="admin-gallery-actions" style="display: none; margin-bottom: 2rem; display: flex; gap: 1rem; flex-wrap: wrap;">
+          <button onclick="approveSelectedImages()" style="background: #4CAF50; color: white; border: none; padding: 0.8rem 1.5rem; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 1rem;">
+            ✅ Ausgewählte freigeben
+          </button>
+          <button onclick="unapproveSelectedImages()" style="background: #ff9800; color: white; border: none; padding: 0.8rem 1.5rem; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 1rem;">
+            ❌ Freigabe entfernen
+          </button>
+          <button onclick="selectAllImages()" style="background: #2196F3; color: white; border: none; padding: 0.8rem 1.5rem; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 1rem;">
+            ☑️ Alle auswählen
+          </button>
+          <button onclick="deselectAllImages()" style="background: #757575; color: white; border: none; padding: 0.8rem 1.5rem; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 1rem;">
+            ☐ Alle abwählen
+          </button>
+        </div>
+
+        <!-- Loading Indicator -->
+        <div id="admin-gallery-loading" style="display: none; text-align: center; padding: 3rem;">
+          <div style="display: inline-block; width: 50px; height: 50px; border: 5px solid #2d5a3d; border-top-color: #4CAF50; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+          <p style="margin-top: 1rem; color: #4CAF50;">Lade Bilder...</p>
+        </div>
+
+        <!-- Gallery Grid -->
+        <div id="admin-gallery-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1.5rem; margin-top: 2rem;">
+          <p style="color: #999; text-align: center; grid-column: 1 / -1;">Bitte wähle eine Veranstaltung aus.</p>
+        </div>
       </div>
     </div>
 
@@ -865,6 +971,200 @@
 
     // Load events when page loads
     loadDashboardEvents();
+
+    // Admin Gallery Functions
+    let adminGalleryImages = [];
+    let selectedImageIds = new Set();
+
+    window.loadAdminGalleryImages = async () => {
+      const eventSlug = document.getElementById('admin-event-select').value;
+      const grid = document.getElementById('admin-gallery-grid');
+      const loading = document.getElementById('admin-gallery-loading');
+      const actions = document.getElementById('admin-gallery-actions');
+
+      if (!eventSlug) {
+        grid.innerHTML = '<p style="color: #999; text-align: center; grid-column: 1 / -1;">Bitte wähle eine Veranstaltung aus.</p>';
+        actions.style.display = 'none';
+        return;
+      }
+
+      loading.style.display = 'block';
+      grid.innerHTML = '';
+      actions.style.display = 'none';
+      selectedImageIds.clear();
+
+      try {
+        // Check if user is logged in
+        if (!auth.currentUser) {
+          throw new Error('Nicht eingeloggt');
+        }
+        
+        const token = await auth.currentUser.getIdToken(true);
+        const response = await fetch(
+          `https://europe-west1-schuetzenverein-12cfa.cloudfunctions.net/adminListImages?event=${eventSlug}`,
+          {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        adminGalleryImages = data.images || [];
+
+        loading.style.display = 'none';
+
+        if (adminGalleryImages.length === 0) {
+          grid.innerHTML = '<p style="color: #999; text-align: center; grid-column: 1 / -1;">Keine Bilder für diese Veranstaltung gefunden.</p>';
+          return;
+        }
+
+        actions.style.display = 'flex';
+        renderAdminGallery();
+      } catch (error) {
+        console.error('Error loading admin gallery:', error);
+        loading.style.display = 'none';
+        grid.innerHTML = `<p style="color: #c62828; text-align: center; grid-column: 1 / -1;">Fehler beim Laden der Bilder: ${error.message}</p>`;
+      }
+    };
+
+    function renderAdminGallery() {
+      const grid = document.getElementById('admin-gallery-grid');
+      grid.innerHTML = adminGalleryImages.map((img, index) => {
+        const isApproved = img.approved || false;
+        const isSelected = selectedImageIds.has(img.public_id);
+        
+        return `
+          <div class="admin-gallery-item ${isSelected ? 'selected' : ''}" data-public-id="${img.public_id}">
+            <input 
+              type="checkbox" 
+              class="admin-gallery-item-checkbox" 
+              ${isSelected ? 'checked' : ''}
+              onchange="toggleImageSelection('${img.public_id}')"
+            >
+            <div class="admin-gallery-item-status ${isApproved ? 'approved' : 'pending'}">
+              ${isApproved ? '✅ Freigegeben' : '⏳ Ausstehend'}
+            </div>
+            <img src="${img.secure_url}" alt="${img.public_id}" loading="lazy">
+          </div>
+        `;
+      }).join('');
+    }
+
+    window.toggleImageSelection = (publicId) => {
+      if (selectedImageIds.has(publicId)) {
+        selectedImageIds.delete(publicId);
+      } else {
+        selectedImageIds.add(publicId);
+      }
+      renderAdminGallery();
+    };
+
+    window.selectAllImages = () => {
+      adminGalleryImages.forEach(img => selectedImageIds.add(img.public_id));
+      renderAdminGallery();
+    };
+
+    window.deselectAllImages = () => {
+      selectedImageIds.clear();
+      renderAdminGallery();
+    };
+
+    window.approveSelectedImages = async () => {
+      if (selectedImageIds.size === 0) {
+        alert('Bitte wähle mindestens ein Bild aus.');
+        return;
+      }
+
+      if (!confirm(`Möchtest du ${selectedImageIds.size} Bild(er) freigeben?`)) {
+        return;
+      }
+
+      try {
+        // Check if user is logged in
+        if (!auth.currentUser) {
+          throw new Error('Nicht eingeloggt');
+        }
+        
+        const token = await auth.currentUser.getIdToken(true);
+        const response = await fetch(
+          'https://europe-west1-schuetzenverein-12cfa.cloudfunctions.net/adminApproveImages',
+          {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              publicIds: Array.from(selectedImageIds)
+            })
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        alert(`✅ ${data.approved} Bild(er) erfolgreich freigegeben!`);
+        
+        // Reload gallery
+        await loadAdminGalleryImages();
+      } catch (error) {
+        console.error('Error approving images:', error);
+        alert(`Fehler beim Freigeben: ${error.message}`);
+      }
+    };
+
+    window.unapproveSelectedImages = async () => {
+      if (selectedImageIds.size === 0) {
+        alert('Bitte wähle mindestens ein Bild aus.');
+        return;
+      }
+
+      if (!confirm(`Möchtest du die Freigabe von ${selectedImageIds.size} Bild(ern) entfernen?`)) {
+        return;
+      }
+
+      try {
+        // Check if user is logged in
+        if (!auth.currentUser) {
+          throw new Error('Nicht eingeloggt');
+        }
+        
+        const token = await auth.currentUser.getIdToken(true);
+        const response = await fetch(
+          'https://europe-west1-schuetzenverein-12cfa.cloudfunctions.net/adminUnapproveImages',
+          {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              publicIds: Array.from(selectedImageIds)
+            })
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        alert(`✅ Freigabe von ${data.unapproved} Bild(ern) erfolgreich entfernt!`);
+        
+        // Reload gallery
+        await loadAdminGalleryImages();
+      } catch (error) {
+        console.error('Error unapproving images:', error);
+        alert(`Fehler beim Entfernen der Freigabe: ${error.message}`);
+      }
+    };
   </script>
 </body>
 </html>
