@@ -266,13 +266,27 @@ export const listEventFolders = onRequest(
         // Cloudinary konfigurieren
         configureCloudinary();
 
-        // Liste alle Ordner unter "events/"
-        const result = await cloudinary.api.sub_folders("events");
+        // Suche nach allen Bildern und extrahiere unique Ordner
+        const result = await cloudinary.search
+          .expression("folder:events/* AND resource_type:image")
+          .max_results(500)
+          .execute();
 
-        // Formatiere Response
-        const folders = result.folders.map((folder: any) => ({
-          name: folder.name,
-          path: folder.path,
+        // Extrahiere unique Ordnernamen
+        const folderSet = new Set<string>();
+        result.resources.forEach((resource: any) => {
+          // Extrahiere Ordnername aus dem asset_folder oder folder
+          const folder = resource.asset_folder || resource.folder;
+          if (folder && folder.startsWith("events/")) {
+            // Entferne "events/" Präfix
+            const eventName = folder.replace("events/", "");
+            folderSet.add(eventName);
+          }
+        });
+
+        const folders = Array.from(folderSet).map((name) => ({
+          name,
+          path: `events/${name}`,
         }));
 
         res.status(200).json({
