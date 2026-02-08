@@ -340,13 +340,25 @@ export const listEventFolders = onRequest(
           console.log("No images found in Cloudinary account!");
         }
 
-        // Extrahiere unique Ordnernamen aus public_id
+        // Extrahiere unique Ordnernamen aus public_id UND asset_folder
         const folderSet = new Set<string>();
         result.resources.forEach((resource: any) => {
           const publicId = resource.public_id;
-          console.log(`Processing: ${publicId}`);
+          const assetFolder = resource.asset_folder;
+          
+          console.log(`Processing: ${publicId} (asset_folder: ${assetFolder || 'none'})`);
 
-          // Extrahiere Ordner aus public_id
+          // Priorität 1: Verwende asset_folder wenn vorhanden
+          if (assetFolder && assetFolder.startsWith("events/")) {
+            const eventName = assetFolder.replace("events/", "");
+            if (eventName) {
+              console.log(`  -> Found event from asset_folder: ${eventName}`);
+              folderSet.add(eventName);
+              return; // Weiter mit nächstem Bild
+            }
+          }
+
+          // Priorität 2: Extrahiere Ordner aus public_id
           // Format kann sein: "events/Fasching 2026/image" oder "Fasching 2026/image"
           if (publicId.includes("/")) {
             const parts = publicId.split("/");
