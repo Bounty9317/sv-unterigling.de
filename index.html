@@ -1247,23 +1247,24 @@
         </p>
       </div>
 
-      <!-- Event Auswahl -->
-      <div style="margin-bottom: 2rem;">
-        <label for="event-select" style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #4CAF50;">Veranstaltung auswählen:</label>
-        <select id="event-select" onchange="loadGalleryImages()" style="width: 100%; max-width: 400px; padding: 0.8rem; background: #2a2a2a; color: white; border: 2px solid #2d5a3d; border-radius: 6px; font-size: 1rem;">
-          <option value="">-- Lade Veranstaltungen... --</option>
-        </select>
-      </div>
+      <!-- Back Button (hidden by default) -->
+      <button id="back-to-folders-btn" onclick="showEventFolders()" style="display: none; background: #2d5a3d; color: white; border: none; padding: 0.8rem 1.5rem; border-radius: 6px; cursor: pointer; font-weight: 600; margin-bottom: 2rem; font-size: 1rem;">
+        ← Zurück zur Übersicht
+      </button>
 
       <!-- Loading Indicator -->
       <div id="gallery-loading" style="display: none; text-align: center; padding: 3rem;">
         <div style="display: inline-block; width: 50px; height: 50px; border: 5px solid #2d5a3d; border-top-color: #4CAF50; border-radius: 50%; animation: spin 1s linear infinite;"></div>
-        <p style="margin-top: 1rem; color: #4CAF50;">Lade Bilder...</p>
+        <p style="margin-top: 1rem; color: #4CAF50;">Lade...</p>
       </div>
 
-      <!-- Gallery Grid -->
-      <div id="gallery-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1.5rem; margin-top: 2rem;">
-        <p style="color: #999; text-align: center; grid-column: 1 / -1;">Bitte wähle eine Veranstaltung aus.</p>
+      <!-- Event Folders Grid -->
+      <div id="event-folders-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 2rem; margin-top: 2rem;">
+        <p style="color: #999; text-align: center; grid-column: 1 / -1;">Lade Veranstaltungen...</p>
+      </div>
+
+      <!-- Gallery Grid (hidden by default) -->
+      <div id="gallery-grid" style="display: none; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1.5rem; margin-top: 2rem;">
       </div>
 
       <!-- Lightbox -->
@@ -1279,6 +1280,42 @@
     <style>
       @keyframes spin {
         to { transform: rotate(360deg); }
+      }
+      
+      .event-folder {
+        background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
+        border-radius: 12px;
+        padding: 2rem;
+        cursor: pointer;
+        transition: all 0.3s;
+        border: 2px solid #2d5a3d;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+      }
+      
+      .event-folder:hover {
+        transform: translateY(-5px);
+        border-color: #4CAF50;
+        box-shadow: 0 8px 20px rgba(76, 175, 80, 0.3);
+      }
+      
+      .event-folder-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        display: block;
+      }
+      
+      .event-folder-name {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: #4CAF50;
+        margin-bottom: 0.5rem;
+      }
+      
+      .event-folder-count {
+        font-size: 0.9rem;
+        color: #999;
       }
       
       .gallery-item {
@@ -1865,10 +1902,15 @@
     // Gallery Functions
     let currentGalleryImages = [];
     let currentImageIndex = 0;
+    let allEventFolders = [];
 
-    // Lade Event-Ordner aus Cloudinary
+    // Lade Event-Ordner aus Cloudinary und zeige sie als Kacheln
     async function loadEventFolders() {
-      const eventSelect = document.getElementById('event-select');
+      const foldersGrid = document.getElementById('event-folders-grid');
+      const loading = document.getElementById('gallery-loading');
+      
+      loading.style.display = 'block';
+      foldersGrid.innerHTML = '';
       
       try {
         const response = await fetch(
@@ -1876,44 +1918,81 @@
         );
         
         const data = await response.json();
+        loading.style.display = 'none';
         
         if (data.success && data.folders.length > 0) {
-          eventSelect.innerHTML = '<option value="">-- Bitte wählen --</option>';
+          allEventFolders = data.folders;
           
-          data.folders.forEach(folder => {
-            const option = document.createElement('option');
-            option.value = folder.name;
-            // Formatiere den Namen schöner (z.B. "fasching-2026" -> "Fasching 2026")
-            const displayName = folder.name
-              .split('-')
-              .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-              .join(' ');
-            option.textContent = displayName;
-            eventSelect.appendChild(option);
+          // Lade Bildanzahl für jeden Ordner
+          const foldersWithCounts = await Promise.all(
+            data.folders.map(async (folder) => {
+              try {
+                const countResponse = await fetch(
+                  `https://europe-west1-schuetzenverein-12cfa.cloudfunctions.net/publicApprovedImages?event=${folder.name}`
+                );
+                const countData = await countResponse.json();
+                return {
+                  ...folder,
+                  imageCount: countData.success ? countData.total : 0
+                };
+              } catch (error) {
+                return { ...folder, imageCount: 0 };
+              }
+            })
+          );
+          
+          // Zeige nur Ordner mit Bildern
+          const foldersWithImages = foldersWithCounts.filter(f => f.imageCount > 0);
+          
+          if (foldersWithImages.length === 0) {
+            foldersGrid.innerHTML = '<p style="color: #999; text-align: center; grid-column: 1 / -1;">Noch keine Bilder verfügbar.</p>';
+            return;
+          }
+          
+          foldersGrid.innerHTML = '';
+          foldersWithImages.forEach(folder => {
+            const folderDiv = document.createElement('div');
+            folderDiv.className = 'event-folder';
+            folderDiv.onclick = () => openEventFolder(folder.name);
+            
+            folderDiv.innerHTML = `
+              <span class="event-folder-icon">📁</span>
+              <div class="event-folder-name">${folder.name}</div>
+              <div class="event-folder-count">${folder.imageCount} Bild${folder.imageCount !== 1 ? 'er' : ''}</div>
+            `;
+            
+            foldersGrid.appendChild(folderDiv);
           });
         } else {
-          eventSelect.innerHTML = '<option value="">-- Keine Veranstaltungen verfügbar --</option>';
+          foldersGrid.innerHTML = '<p style="color: #999; text-align: center; grid-column: 1 / -1;">Noch keine Veranstaltungen verfügbar.</p>';
         }
       } catch (error) {
         console.error('Error loading event folders:', error);
-        eventSelect.innerHTML = '<option value="">-- Fehler beim Laden --</option>';
+        loading.style.display = 'none';
+        foldersGrid.innerHTML = '<p style="color: #c62828; text-align: center; grid-column: 1 / -1;">Fehler beim Laden der Veranstaltungen.</p>';
       }
     }
 
-    // Lade Event-Ordner beim Seitenaufruf
-    loadEventFolders();
+    // Zeige Event-Ordner-Übersicht
+    function showEventFolders() {
+      document.getElementById('event-folders-grid').style.display = 'grid';
+      document.getElementById('gallery-grid').style.display = 'none';
+      document.getElementById('back-to-folders-btn').style.display = 'none';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
 
-    async function loadGalleryImages() {
-      const eventSelect = document.getElementById('event-select');
-      const eventSlug = eventSelect.value;
+    // Öffne einen Event-Ordner und zeige die Bilder
+    async function openEventFolder(eventSlug) {
+      const foldersGrid = document.getElementById('event-folders-grid');
       const galleryGrid = document.getElementById('gallery-grid');
+      const backBtn = document.getElementById('back-to-folders-btn');
       const loading = document.getElementById('gallery-loading');
 
-      if (!eventSlug) {
-        galleryGrid.innerHTML = '<p style="color: #999; text-align: center; grid-column: 1 / -1;">Bitte wähle eine Veranstaltung aus.</p>';
-        return;
-      }
-
+      // Verstecke Ordner, zeige Galerie
+      foldersGrid.style.display = 'none';
+      galleryGrid.style.display = 'grid';
+      backBtn.style.display = 'block';
+      
       // Show loading
       loading.style.display = 'block';
       galleryGrid.innerHTML = '';
@@ -1952,6 +2031,8 @@
           
           galleryGrid.appendChild(item);
         });
+        
+        window.scrollTo({ top: 0, behavior: 'smooth' });
 
       } catch (error) {
         console.error('Error loading gallery:', error);
@@ -1959,6 +2040,9 @@
         galleryGrid.innerHTML = '<p style="color: #c62828; text-align: center; grid-column: 1 / -1;">Fehler beim Laden der Bilder.</p>';
       }
     }
+
+    // Lade Event-Ordner beim Seitenaufruf
+    loadEventFolders();
 
     function openLightbox(index) {
       currentImageIndex = index;

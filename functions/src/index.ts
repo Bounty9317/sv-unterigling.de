@@ -98,12 +98,14 @@ export const adminListImages = onRequest(
         configureCloudinary();
 
         // Suche nach Bildern im Ordner events/<eventSlug> ODER mit Tag event_<eventSlug>
+        // Erlaube sowohl "Fasching 2026" als auch "fasching-2026" Format
         const folderPath = `events/${eventSlug}`;
-        const searchExpression = `(folder:${folderPath} OR tags:event_${eventSlug}) AND resource_type:image`;
+        const searchExpression = `folder:"${folderPath}" AND resource_type:image`;
 
         const result = await cloudinary.search
           .expression(searchExpression)
           .sort_by("created_at", "desc")
+          .with_field("tags")
           .max_results(500)
           .execute();
 
@@ -246,7 +248,62 @@ export const adminUnapproveImages = onRequest(
 );
 
 /**
- * (D) Public: Liste aller Event-Ordner
+ * (D) Admin: Bilder löschen
+ * POST /adminDeleteImages
+ * Body: { publicIds: string[] }
+ */
+export const adminDeleteImages = onRequest(
+  {
+    region: "europe-west1",
+    secrets: [CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET],
+  },
+  (req, res) => {
+    cors(req, res, async () => {
+      try {
+        // Nur POST erlaubt
+        if (req.method !== "POST") {
+          res.status(405).json({error: "Method not allowed"});
+          return;
+        }
+
+        // Admin-Check
+        await verifyAdmin(req);
+
+        // Body validieren
+        const {publicIds} = req.body;
+        if (!publicIds || !Array.isArray(publicIds) || publicIds.length === 0) {
+          res.status(400).json({error: "Missing or invalid publicIds array"});
+          return;
+        }
+
+        // Cloudinary konfigurieren
+        configureCloudinary();
+
+        // Lösche alle Bilder permanent
+        const results = await Promise.all(
+          publicIds.map((publicId) =>
+            cloudinary.uploader.destroy(publicId)
+          )
+        );
+
+        res.status(200).json({
+          success: true,
+          deleted: publicIds.length,
+          results,
+        });
+      } catch (error: any) {
+        console.error("Error in adminDeleteImages:", error);
+        const statusCode = error.message?.includes("admin") ? 403 : 500;
+        res.status(statusCode).json({
+          error: error.message || "Internal server error",
+        });
+      }
+    });
+  }
+);
+
+/**
+ * (E) Public: Liste aller Event-Ordner
  * GET /listEventFolders
  */
 export const listEventFolders = onRequest(
@@ -266,21 +323,46 @@ export const listEventFolders = onRequest(
         // Cloudinary konfigurieren
         configureCloudinary();
 
-        // Suche nach allen Bildern und extrahiere unique Ordner
+        console.log("Searching for event folders in Cloudinary...");
+
+        // Suche nach ALLEN Bildern (ohne Filter)
         const result = await cloudinary.search
-          .expression("folder:events/* AND resource_type:image")
+          .expression("resource_type:image")
           .max_results(500)
           .execute();
 
-        // Extrahiere unique Ordnernamen
+        console.log(`Total images found: ${result.resources?.length || 0}`);
+
+        // Debug: Zeige erste paar Ressourcen
+        if (result.resources && result.resources.length > 0) {
+          console.log("Sample resources:", JSON.stringify(result.resources.slice(0, 5), null, 2));
+        } else {
+          console.log("No images found in Cloudinary account!");
+        }
+
+        // Extrahiere unique Ordnernamen aus public_id
         const folderSet = new Set<string>();
         result.resources.forEach((resource: any) => {
-          // Extrahiere Ordnername aus dem asset_folder oder folder
-          const folder = resource.asset_folder || resource.folder;
-          if (folder && folder.startsWith("events/")) {
-            // Entferne "events/" Präfix
-            const eventName = folder.replace("events/", "");
-            folderSet.add(eventName);
+          const publicId = resource.public_id;
+          console.log(`Processing: ${publicId}`);
+
+          // Extrahiere Ordner aus public_id
+          // Format kann sein: "events/Fasching 2026/image" oder "Fasching 2026/image"
+          if (publicId.includes("/")) {
+            const parts = publicId.split("/");
+            
+            // Fall 1: events/EventName/image -> nimm EventName
+            if (parts[0] === "events" && parts.length >= 3) {
+              const eventName = parts[1];
+              console.log(`  -> Found event (under events/): ${eventName}`);
+              folderSet.add(eventName);
+            }
+            // Fall 2: EventName/image (ohne events/ prefix) -> nimm EventName
+            else if (parts.length >= 2) {
+              const eventName = parts[0];
+              console.log(`  -> Found event (root level): ${eventName}`);
+              folderSet.add(eventName);
+            }
           }
         });
 
@@ -288,6 +370,8 @@ export const listEventFolders = onRequest(
           name,
           path: `events/${name}`,
         }));
+
+        console.log(`Found ${folders.length} unique event folders:`, JSON.stringify(folders));
 
         res.status(200).json({
           success: true,
@@ -305,7 +389,7 @@ export const listEventFolders = onRequest(
 );
 
 /**
- * (E) Public: Freigegebene Bilder für ein Event
+ * (F) Public: Freigegebene Bilder für ein Event
  * GET /publicApprovedImages?event=<eventSlug>
  */
 export const publicApprovedImages = onRequest(
@@ -335,7 +419,7 @@ export const publicApprovedImages = onRequest(
         // Suche nur nach freigegebenen Bildern im Ordner oder mit Tags
         const folderPath = `events/${eventSlug}`;
         const searchExpression =
-          `(folder:${folderPath} OR tags:event_${eventSlug}) AND tags:approved AND resource_type:image`;
+          `(folder:"${folderPath}" OR tags:event_${eventSlug}) AND tags:approved AND resource_type:image`;
 
         const result = await cloudinary.search
           .expression(searchExpression)
