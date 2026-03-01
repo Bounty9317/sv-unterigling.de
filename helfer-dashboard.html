@@ -195,9 +195,8 @@
     .tab.active { color: #4CAF50; border-bottom-color: #4CAF50; }
     .tab-content { display: none; }
     .tab-content.active { display: block; }
-    .dashboard-grid { display: grid; grid-template-columns: 1fr 350px; gap: 2rem; }
+    .dashboard-grid { display: grid; grid-template-columns: 1fr; gap: 2rem; }
     .calendar-section { background: #2a2a2a; padding: 2rem; border-radius: 8px; max-width: 100%; overflow-x: auto; }
-    .chat-section { background: #2a2a2a; padding: 1.5rem; border-radius: 8px; position: sticky; top: 2rem; max-height: 600px; overflow-y: auto; }
     h2 { color: #4CAF50; margin-bottom: 1.5rem; }
     .person-cards { display: flex; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap; }
     .person-card { padding: 0.8rem 1.2rem; border-radius: 6px; cursor: move; font-weight: 600; }
@@ -210,18 +209,12 @@
     .calendar-day.drop-zone { background: rgba(76, 175, 80, 0.2); }
     .assigned-person { padding: 0.5rem; border-radius: 4px; font-size: 0.85rem; margin-bottom: 0.3rem; cursor: pointer; }
     .swap-info { font-size: 0.75rem; background: #ffa726; color: #1a1a1a; padding: 0.3rem; border-radius: 4px; margin-top: 0.3rem; font-weight: 600; }
-    .chat-message.completed { border-left-color: #4CAF50; opacity: 0.7; }
-    .chat-message { background: #1a1a1a; padding: 1rem; border-radius: 6px; margin-bottom: 1rem; border-left: 3px solid #ffa726; }
 
     /* Responsive Layout */
     @media (max-width: 1024px) {
       .dashboard-grid { 
         grid-template-columns: 1fr; 
         gap: 1.5rem; 
-      }
-      .chat-section { 
-        position: static; 
-        max-height: none; 
       }
       .calendar-section {
         padding: 1rem;
@@ -370,10 +363,6 @@
           <div class="person-cards" id="wirte-cards"></div>
           <div id="wirte-calendar" class="calendar-grid"></div>
         </div>
-        <div class="chat-section">
-          <h2>💬 Tausch-Anfragen</h2>
-          <div id="wirte-chat"><p style="color: #999;">Keine Anfragen</p></div>
-        </div>
       </div>
     </div>
     <div id="aufsicht-tab" class="tab-content">
@@ -389,10 +378,6 @@
           <button class="btn" onclick="openAddPersonModal('aufsicht')" style="margin-bottom: 1rem; background: #4CAF50;">➕ Schießaufsicht hinzufügen</button>
           <div class="person-cards" id="aufsicht-cards"></div>
           <div id="aufsicht-calendar" class="calendar-grid"></div>
-        </div>
-        <div class="chat-section">
-          <h2>💬 Tausch-Anfragen</h2>
-          <div id="aufsicht-chat"><p style="color: #999;">Keine Anfragen</p></div>
         </div>
       </div>
     </div>
