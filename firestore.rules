@@ -69,10 +69,13 @@ service cloud.firestore {
     match /settings/{document} {
       allow read: if true;
       allow write: if isAdmin();
-      // Allow visitor counter updates from anyone
-      allow update: if document == 'visitor-counter' && 
-                      request.resource.data.keys().hasOnly(['count']) &&
-                      request.resource.data.count is number;
+    }
+    
+    // Visitor Counter - Allow anyone to read and increment
+    match /settings/visitor-counter {
+      allow read: if true;
+      allow create, update: if request.resource.data.keys().hasOnly(['count']) &&
+                               request.resource.data.count is number;
     }
     
     // Default: Deny all other access
