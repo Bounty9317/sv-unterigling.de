@@ -606,79 +606,6 @@
       });
     }
 
-    function loadSwapRequests(type) {
-      onSnapshot(collection(db, `${type}-swaps`), (snapshot) => {
-        const chat = document.getElementById(`${type}-chat`);
-        if (snapshot.empty) { chat.innerHTML = '<p style="color: #999;">Keine Anfragen</p>'; return; }
-        chat.innerHTML = '';
-        
-        const messages = [];
-        snapshot.forEach(d => {
-          messages.push({ id: d.id, ...d.data() });
-        });
-        
-        messages.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-        
-        messages.forEach(s => {
-          // Überspringe Einträge mit fehlenden Daten
-          if (!s.requestPerson || !s.date) return;
-          
-          const div = document.createElement('div');
-          div.className = 'chat-message' + (s.status === 'completed' ? ' completed' : '');
-          
-          if (s.status === 'pending') {
-            div.innerHTML = `<strong>${s.requestPerson}</strong> sucht Ersatz für ${new Date(s.date).toLocaleDateString('de-DE')}<br>
-              <div style="margin: 0.5rem 0; font-size: 0.85rem; color: #999;">
-                Warte auf Zusage...
-              </div>
-              ${s.replacementPerson ? `<button class="btn-approve" onclick="approveSwapAsReplacement('${type}', '${s.id}', '${s.replacementPerson}')">✓ Einspringen als ${s.replacementPerson}</button>` : ''}
-              <button class="btn-reject" onclick="rejectSwap('${type}', '${s.id}')">✗ Anfrage zurückziehen</button>`;
-          } else if (s.status === 'completed' && s.replacementPerson) {
-            div.innerHTML = `✅ <strong>${s.replacementPerson}</strong> hat für <strong>${s.requestPerson}</strong> am ${new Date(s.date).toLocaleDateString('de-DE')} übernommen<br>
-              <div style="margin: 0.5rem 0; font-size: 0.75rem; color: #4CAF50;">
-                Tausch abgeschlossen
-              </div>`;
-          } else {
-            return; // Überspringe ungültige completed swaps
-          }
-          chat.appendChild(div);
-        });
-      });
-    }
-
-    window.approveSwapAsReplacement = async (type, swapId, replacementPerson) => {
-      const swapSnapshot = await getDocs(query(collection(db, `${type}-swaps`)));
-      let swap = null;
-      swapSnapshot.forEach(d => {
-        if (d.id === swapId) swap = { id: d.id, ...d.data() };
-      });
-      
-      if (!swap) return;
-      
-      // Finde die Farbe des Ersatz-Helfers
-      const replacementHelper = persons[type].find(p => p.name === replacementPerson);
-      if (!replacementHelper) return;
-      
-      // Update swap status
-      await updateDoc(doc(db, `${type}-swaps`, swapId), { 
-        replacementPerson,
-        status: 'completed'
-      });
-      
-      // Update assignment
-      const assignment = assignments[type][swap.date];
-      if (assignment) {
-        await updateDoc(doc(db, `${type}-assignments`, assignment.id), { 
-          originalPerson: swap.requestPerson,
-          person: replacementPerson,
-          color: replacementHelper.color,
-          swappedWith: replacementPerson
-        });
-      }
-      
-      await loadAssignments(type);
-    };
-
     window.rejectSwap = async (type, id) => { 
       await deleteDoc(doc(db, `${type}-swaps`, id)); 
     };
@@ -1099,7 +1026,7 @@
       logo.src = 'logo.png';
     };
 
-    ['wirte', 'aufsicht'].forEach(type => { loadPersons(type); loadAssignments(type); loadSwapRequests(type); });
+    ['wirte', 'aufsicht'].forEach(type => { loadPersons(type); loadAssignments(type); });
   </script>
 
   <!-- Modal für Helfer hinzufügen -->
