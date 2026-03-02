@@ -65,17 +65,21 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
     
-    // Settings - Public read, Admin write (for winter mode and visitor counter)
-    match /settings/{document} {
+    // Settings - Visitor Counter (allow anyone to read and update)
+    match /settings/visitor-counter {
+      allow read, write: if true;
+    }
+    
+    // Settings - Winter Mode (public read, admin write)
+    match /settings/winter-mode {
       allow read: if true;
       allow write: if isAdmin();
     }
     
-    // Visitor Counter - Allow anyone to read and increment
-    match /settings/visitor-counter {
+    // Settings - Other documents (admin only)
+    match /settings/{document} {
       allow read: if true;
-      allow create, update: if request.resource.data.keys().hasOnly(['count']) &&
-                               request.resource.data.count is number;
+      allow write: if isAdmin();
     }
     
     // Default: Deny all other access
