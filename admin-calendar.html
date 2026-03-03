@@ -606,17 +606,8 @@
         card.classList.add('disabled');
       }
       
-      const isSaturday = dayOfWeek === 6;
-      const hasMultiSlots = type === 'wirte' && isSaturday;
-      
-      let hasAssignment = false;
-      if (hasMultiSlots) {
-        const frueh = assignments[type][`${dateStr}-fruehschoppen`];
-        const schies = assignments[type][`${dateStr}-schiessabend`];
-        hasAssignment = frueh || schies;
-      } else {
-        hasAssignment = !!assignments[type][dateStr];
-      }
+      // Einfache Logik: Jeder Tag hat nur eine Einteilung
+      const hasAssignment = !!assignments[type][dateStr];
       
       if (isAllowed) {
         card.classList.add(hasAssignment ? 'assigned' : 'missing');
@@ -651,12 +642,8 @@
       body.className = 'day-card-body';
       
       if (isAllowed) {
-        if (hasMultiSlots) {
-          body.appendChild(createSlotDisplay(type, dateStr, 'fruehschoppen', '☀️ Frühschoppen'));
-          body.appendChild(createSlotDisplay(type, dateStr, 'schiessabend', '🌙 Schießabend'));
-        } else {
-          body.appendChild(createAssignmentDisplay(type, dateStr, null));
-        }
+        // Jeder Tag hat nur eine einfache Einteilung
+        body.appendChild(createAssignmentDisplay(type, dateStr, null));
       } else {
         const disabledMsg = document.createElement('div');
         disabledMsg.style.cssText = 'color: #666; font-size: 14px;';
@@ -852,13 +839,13 @@
           isAllowed = dayOfWeek === 0 || dayOfWeek === 6 || isCustomWirteDay;
         }
         
-        // Prüfe ob Samstag und Wirte (dann 2 Slots)
+        // Prüfe ob Samstag und Wirte - KEINE Multi-Slots mehr
         const isSaturday = dayOfWeek === 6;
-        const hasMultiSlots = type === 'wirte' && isSaturday;
+        const hasMultiSlots = false; // Deaktiviert: Samstag = nur Schießabend, Sonntag = nur Frühschoppen
         
         const assignment = assignments[type][dateStr];
-        const fruehschoppenAssignment = hasMultiSlots ? assignments[type][`${dateStr}-fruehschoppen`] : null;
-        const schiessabendAssignment = hasMultiSlots ? assignments[type][`${dateStr}-schiessabend`] : null;
+        const fruehschoppenAssignment = null; // Nicht mehr verwendet
+        const schiessabendAssignment = null; // Nicht mehr verwendet
         
         // Setze CSS-Klassen basierend auf Einteilung
         let cellClass = 'calendar-day';
