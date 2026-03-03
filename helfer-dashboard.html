@@ -309,6 +309,9 @@
     }
     .btn-approve { background: #4CAF50; color: white; border: none; padding: 0.4rem 0.8rem; border-radius: 4px; cursor: pointer; margin-right: 0.5rem; }
     .btn-reject { background: #c62828; color: white; border: none; padding: 0.4rem 0.8rem; border-radius: 4px; cursor: pointer; }
+    .chat-section { background: #2a2a2a; padding: 1.5rem; border-radius: 8px; margin-top: 2rem; }
+    .chat-message { background: #1a1a1a; padding: 1rem; border-radius: 6px; margin-bottom: 0.8rem; border-left: 4px solid #ffa726; }
+    .chat-message.completed { border-left-color: #4CAF50; background: rgba(76, 175, 80, 0.1); }
     .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); }
     .modal-content { background: #2a2a2a; margin: 5% auto; padding: 2rem; border-radius: 12px; max-width: 500px; }
     .close-modal { float: right; font-size: 2rem; color: #999; cursor: pointer; }
@@ -324,6 +327,150 @@
     .helper-select { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; max-height: 300px; overflow-y: auto; }
     .helper-option { padding: 0.8rem; border-radius: 6px; cursor: pointer; text-align: center; font-weight: 600; color: white; transition: transform 0.2s; }
     .helper-option:hover { transform: scale(1.05); }
+
+    /* Mobile Calendar List View Styles */
+    .calendar-list {
+      display: none; /* Hidden by default, shown on mobile via media query */
+    }
+
+    /* Desktop - Hide List View, Show Grid View */
+    @media (min-width: 769px) {
+      .calendar-list {
+        display: none !important;
+      }
+    }
+
+    /* Mobile - Hide Grid View, Show List View */
+    @media (max-width: 768px) {
+      .calendar-grid {
+        display: none !important;
+      }
+      
+      .calendar-list {
+        display: block;
+        width: 100%;
+      }
+
+      /* Day Card Styles */
+      .day-card {
+        background: #2a2a2a;
+        border-left: 4px solid transparent;
+        border-radius: 8px;
+        margin-bottom: 12px;
+        padding: 16px;
+      }
+
+      .day-card.assigned {
+        border-left-color: #4CAF50;
+      }
+
+      .day-card.missing {
+        border-left-color: #c62828;
+        background: rgba(198, 40, 40, 0.1);
+      }
+
+      .day-card.disabled {
+        opacity: 0.5;
+        background: #1a1a1a;
+      }
+
+      /* Day Card Header */
+      .day-card-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 12px;
+      }
+
+      .day-number {
+        font-size: 24px;
+        font-weight: bold;
+      }
+
+      .day-name {
+        font-size: 14px;
+        color: #999;
+        margin-left: 8px;
+      }
+
+      .day-date {
+        font-size: 14px;
+        color: #999;
+        margin-left: auto;
+      }
+
+      /* Day Card Body */
+      .day-card-body {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      /* Assignment Display */
+      .assignment-display {
+        margin-bottom: 8px;
+      }
+
+      .slot-label {
+        font-size: 12px;
+        color: #999;
+        margin-bottom: 6px;
+        font-weight: 600;
+      }
+
+      /* Assignment Button - Touch-Friendly */
+      .assignment-button {
+        min-height: 44px;
+        min-width: 44px;
+        width: 100%;
+        padding: 12px 16px;
+        border: none;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 600;
+        color: white;
+        cursor: pointer;
+        text-align: left;
+        display: block;
+      }
+
+      .assignment-button:active {
+        transform: scale(0.98);
+      }
+
+      /* Person Name Display */
+      .person-name {
+        font-size: 14px;
+        word-wrap: break-word;
+        white-space: normal;
+      }
+
+      /* Month Navigation Buttons - Touch-Friendly */
+      .btn {
+        min-height: 44px;
+        min-width: 44px;
+        padding: 12px 16px;
+        font-size: 14px;
+      }
+
+      /* Swap Modal Helper Options - Touch-Friendly */
+      .helper-option {
+        min-height: 44px;
+        min-width: 44px;
+        padding: 12px;
+        font-size: 14px;
+      }
+
+      .modal-content {
+        margin: 10% auto;
+        padding: 20px;
+        max-width: 90%;
+      }
+
+      /* Spacing between elements */
+      .day-card-body > * + * {
+        margin-top: 8px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -359,9 +506,13 @@
             <h3 id="wirte-month-display" style="min-width: 200px; text-align: center; color: #4CAF50; font-size: 1.3rem;">Januar 2025</h3>
             <button class="btn" onclick="nextMonth('wirte')" style="padding: 0.5rem 1rem; font-size: 1.2rem;">▶</button>
           </div>
-          <button class="btn" onclick="openAddPersonModal('wirte')" style="margin-bottom: 1rem; background: #4CAF50;">➕ Wirt hinzufügen</button>
           <div class="person-cards" id="wirte-cards"></div>
           <div id="wirte-calendar" class="calendar-grid"></div>
+          <div id="wirte-calendar-list" class="calendar-list"></div>
+        </div>
+        <div class="chat-section">
+          <h2>💬 Tausch-Anfragen & Verlauf</h2>
+          <div id="wirte-chat"><p style="color: #999;">Keine Anfragen</p></div>
         </div>
       </div>
     </div>
@@ -375,9 +526,13 @@
             <h3 id="aufsicht-month-display" style="min-width: 200px; text-align: center; color: #4CAF50; font-size: 1.3rem;">Januar 2025</h3>
             <button class="btn" onclick="nextMonth('aufsicht')" style="padding: 0.5rem 1rem; font-size: 1.2rem;">▶</button>
           </div>
-          <button class="btn" onclick="openAddPersonModal('aufsicht')" style="margin-bottom: 1rem; background: #4CAF50;">➕ Schießaufsicht hinzufügen</button>
           <div class="person-cards" id="aufsicht-cards"></div>
           <div id="aufsicht-calendar" class="calendar-grid"></div>
+          <div id="aufsicht-calendar-list" class="calendar-list"></div>
+        </div>
+        <div class="chat-section">
+          <h2>💬 Tausch-Anfragen & Verlauf</h2>
+          <div id="aufsicht-chat"><p style="color: #999;">Keine Anfragen</p></div>
         </div>
       </div>
     </div>
@@ -479,55 +634,28 @@
 
     const monthNames = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
 
-    // Funktion zur Berechnung deutscher Feiertage
-    function getGermanHolidays(year) {
-      const holidays = [];
-      
-      // Feste Feiertage
-      holidays.push(`${year}-01-01`); // Neujahr
-      holidays.push(`${year}-01-06`); // Heilige Drei Könige
-      holidays.push(`${year}-05-01`); // Tag der Arbeit
-      holidays.push(`${year}-08-15`); // Mariä Himmelfahrt
-      holidays.push(`${year}-10-03`); // Tag der Deutschen Einheit
-      holidays.push(`${year}-11-01`); // Allerheiligen
-      holidays.push(`${year}-12-25`); // 1. Weihnachtstag
-      holidays.push(`${year}-12-26`); // 2. Weihnachtstag
-      
-      // Berechnung von Ostern (Gaußsche Osterformel)
-      const a = year % 19;
-      const b = Math.floor(year / 100);
-      const c = year % 100;
-      const d = Math.floor(b / 4);
-      const e = b % 4;
-      const f = Math.floor((b + 8) / 25);
-      const g = Math.floor((b - f + 1) / 3);
-      const h = (19 * a + b - d - g + 15) % 30;
-      const i = Math.floor(c / 4);
-      const k = c % 4;
-      const l = (32 + 2 * e + 2 * i - h - k) % 7;
-      const m = Math.floor((a + 11 * h + 22 * l) / 451);
-      const month = Math.floor((h + l - 7 * m + 114) / 31);
-      const day = ((h + l - 7 * m + 114) % 31) + 1;
-      
-      const easter = new Date(year, month - 1, day);
-      
-      // Bewegliche Feiertage basierend auf Ostern
-      const addDays = (date, days) => {
-        const result = new Date(date);
-        result.setDate(result.getDate() + days);
-        return result.toISOString().split('T')[0];
-      };
-      
-      holidays.push(addDays(easter, -2));  // Karfreitag
-      holidays.push(addDays(easter, 1));   // Ostermontag
-      holidays.push(addDays(easter, 39));  // Christi Himmelfahrt
-      holidays.push(addDays(easter, 50));  // Pfingstmontag
-      holidays.push(addDays(easter, 60));  // Fronleichnam
-      
-      return holidays;
+    // Wirte-Tage aus Firebase laden
+    let customWirteDays = [];
+    
+    async function loadWirteDays() {
+      try {
+        const snapshot = await getDocs(collection(db, 'wirte-days'));
+        customWirteDays = [];
+        snapshot.forEach(doc => {
+          customWirteDays.push(doc.data().date);
+        });
+      } catch (error) {
+        console.error('Fehler beim Laden der Wirte-Tage:', error);
+      }
     }
 
-    // Feiertage für 2025 und 2026 vorab berechnen
+    // Funktion zur Berechnung deutscher Feiertage (VERALTET - wird nicht mehr verwendet)
+    // Stattdessen werden Feiertage in Firebase verwaltet
+    function getGermanHolidays(year) {
+      return []; // Leer, da Feiertage jetzt in Firebase verwaltet werden
+    }
+
+    // Feiertage für 2025 und 2026 vorab berechnen (VERALTET)
     const holidays2025 = getGermanHolidays(2025);
     const holidays2026 = getGermanHolidays(2026);
     const allHolidays = [...holidays2025, ...holidays2026];
@@ -616,7 +744,7 @@
       ).join('');
     }
 
-    function renderCalendar(type) {
+    function renderCalendarGrid(type) {
       const cal = document.getElementById(`${type}-calendar`);
       cal.innerHTML = '';
       
@@ -658,12 +786,13 @@
         
         // Prüfe ob Tag erlaubt ist
         let isAllowed = false;
-        const isHoliday = allHolidays.includes(dateStr);
+        const isCustomWirteDay = customWirteDays.includes(dateStr);
         
         if (type === 'aufsicht') {
           isAllowed = dayOfWeek === 6; // Nur Samstag
         } else if (type === 'wirte') {
-          isAllowed = dayOfWeek === 0 || dayOfWeek === 6 || isHoliday; // Samstag, Sonntag oder Feiertag
+          // Samstag, Sonntag ODER benutzerdefinierter Wirte-Tag
+          isAllowed = dayOfWeek === 0 || dayOfWeek === 6 || isCustomWirteDay;
         }
         
         // Prüfe ob Samstag und Wirte (dann 2 Slots)
@@ -692,7 +821,7 @@
         }
         
         cell.className = cellClass;
-        cell.innerHTML = `<div style="font-size: 0.9rem; color: ${isHoliday ? '#ffa726' : '#999'};">${day}${isHoliday ? ' 🎉' : ''}</div>`;
+        cell.innerHTML = `<div style="font-size: 0.9rem; color: ${isCustomWirteDay ? '#ffa726' : '#999'};">${day}${isCustomWirteDay ? ' 🎉' : ''}</div>`;
         cell.dataset.date = dateStr;
         
         // Render Multi-Slot Assignments (Samstag bei Wirten)
@@ -762,9 +891,24 @@
     function openSwapModal(type, date, assignment) {
       currentSwapRequest = { type, date, assignment };
       // Datum korrekt formatieren (YYYY-MM-DD zu DD.MM.YYYY)
-      const [year, month, day] = date.split('-');
-      const formattedDate = `${day}.${month}.${year}`;
-      document.getElementById('swap-modal-title').textContent = `Tausch-Anfrage für ${formattedDate}`;
+      // Handle slot information if date contains slot (e.g., "2025-01-04-fruehschoppen")
+      let formattedDate;
+      let slotInfo = '';
+      
+      if (date.includes('-fruehschoppen')) {
+        const [year, month, day] = date.split('-').slice(0, 3);
+        formattedDate = `${day}.${month}.${year}`;
+        slotInfo = ' (☀️ Frühschoppen)';
+      } else if (date.includes('-schiessabend')) {
+        const [year, month, day] = date.split('-').slice(0, 3);
+        formattedDate = `${day}.${month}.${year}`;
+        slotInfo = ' (🌙 Schießabend)';
+      } else {
+        const [year, month, day] = date.split('-');
+        formattedDate = `${day}.${month}.${year}`;
+      }
+      
+      document.getElementById('swap-modal-title').textContent = `Tausch-Anfrage für ${formattedDate}${slotInfo}`;
       document.getElementById('swap-modal-info').textContent = `Du bist eingeteilt: ${assignment.person}`;
       
       const helperSelect = document.getElementById('helper-select');
@@ -1026,7 +1170,335 @@
       logo.src = 'logo.png';
     };
 
-    ['wirte', 'aufsicht'].forEach(type => { loadPersons(type); loadAssignments(type); });
+    // Create Day Card for List View
+    function createDayCard(type, dateStr, day, dayName, isAllowed, isHoliday, dayOfWeek) {
+      // Validate date parameters
+      if (!dateStr || !day || !dayName || typeof dayOfWeek !== 'number') {
+        console.error('Invalid date parameters in createDayCard:', { dateStr, day, dayName, dayOfWeek });
+        // Return empty card with error indicator
+        const errorCard = document.createElement('div');
+        errorCard.className = 'day-card disabled';
+        errorCard.innerHTML = '<div style="color: #c62828; font-size: 14px;">Ungültiges Datum</div>';
+        return errorCard;
+      }
+      
+      const card = document.createElement('div');
+      card.className = 'day-card';
+      card.dataset.date = dateStr;
+      
+      if (!isAllowed) {
+        card.classList.add('disabled');
+      }
+      
+      // Check for assignments (handle multi-slot Saturdays separately)
+      const isSaturday = dayOfWeek === 6;
+      const hasMultiSlots = type === 'wirte' && isSaturday;
+      
+      let hasAssignment = false;
+      if (hasMultiSlots) {
+        const frueh = assignments[type][`${dateStr}-fruehschoppen`];
+        const schies = assignments[type][`${dateStr}-schiessabend`];
+        hasAssignment = frueh || schies;
+      } else {
+        hasAssignment = !!assignments[type][dateStr];
+      }
+      
+      if (isAllowed) {
+        card.classList.add(hasAssignment ? 'assigned' : 'missing');
+      }
+      
+      // Create header section with day number, day name, and full date
+      const header = document.createElement('div');
+      header.className = 'day-card-header';
+      header.style.cssText = 'display: flex; align-items: center; margin-bottom: 12px;';
+      
+      // Style day number with larger font (24px) and green color (#4CAF50)
+      // Add 🎉 emoji to day number if holiday, use orange color (#ffa726)
+      const dayNumber = document.createElement('span');
+      dayNumber.className = 'day-number';
+      dayNumber.style.cssText = `font-size: 24px; font-weight: bold; color: ${isHoliday ? '#ffa726' : '#4CAF50'};`;
+      dayNumber.textContent = `${day}${isHoliday ? ' 🎉' : ''}`;
+      header.appendChild(dayNumber);
+      
+      const dayNameSpan = document.createElement('span');
+      dayNameSpan.className = 'day-name';
+      dayNameSpan.style.cssText = 'font-size: 14px; color: #999; margin-left: 8px;';
+      dayNameSpan.textContent = dayName;
+      header.appendChild(dayNameSpan);
+      
+      const dayDate = document.createElement('span');
+      dayDate.className = 'day-date';
+      dayDate.style.cssText = 'font-size: 14px; color: #999; margin-left: auto;';
+      const [year, month] = dateStr.split('-');
+      dayDate.textContent = `${String(day).padStart(2, '0')}.${month}.${year}`;
+      header.appendChild(dayDate);
+      
+      card.appendChild(header);
+      
+      // Create body section for assignments
+      const body = document.createElement('div');
+      body.className = 'day-card-body';
+      
+      if (isAllowed) {
+        if (hasMultiSlots) {
+          // For multi-slot days, call createSlotDisplay() for each slot
+          body.appendChild(createSlotDisplay(type, dateStr, 'fruehschoppen', '☀️ Frühschoppen'));
+          body.appendChild(createSlotDisplay(type, dateStr, 'schiessabend', '🌙 Schießabend'));
+        } else {
+          // For single-slot days, call createAssignmentDisplay()
+          body.appendChild(createAssignmentDisplay(type, dateStr, null));
+        }
+      } else {
+        // For disabled days, show "Keine Einteilung möglich" message
+        const disabledMsg = document.createElement('div');
+        disabledMsg.style.cssText = 'color: #666; font-size: 14px;';
+        disabledMsg.textContent = 'Keine Einteilung möglich';
+        body.appendChild(disabledMsg);
+      }
+      
+      card.appendChild(body);
+      
+      // Return completed card element
+      return card;
+    }
+
+    // Create slot display for multi-slot days (Task 3.3)
+    function createSlotDisplay(type, dateStr, slot, label) {
+      // Create container div with class assignment-display and data-slot attribute
+      const container = document.createElement('div');
+      container.className = 'assignment-display';
+      container.dataset.slot = slot;
+      container.style.marginBottom = '12px';
+      
+      // Create slot label element with emoji and text
+      const slotLabel = document.createElement('div');
+      slotLabel.className = 'slot-label';
+      slotLabel.textContent = label;
+      slotLabel.style.cssText = 'font-size: 12px; color: #999; margin-bottom: 6px; font-weight: 600;';
+      container.appendChild(slotLabel);
+      
+      // Build slot key as ${dateStr}-${slot}
+      const slotKey = `${dateStr}-${slot}`;
+      
+      // Get assignment from assignments[type][slotKey]
+      const assignment = assignments[type][slotKey];
+      
+      // If assignment exists, call createAssignmentButton() and append
+      if (assignment) {
+        const button = createAssignmentButton(type, slotKey, assignment);
+        container.appendChild(button);
+      } else {
+        // If no assignment, create empty div with red background and "Nicht eingeteilt" text
+        const emptyDiv = document.createElement('div');
+        emptyDiv.style.cssText = 'padding: 12px; background: rgba(198, 40, 40, 0.2); border-radius: 6px; color: #c62828; font-size: 14px;';
+        emptyDiv.textContent = 'Nicht eingeteilt';
+        container.appendChild(emptyDiv);
+      }
+      
+      // Return container element
+      return container;
+    }
+
+    // Task 3.4: Implement createAssignmentDisplay for single-slot day assignments
+    function createAssignmentDisplay(type, dateStr, slot) {
+      const container = document.createElement('div');
+      container.className = 'assignment-display';
+      
+      // Get assignment from assignments[type][dateStr]
+      const assignment = assignments[type][dateStr];
+      
+      if (assignment) {
+        // If assignment exists, call createAssignmentButton() and append
+        const button = createAssignmentButton(type, dateStr, assignment);
+        container.appendChild(button);
+      } else {
+        // If no assignment, create empty div with red background and "Nicht eingeteilt" text
+        const emptyDiv = document.createElement('div');
+        emptyDiv.style.cssText = 'padding: 12px; background: rgba(198, 40, 40, 0.2); border-radius: 6px; color: #c62828; font-size: 14px;';
+        emptyDiv.textContent = 'Nicht eingeteilt';
+        container.appendChild(emptyDiv);
+      }
+      
+      return container;
+    }
+
+    // Task 3.5: Implement createAssignmentButton for assignment buttons
+    function createAssignmentButton(type, dateKey, assignment) {
+      // Validate assignment data and use default values for missing fields
+      if (!assignment) {
+        console.error('Missing assignment data in createAssignmentButton');
+        assignment = { person: 'Unbekannt', color: '#666' };
+      }
+      
+      // Use default values for missing fields
+      const validatedAssignment = {
+        person: assignment.person || 'Unbekannt',
+        color: assignment.color || '#666',
+        swappedWith: assignment.swappedWith || null,
+        originalPerson: assignment.originalPerson || null
+      };
+      
+      // Log warning if defaults were used
+      if (assignment.person !== validatedAssignment.person || assignment.color !== validatedAssignment.color) {
+        console.warn('Assignment data incomplete, using defaults:', { original: assignment, validated: validatedAssignment });
+      }
+      
+      // Create button element with class assignment-button
+      const button = document.createElement('button');
+      button.className = 'assignment-button';
+      
+      // Set background color to assignment.color
+      button.style.background = validatedAssignment.color;
+      
+      // Check if assignment is swapped (has swappedWith and originalPerson)
+      if (validatedAssignment.swappedWith && validatedAssignment.originalPerson) {
+        // For swapped assignments, create three-line display:
+        // - original name with strikethrough
+        // - "Getauscht mit" label
+        // - replacement name in bold
+        button.innerHTML = `
+          <div style="text-decoration: line-through; opacity: 0.7; margin-bottom: 4px;">
+            ${validatedAssignment.originalPerson}
+          </div>
+          <div style="font-size: 12px; color: rgba(255,255,255,0.8); margin-bottom: 4px;">
+            Getauscht mit
+          </div>
+          <div style="font-weight: bold;">
+            ${validatedAssignment.swappedWith}
+          </div>
+        `;
+      } else {
+        // For normal assignments, display person name in span
+        button.innerHTML = `<span class="person-name">${validatedAssignment.person}</span>`;
+      }
+      
+      // Add click event listener to call openSwapModal(type, dateKey, assignment)
+      button.addEventListener('click', () => {
+        openSwapModal(type, dateKey, validatedAssignment);
+      });
+      
+      // Return button element
+      return button;
+    }
+
+    // Render Calendar List View (Mobile)
+    function renderCalendarList(type) {
+      const listContainer = document.getElementById(`${type}-calendar-list`);
+      if (!listContainer) return; // Not in mobile view
+      
+      try {
+        listContainer.innerHTML = '';
+        
+        // Extract year and month from currentMonth[type]
+        const [year, month] = currentMonth[type].split('-');
+        
+        // Calculate days in month
+        const daysInMonth = new Date(parseInt(year), parseInt(month), 0).getDate();
+        
+        // Loop through days 1 to daysInMonth
+        for (let day = 1; day <= daysInMonth; day++) {
+          const dateStr = `${year}-${month}-${String(day).padStart(2, '0')}`;
+          const date = new Date(parseInt(year), parseInt(month) - 1, day);
+          const dayOfWeek = date.getDay(); // 0=Sunday, 6=Saturday
+          
+          // Determine day name
+          const dayNames = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
+          const dayName = dayNames[dayOfWeek];
+          
+          // Check if day is custom wirte day
+          const isCustomWirteDay = customWirteDays.includes(dateStr);
+          
+          // Determine if day is allowed based on calendar type rules
+          let isAllowed = false;
+          if (type === 'aufsicht') {
+            isAllowed = dayOfWeek === 6; // Saturday only
+          } else if (type === 'wirte') {
+            // Saturday, Sunday OR custom wirte day
+            isAllowed = dayOfWeek === 0 || dayOfWeek === 6 || isCustomWirteDay;
+          }
+          
+          // Call createDayCard() for each day and append to container
+          const card = createDayCard(type, dateStr, day, dayName, isAllowed, isCustomWirteDay, dayOfWeek);
+          listContainer.appendChild(card);
+        }
+      } catch (error) {
+        console.error('List view rendering failed:', error);
+        listContainer.innerHTML = `
+          <div style="padding: 2rem; text-align: center; color: #c62828;">
+            <p>Fehler beim Laden der Listenansicht.</p>
+            <p style="font-size: 0.9rem; color: #999;">Bitte Seite neu laden oder Desktop-Ansicht verwenden.</p>
+          </div>
+        `;
+      }
+    }
+
+    // Wrapper function to render both grid and list views (Task 4.2)
+    function renderCalendar(type) {
+      // Render grid view (for desktop)
+      renderCalendarGrid(type);
+      
+      // Render list view (for mobile)
+      renderCalendarList(type);
+    }
+
+    // Lade und zeige Tausch-Anfragen
+    function loadSwapRequests(type) {
+      onSnapshot(collection(db, `${type}-swaps`), (snapshot) => {
+        const chat = document.getElementById(`${type}-chat`);
+        if (snapshot.empty) { chat.innerHTML = '<p style="color: #999;">Keine Anfragen</p>'; return; }
+        chat.innerHTML = '';
+        
+        const messages = [];
+        snapshot.forEach(d => { messages.push({ id: d.id, ...d.data() }); });
+        messages.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        
+        messages.forEach(s => {
+          // Überspringe Einträge mit fehlenden Daten
+          if (!s.requestPerson || !s.date) return;
+          
+          const div = document.createElement('div');
+          div.className = 'chat-message' + (s.status === 'completed' ? ' completed' : '');
+          
+          const formattedDate = new Date(s.date + 'T00:00:00').toLocaleDateString('de-DE', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+          });
+          
+          if (s.status === 'pending') {
+            div.innerHTML = `<strong>${s.requestPerson}</strong> sucht Ersatz für ${formattedDate}<br>
+              <div style="margin: 0.5rem 0; font-size: 0.85rem; color: #999;">
+                ${s.replacementPerson ? `Ersatz: ${s.replacementPerson}` : 'Warte auf Zusage...'}
+              </div>`;
+          } else if (s.status === 'completed' && s.replacementPerson) {
+            div.innerHTML = `
+              <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                <span style="color: #4CAF50; font-size: 1.2rem;">✅</span>
+                <strong>${s.requestPerson}</strong> 
+                <span style="color: #999;">hat mit</span>
+                <strong>${s.replacementPerson}</strong>
+                <span style="color: #999;">getauscht</span>
+              </div>
+              <div style="margin-top: 0.3rem; font-size: 0.85rem; color: #ffa726;">
+                📅 Datum: ${formattedDate}
+              </div>
+            `;
+          } else {
+            return; // Überspringe ungültige completed swaps
+          }
+          chat.appendChild(div);
+        });
+      });
+    }
+
+    // Wirte-Tage laden und dann Kalender initialisieren
+    loadWirteDays().then(() => {
+      ['wirte', 'aufsicht'].forEach(type => { 
+        loadPersons(type); 
+        loadAssignments(type);
+        loadSwapRequests(type);
+      });
+    });
   </script>
 
   <!-- Modal für Helfer hinzufügen -->

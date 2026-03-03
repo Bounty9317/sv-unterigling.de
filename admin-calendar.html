@@ -146,7 +146,10 @@
 <body>
   <div class="header">
     <h1>📅 Kalender-Verwaltung (Vorstand)</h1>
-    <button class="btn" onclick="window.location.href='admin-dashboard.html'">Zurück</button>
+    <div style="display: flex; gap: 1rem;">
+      <button class="btn" onclick="window.location.href='admin-wirte-tage.html'" style="background: #ffa726;">🗓️ Wirte-Tage verwalten</button>
+      <button class="btn" onclick="window.location.href='admin-dashboard.html'">Zurück</button>
+    </div>
   </div>
   <div class="container">
     <div class="tabs">
@@ -156,7 +159,8 @@
     <div id="wirte-tab" class="tab-content active">
       <div class="dashboard-grid">
         <div class="calendar-section">
-          <button class="btn" onclick="downloadList('wirte')" style="margin-bottom: 1rem; background: #2d5a3d;">📥 Wirteliste herunterladen</button>
+          <button class="btn" onclick="downloadList('wirte')" style="margin-bottom: 1rem; background: #2d5a3d;">📥 Aktueller Monat</button>
+          <button class="btn" onclick="openDateRangeModal('wirte')" style="margin-bottom: 1rem; margin-left: 0.5rem; background: #1976d2;">📅 Zeitraum wählen</button>
           <button class="btn" onclick="openRotationModal('wirte')" style="margin-bottom: 1rem; margin-left: 1rem; background: #1a472a;">🔄 Auto-Rotation</button>
           <h2>Wirte-Kalender</h2>
           <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem; gap: 1rem;">
@@ -176,7 +180,8 @@
     <div id="aufsicht-tab" class="tab-content">
       <div class="dashboard-grid">
         <div class="calendar-section">
-          <button class="btn" onclick="downloadList('aufsicht')" style="margin-bottom: 1rem; background: #2d5a3d;">📥 Schießaufsichtsliste herunterladen</button>
+          <button class="btn" onclick="downloadList('aufsicht')" style="margin-bottom: 1rem; background: #2d5a3d;">📥 Aktueller Monat</button>
+          <button class="btn" onclick="openDateRangeModal('aufsicht')" style="margin-bottom: 1rem; margin-left: 0.5rem; background: #1976d2;">📅 Zeitraum wählen</button>
           <button class="btn" onclick="openRotationModal('aufsicht')" style="margin-bottom: 1rem; margin-left: 1rem; background: #1a472a;">🔄 Auto-Rotation</button>
           <h2>Schießaufsicht-Kalender</h2>
           <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem; gap: 1rem;">
@@ -212,14 +217,61 @@
       </div>
       
       <div style="margin-bottom: 1.5rem;">
+        <label style="display: block; margin-bottom: 0.5rem; color: #4CAF50; font-weight: 600;">Tage einbeziehen:</label>
+        <div style="background: #1a1a1a; padding: 1rem; border-radius: 6px;">
+          <label style="display: flex; align-items: center; margin-bottom: 0.8rem; cursor: pointer; color: #e0e0e0; font-weight: normal;">
+            <input type="checkbox" id="include-saturdays" checked style="width: 20px; height: 20px; margin-right: 0.8rem; cursor: pointer;">
+            <span>☑️ Samstage</span>
+          </label>
+          <label style="display: flex; align-items: center; margin-bottom: 0.8rem; cursor: pointer; color: #e0e0e0; font-weight: normal;">
+            <input type="checkbox" id="include-sundays" checked style="width: 20px; height: 20px; margin-right: 0.8rem; cursor: pointer;">
+            <span>☑️ Sonntage</span>
+          </label>
+          <label style="display: flex; align-items: center; cursor: pointer; color: #e0e0e0; font-weight: normal;">
+            <input type="checkbox" id="include-holidays" checked style="width: 20px; height: 20px; margin-right: 0.8rem; cursor: pointer;">
+            <span>☑️ Feiertage/Sondertage</span>
+          </label>
+        </div>
+      </div>
+      
+      <div style="margin-bottom: 1.5rem;">
         <label style="display: block; margin-bottom: 0.5rem; color: #4CAF50; font-weight: 600;">Rotations-Reihenfolge:</label>
-        <p style="color: #999; font-size: 0.9rem; margin-bottom: 1rem;">Ziehe die Personen in die gewünschte Reihenfolge</p>
+        <p style="color: #999; font-size: 0.9rem; margin-bottom: 1rem;">Ziehe die Personen in die gewünschte Reihenfolge. Deaktiviere Personen, die nicht eingeteilt werden sollen.</p>
         <div id="rotation-list" style="background: #1a1a1a; padding: 1rem; border-radius: 6px; min-height: 200px;"></div>
       </div>
       
       <div style="display: flex; gap: 1rem;">
         <button onclick="startRotation()" style="flex: 1; background: #4CAF50; color: white; border: none; padding: 1rem; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 1rem;">✓ Rotation starten</button>
         <button onclick="closeRotationModal()" style="flex: 1; background: #c62828; color: white; border: none; padding: 1rem; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 1rem;">✗ Abbrechen</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Zeitraum PDF Modal -->
+  <div id="daterange-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999;">
+    <div style="background: #2a2a2a; max-width: 500px; margin: 10% auto; padding: 2rem; border-radius: 12px; position: relative;">
+      <button onclick="closeDateRangeModal()" style="position: absolute; top: 1rem; right: 1rem; background: transparent; border: none; color: #999; font-size: 2rem; cursor: pointer;">&times;</button>
+      <h2 style="color: #4CAF50; margin-bottom: 1.5rem;">📅 Zeitraum für PDF wählen</h2>
+      
+      <div style="margin-bottom: 1.5rem;">
+        <label style="display: block; margin-bottom: 0.5rem; color: #4CAF50; font-weight: 600;">Von (Monat/Jahr):</label>
+        <input type="month" id="pdf-start-month" style="width: 100%; padding: 0.8rem; background: #1a1a1a; border: 2px solid #3a3a3a; border-radius: 6px; color: #e0e0e0; font-size: 1rem;">
+      </div>
+      
+      <div style="margin-bottom: 1.5rem;">
+        <label style="display: block; margin-bottom: 0.5rem; color: #4CAF50; font-weight: 600;">Bis (Monat/Jahr):</label>
+        <input type="month" id="pdf-end-month" style="width: 100%; padding: 0.8rem; background: #1a1a1a; border: 2px solid #3a3a3a; border-radius: 6px; color: #e0e0e0; font-size: 1rem;">
+      </div>
+      
+      <div style="background: rgba(76, 175, 80, 0.1); border-left: 4px solid #4CAF50; padding: 1rem; margin-bottom: 1.5rem; border-radius: 4px;">
+        <p style="color: #999; font-size: 0.9rem; margin: 0;">
+          ℹ️ Es wird eine PDF mit allen Einteilungen im gewählten Zeitraum erstellt.
+        </p>
+      </div>
+      
+      <div style="display: flex; gap: 1rem;">
+        <button onclick="generateDateRangePDF()" style="flex: 1; background: #4CAF50; color: white; border: none; padding: 1rem; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 1rem;">📥 PDF erstellen</button>
+        <button onclick="closeDateRangeModal()" style="flex: 1; background: #666; color: white; border: none; padding: 1rem; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 1rem;">Abbrechen</button>
       </div>
     </div>
   </div>
@@ -265,55 +317,28 @@
 
     const monthNames = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
 
-    // Funktion zur Berechnung deutscher Feiertage
-    function getGermanHolidays(year) {
-      const holidays = [];
-      
-      // Feste Feiertage
-      holidays.push(`${year}-01-01`); // Neujahr
-      holidays.push(`${year}-01-06`); // Heilige Drei Könige
-      holidays.push(`${year}-05-01`); // Tag der Arbeit
-      holidays.push(`${year}-08-15`); // Mariä Himmelfahrt
-      holidays.push(`${year}-10-03`); // Tag der Deutschen Einheit
-      holidays.push(`${year}-11-01`); // Allerheiligen
-      holidays.push(`${year}-12-25`); // 1. Weihnachtstag
-      holidays.push(`${year}-12-26`); // 2. Weihnachtstag
-      
-      // Berechnung von Ostern (Gaußsche Osterformel)
-      const a = year % 19;
-      const b = Math.floor(year / 100);
-      const c = year % 100;
-      const d = Math.floor(b / 4);
-      const e = b % 4;
-      const f = Math.floor((b + 8) / 25);
-      const g = Math.floor((b - f + 1) / 3);
-      const h = (19 * a + b - d - g + 15) % 30;
-      const i = Math.floor(c / 4);
-      const k = c % 4;
-      const l = (32 + 2 * e + 2 * i - h - k) % 7;
-      const m = Math.floor((a + 11 * h + 22 * l) / 451);
-      const month = Math.floor((h + l - 7 * m + 114) / 31);
-      const day = ((h + l - 7 * m + 114) % 31) + 1;
-      
-      const easter = new Date(year, month - 1, day);
-      
-      // Bewegliche Feiertage basierend auf Ostern
-      const addDays = (date, days) => {
-        const result = new Date(date);
-        result.setDate(result.getDate() + days);
-        return result.toISOString().split('T')[0];
-      };
-      
-      holidays.push(addDays(easter, -2));  // Karfreitag
-      holidays.push(addDays(easter, 1));   // Ostermontag
-      holidays.push(addDays(easter, 39));  // Christi Himmelfahrt
-      holidays.push(addDays(easter, 50));  // Pfingstmontag
-      holidays.push(addDays(easter, 60));  // Fronleichnam
-      
-      return holidays;
+    // Wirte-Tage aus Firebase laden
+    let customWirteDays = [];
+    
+    async function loadWirteDays() {
+      try {
+        const snapshot = await getDocs(collection(db, 'wirte-days'));
+        customWirteDays = [];
+        snapshot.forEach(doc => {
+          customWirteDays.push(doc.data().date);
+        });
+      } catch (error) {
+        console.error('Fehler beim Laden der Wirte-Tage:', error);
+      }
     }
 
-    // Feiertage für 2025 und 2026 vorab berechnen
+    // Funktion zur Berechnung deutscher Feiertage (VERALTET - wird nicht mehr verwendet)
+    // Stattdessen werden Feiertage in Firebase verwaltet
+    function getGermanHolidays(year) {
+      return []; // Leer, da Feiertage jetzt in Firebase verwaltet werden
+    }
+
+    // Feiertage für 2025 und 2026 vorab berechnen (VERALTET)
     const holidays2025 = getGermanHolidays(2025);
     const holidays2026 = getGermanHolidays(2026);
     const allHolidays = [...holidays2025, ...holidays2026];
@@ -509,14 +534,15 @@
         
         // Prüfe ob Tag erlaubt ist
         let isAllowed = false;
-        const isHoliday = allHolidays.includes(dateStr);
+        const isCustomWirteDay = customWirteDays.includes(dateStr);
         
         if (type === 'aufsicht') {
           // Samstag ODER 26.12. (2. Weihnachtsfeiertag)
           const is26Dec = dateStr.endsWith('-12-26');
           isAllowed = dayOfWeek === 6 || is26Dec;
         } else if (type === 'wirte') {
-          isAllowed = dayOfWeek === 0 || dayOfWeek === 6 || isHoliday; // Samstag, Sonntag oder Feiertag
+          // Samstag, Sonntag ODER benutzerdefinierter Wirte-Tag
+          isAllowed = dayOfWeek === 0 || dayOfWeek === 6 || isCustomWirteDay;
         }
         
         // Prüfe ob Samstag und Wirte (dann 2 Slots)
@@ -546,7 +572,7 @@
         
         cell.className = cellClass;
         const dayNote = dayNotes[type][dateStr];
-        cell.innerHTML = `<div style="font-size: 0.9rem; color: ${isHoliday ? '#ffa726' : '#999'};">${day}${isHoliday ? ' 🎉' : ''}${dayNote ? ' 📝' : ''}</div>`;
+        cell.innerHTML = `<div style="font-size: 0.9rem; color: ${isCustomWirteDay ? '#ffa726' : '#999'};">${day}${isCustomWirteDay ? ' 🎉' : ''}${dayNote ? ' 📝' : ''}</div>`;
         cell.dataset.date = dateStr;
         
         if (!isAllowed) {
@@ -732,13 +758,30 @@
           const div = document.createElement('div');
           div.className = 'chat-message' + (s.status === 'completed' ? ' completed' : '');
           
+          const formattedDate = new Date(s.date + 'T00:00:00').toLocaleDateString('de-DE', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+          });
+          
           if (s.status === 'pending') {
-            div.innerHTML = `<strong>${s.requestPerson}</strong> sucht Ersatz für ${new Date(s.date).toLocaleDateString('de-DE')}<br>
+            div.innerHTML = `<strong>${s.requestPerson}</strong> sucht Ersatz für ${formattedDate}<br>
               <div style="margin: 0.5rem 0; font-size: 0.85rem; color: #999;">
                 ${s.replacementPerson ? `Ersatz: ${s.replacementPerson}` : 'Warte auf Zusage...'}
               </div>`;
           } else if (s.status === 'completed' && s.replacementPerson) {
-            div.innerHTML = `✅ <strong>${s.replacementPerson}</strong> hat für <strong>${s.requestPerson}</strong> am ${new Date(s.date).toLocaleDateString('de-DE')} übernommen`;
+            div.innerHTML = `
+              <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                <span style="color: #4CAF50; font-size: 1.2rem;">✅</span>
+                <strong>${s.requestPerson}</strong> 
+                <span style="color: #999;">hat mit</span>
+                <strong>${s.replacementPerson}</strong>
+                <span style="color: #999;">getauscht</span>
+              </div>
+              <div style="margin-top: 0.3rem; font-size: 0.85rem; color: #ffa726;">
+                📅 Datum: ${formattedDate}
+              </div>
+            `;
           } else {
             return; // Überspringe ungültige completed swaps
           }
@@ -756,13 +799,16 @@
       }
     };
 
-    ['wirte', 'aufsicht'].forEach(type => { 
-      loadPersons(type); 
-      loadAssignments(type); 
-      loadDayNotes(type);
-      loadSwapRequests(type);
-      updateMonthDisplay(type);
-      renderCalendar(type); 
+    // Wirte-Tage laden und dann Kalender initialisieren
+    loadWirteDays().then(() => {
+      ['wirte', 'aufsicht'].forEach(type => { 
+        loadPersons(type); 
+        loadAssignments(type); 
+        loadDayNotes(type);
+        loadSwapRequests(type);
+        updateMonthDisplay(type);
+        renderCalendar(type); 
+      });
     });
 
     // PDF Export Function - Optimiert für Querformat
@@ -1140,6 +1186,209 @@
       logo.src = 'logo.png';
     };
 
+    // === ZEITRAUM PDF FUNKTIONEN ===
+    let currentPDFType = null;
+
+    window.openDateRangeModal = (type) => {
+      currentPDFType = type;
+      document.getElementById('daterange-modal').style.display = 'block';
+      
+      // Setze Standard-Werte (aktueller Monat bis 3 Monate später)
+      const today = new Date();
+      const startMonth = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
+      const endDate = new Date(today.getFullYear(), today.getMonth() + 3, 1);
+      const endMonth = `${endDate.getFullYear()}-${String(endDate.getMonth() + 1).padStart(2, '0')}`;
+      
+      document.getElementById('pdf-start-month').value = startMonth;
+      document.getElementById('pdf-end-month').value = endMonth;
+    };
+
+    window.closeDateRangeModal = () => {
+      document.getElementById('daterange-modal').style.display = 'none';
+      currentPDFType = null;
+    };
+
+    window.generateDateRangePDF = async () => {
+      const startMonth = document.getElementById('pdf-start-month').value;
+      const endMonth = document.getElementById('pdf-end-month').value;
+      
+      if (!startMonth || !endMonth) {
+        alert('Bitte wähle Start- und End-Monat aus!');
+        return;
+      }
+      
+      if (startMonth > endMonth) {
+        alert('Start-Monat muss vor End-Monat liegen!');
+        return;
+      }
+      
+      closeDateRangeModal();
+      
+      // Lade jsPDF falls noch nicht geladen
+      if (!window.jspdf) {
+        const script = document.createElement('script');
+        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+        document.head.appendChild(script);
+        await new Promise(resolve => script.onload = resolve);
+      }
+      
+      const { jsPDF } = window.jspdf;
+      const type = currentPDFType;
+      
+      // Lade alle Assignments
+      const snapshot = await getDocs(collection(db, `${type}-assignments`));
+      const allAssignments = {};
+      snapshot.forEach(d => {
+        const data = d.data();
+        if (data.slot) {
+          const slotKey = `${data.date}-${data.slot}`;
+          allAssignments[slotKey] = { ...data, id: d.id };
+        } else {
+          allAssignments[data.date] = { ...data, id: d.id };
+        }
+      });
+      
+      // Filtere Assignments nach Zeitraum
+      const [startYear, startMonthNum] = startMonth.split('-').map(Number);
+      const [endYear, endMonthNum] = endMonth.split('-').map(Number);
+      
+      const filteredAssignments = {};
+      Object.keys(allAssignments).forEach(key => {
+        const dateStr = key.split('-').slice(0, 3).join('-'); // Entferne Slot-Teil falls vorhanden
+        const [year, month] = dateStr.split('-').map(Number);
+        
+        const isInRange = (year > startYear || (year === startYear && month >= startMonthNum)) &&
+                         (year < endYear || (year === endYear && month <= endMonthNum));
+        
+        if (isInRange) {
+          filteredAssignments[key] = allAssignments[key];
+        }
+      });
+      
+      if (Object.keys(filteredAssignments).length === 0) {
+        alert('Keine Einteilungen im gewählten Zeitraum gefunden!');
+        return;
+      }
+      
+      // Erstelle PDF
+      const doc = new jsPDF('landscape', 'mm', 'a4');
+      
+      // Titel
+      doc.setFontSize(16);
+      doc.setFont('helvetica', 'bold');
+      const title = type === 'wirte' ? 'Wirteliste' : 'Schießaufsichtsliste';
+      const startMonthName = new Date(startYear, startMonthNum - 1).toLocaleDateString('de-DE', { month: 'long', year: 'numeric' });
+      const endMonthName = new Date(endYear, endMonthNum - 1).toLocaleDateString('de-DE', { month: 'long', year: 'numeric' });
+      doc.text(`${title} - ${startMonthName} bis ${endMonthName}`, 148.5, 15, { align: 'center' });
+      
+      // Sortiere Assignments nach Datum
+      const sortedKeys = Object.keys(filteredAssignments).sort((a, b) => {
+        const dateA = a.split('-').slice(0, 3).join('-');
+        const dateB = b.split('-').slice(0, 3).join('-');
+        return dateA.localeCompare(dateB);
+      });
+      
+      // Tabelle erstellen
+      let yPos = 30;
+      const rowHeight = 8;
+      const colWidths = [20, 30, 60, 40]; // Tag, Datum, Name, Slot/Info
+      const startX = 20;
+      
+      // Header
+      doc.setFillColor(26, 71, 42);
+      doc.rect(startX, yPos, colWidths[0] + colWidths[1] + colWidths[2] + colWidths[3], rowHeight, 'F');
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(10);
+      doc.text('Tag', startX + colWidths[0]/2, yPos + 5.5, { align: 'center' });
+      doc.text('Datum', startX + colWidths[0] + colWidths[1]/2, yPos + 5.5, { align: 'center' });
+      doc.text('Name', startX + colWidths[0] + colWidths[1] + colWidths[2]/2, yPos + 5.5, { align: 'center' });
+      doc.text('Info', startX + colWidths[0] + colWidths[1] + colWidths[2] + colWidths[3]/2, yPos + 5.5, { align: 'center' });
+      
+      yPos += rowHeight;
+      
+      // Daten
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9);
+      
+      sortedKeys.forEach(key => {
+        const assignment = filteredAssignments[key];
+        const dateStr = key.split('-').slice(0, 3).join('-');
+        const date = new Date(dateStr + 'T00:00:00');
+        const dayName = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'][date.getDay()];
+        const formattedDate = date.toLocaleDateString('de-DE');
+        const name = assignment.swappedWith ? `${assignment.swappedWith} (für ${assignment.originalPerson})` : assignment.person;
+        const slot = assignment.slot ? (assignment.slot === 'fruehschoppen' ? '☀️ Frühschoppen' : '🌙 Schießabend') : '';
+        
+        // Neue Seite wenn nötig
+        if (yPos > 190) {
+          doc.addPage();
+          yPos = 20;
+          
+          // Header wiederholen
+          doc.setFillColor(26, 71, 42);
+          doc.rect(startX, yPos, colWidths[0] + colWidths[1] + colWidths[2] + colWidths[3], rowHeight, 'F');
+          doc.setTextColor(255, 255, 255);
+          doc.setFontSize(10);
+          doc.text('Tag', startX + colWidths[0]/2, yPos + 5.5, { align: 'center' });
+          doc.text('Datum', startX + colWidths[0] + colWidths[1]/2, yPos + 5.5, { align: 'center' });
+          doc.text('Name', startX + colWidths[0] + colWidths[1] + colWidths[2]/2, yPos + 5.5, { align: 'center' });
+          doc.text('Info', startX + colWidths[0] + colWidths[1] + colWidths[2] + colWidths[3]/2, yPos + 5.5, { align: 'center' });
+          yPos += rowHeight;
+          doc.setFont('helvetica', 'normal');
+          doc.setFontSize(9);
+        }
+        
+        // Hintergrund für Name-Spalte
+        if (assignment.color) {
+          const rgb = hexToRgb(assignment.color);
+          doc.setFillColor(rgb.r, rgb.g, rgb.b);
+          doc.rect(startX + colWidths[0] + colWidths[1], yPos, colWidths[2], rowHeight, 'F');
+        }
+        
+        // Rahmen
+        doc.setDrawColor(0);
+        doc.rect(startX, yPos, colWidths[0], rowHeight);
+        doc.rect(startX + colWidths[0], yPos, colWidths[1], rowHeight);
+        doc.rect(startX + colWidths[0] + colWidths[1], yPos, colWidths[2], rowHeight);
+        doc.rect(startX + colWidths[0] + colWidths[1] + colWidths[2], yPos, colWidths[3], rowHeight);
+        
+        // Text
+        doc.setTextColor(0, 0, 0);
+        doc.text(dayName, startX + colWidths[0]/2, yPos + 5.5, { align: 'center' });
+        doc.setFont('helvetica', 'bold');
+        doc.text(formattedDate, startX + colWidths[0] + colWidths[1]/2, yPos + 5.5, { align: 'center' });
+        doc.setFont('helvetica', 'normal');
+        
+        // Name in weiß wenn Hintergrund farbig
+        if (assignment.color) {
+          doc.setTextColor(255, 255, 255);
+        }
+        doc.text(name, startX + colWidths[0] + colWidths[1] + 2, yPos + 5.5);
+        
+        // Slot/Info
+        doc.setTextColor(0, 0, 0);
+        doc.setFontSize(8);
+        doc.text(slot, startX + colWidths[0] + colWidths[1] + colWidths[2] + 2, yPos + 5.5);
+        doc.setFontSize(9);
+        
+        yPos += rowHeight;
+      });
+      
+      // PDF speichern
+      doc.save(`${type}-liste-${startMonth}-bis-${endMonth}.pdf`);
+      alert('PDF wurde erstellt!');
+    };
+
+    // Helper function für Farbkonvertierung
+    function hexToRgb(hex) {
+      const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+      return result ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16)
+      } : { r: 0, g: 0, b: 0 };
+    }
+
     // === ROTATION FUNKTIONEN ===
     let currentRotationType = null;
     let rotationPersons = [];
@@ -1182,10 +1431,31 @@
         item.draggable = true;
         item.dataset.index = index;
         
-        item.innerHTML = `
-          <span>${index + 1}. ${person.name}</span>
-          <span style="opacity: 0.7;">☰</span>
-        `;
+        // Checkbox für Ein-/Ausschluss
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.checked = person.included !== false; // Default: eingeschlossen
+        checkbox.style.cssText = 'width: 20px; height: 20px; margin-right: 0.8rem; cursor: pointer;';
+        checkbox.onclick = (e) => {
+          e.stopPropagation();
+          person.included = checkbox.checked;
+        };
+        
+        const nameSpan = document.createElement('span');
+        nameSpan.textContent = `${index + 1}. ${person.name}`;
+        nameSpan.style.flex = '1';
+        
+        const dragHandle = document.createElement('span');
+        dragHandle.textContent = '☰';
+        dragHandle.style.opacity = '0.7';
+        
+        const leftDiv = document.createElement('div');
+        leftDiv.style.cssText = 'display: flex; align-items: center; flex: 1;';
+        leftDiv.appendChild(checkbox);
+        leftDiv.appendChild(nameSpan);
+        
+        item.appendChild(leftDiv);
+        item.appendChild(dragHandle);
         
         item.addEventListener('dragstart', (e) => {
           e.dataTransfer.effectAllowed = 'move';
@@ -1222,16 +1492,38 @@
         return;
       }
       
-      if (rotationPersons.length === 0) {
-        alert('Keine Personen verfügbar!');
+      // Filtere nur aktivierte Personen
+      const activePersons = rotationPersons.filter(p => p.included !== false);
+      
+      if (activePersons.length === 0) {
+        alert('Bitte mindestens eine Person aktivieren!');
         return;
       }
       
-      if (!confirm(`Rotation von ${startDate.toLocaleDateString('de-DE')} bis ${endDate.toLocaleDateString('de-DE')} starten?\n\nAlle bestehenden Einteilungen in diesem Zeitraum werden überschrieben!`)) {
+      // Hole Tagestyp-Auswahl
+      const includeSaturdays = document.getElementById('include-saturdays').checked;
+      const includeSundays = document.getElementById('include-sundays').checked;
+      const includeHolidays = document.getElementById('include-holidays').checked;
+      
+      if (!includeSaturdays && !includeSundays && !includeHolidays) {
+        alert('Bitte mindestens einen Tagestyp auswählen!');
         return;
       }
       
-      // Sammle alle Samstage + 26.12. im Zeitraum
+      // Lade customWirteDays für Feiertage/Sondertage
+      let holidayDates = [];
+      if (includeHolidays) {
+        try {
+          const snapshot = await getDocs(collection(db, 'wirte-days'));
+          snapshot.forEach(doc => {
+            holidayDates.push(doc.data().date);
+          });
+        } catch (error) {
+          console.error('Fehler beim Laden der Feiertage:', error);
+        }
+      }
+      
+      // Sammle alle passenden Tage im Zeitraum
       const dates = [];
       const current = new Date(startDate);
       
@@ -1239,18 +1531,49 @@
         const dayOfWeek = current.getDay();
         const dateStr = `${current.getFullYear()}-${String(current.getMonth() + 1).padStart(2, '0')}-${String(current.getDate()).padStart(2, '0')}`;
         
-        // Samstag ODER 26.12.
-        if (dayOfWeek === 6 || dateStr.endsWith('-12-26')) {
+        let shouldInclude = false;
+        
+        // Prüfe Samstag
+        if (includeSaturdays && dayOfWeek === 6) {
+          shouldInclude = true;
+        }
+        
+        // Prüfe Sonntag
+        if (includeSundays && dayOfWeek === 0) {
+          shouldInclude = true;
+        }
+        
+        // Prüfe Feiertag/Sondertag
+        if (includeHolidays && holidayDates.includes(dateStr)) {
+          shouldInclude = true;
+        }
+        
+        if (shouldInclude) {
           dates.push(dateStr);
         }
         
         current.setDate(current.getDate() + 1);
       }
       
+      if (dates.length === 0) {
+        alert('Keine passenden Tage im ausgewählten Zeitraum gefunden!');
+        return;
+      }
+      
+      const dayTypeText = [
+        includeSaturdays ? 'Samstage' : '',
+        includeSundays ? 'Sonntage' : '',
+        includeHolidays ? 'Feiertage/Sondertage' : ''
+      ].filter(t => t).join(', ');
+      
+      if (!confirm(`Rotation von ${startDate.toLocaleDateString('de-DE')} bis ${endDate.toLocaleDateString('de-DE')} starten?\n\nTage: ${dayTypeText}\nAnzahl Tage: ${dates.length}\nAktive Personen: ${activePersons.length}\n\nAlle bestehenden Einteilungen in diesem Zeitraum werden überschrieben!`)) {
+        return;
+      }
+      
       // Rotation durchführen
       let personIndex = 0;
       for (const dateStr of dates) {
-        const person = rotationPersons[personIndex % rotationPersons.length];
+        const person = activePersons[personIndex % activePersons.length];
         
         // Lösche bestehende Einteilung
         const existingSnapshot = await getDocs(collection(db, `${currentRotationType}-assignments`));
