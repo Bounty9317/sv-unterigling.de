@@ -1,6 +1,6 @@
 rules_version = '2';
 service cloud.firestore {
-  match /databases/vorstandschaftschuetzen/documents {
+  match /databases/{database}/documents {
     
     // Helper function to check if user is a helper
     function isHelper() {
