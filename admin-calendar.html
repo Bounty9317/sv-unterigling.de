@@ -338,10 +338,8 @@
       return []; // Leer, da Feiertage jetzt in Firebase verwaltet werden
     }
 
-    // Feiertage für 2025 und 2026 vorab berechnen (VERALTET)
-    const holidays2025 = getGermanHolidays(2025);
-    const holidays2026 = getGermanHolidays(2026);
-    const allHolidays = [...holidays2025, ...holidays2026];
+    // Feiertage für 2025 und 2026 werden jetzt in Firebase verwaltet (wirte-days collection)
+    // Die getGermanHolidays Funktion wird nicht mehr verwendet
 
     function updateMonthDisplay(type) {
       const [year, month] = currentMonth[type].split('-');
@@ -864,30 +862,30 @@
         const date = new Date(dateStr);
         const dayOfWeek = date.getDay();
         const slots = assignmentsByDate[dateStr];
-        const isHoliday = allHolidays.includes(dateStr);
+        const isCustomDay = customWirteDays.includes(dateStr);
         
         // Spezielle Ausnahme: 26.12. ist immer Schießabend (links)
         const is26Dec = dateStr.endsWith('-12-26');
         
         // Samstag Schießabend + 26.12.
         if (slots.schiessabend) {
-          saturdayEvening.push({ ...slots.schiessabend, dateStr, isHoliday, note: allNotes[dateStr] });
+          saturdayEvening.push({ ...slots.schiessabend, dateStr, isCustomDay, note: allNotes[dateStr] });
         } else if (dayOfWeek === 6 && slots.default && !slots.fruehschoppen) {
-          saturdayEvening.push({ ...slots.default, dateStr, isHoliday, note: allNotes[dateStr] });
+          saturdayEvening.push({ ...slots.default, dateStr, isCustomDay, note: allNotes[dateStr] });
         } else if (is26Dec && slots.default) {
           // 26.12. = Schießabend (links)
-          saturdayEvening.push({ ...slots.default, dateStr, isHoliday, note: allNotes[dateStr] });
+          saturdayEvening.push({ ...slots.default, dateStr, isCustomDay, note: allNotes[dateStr] });
         }
         
         // Sonntag oder Samstag-Frühschoppen oder andere Feiertage
         if (slots.fruehschoppen) {
-          sundayMorning.push({ ...slots.fruehschoppen, dateStr, isHoliday, isSaturdayMorning: dayOfWeek === 6, note: allNotes[dateStr] });
+          sundayMorning.push({ ...slots.fruehschoppen, dateStr, isCustomDay, isSaturdayMorning: dayOfWeek === 6, note: allNotes[dateStr] });
         } else if (dayOfWeek === 0 && slots.default) {
           // Sonntag = Frühschoppen (rechts)
-          sundayMorning.push({ ...slots.default, dateStr, isHoliday, note: allNotes[dateStr] });
-        } else if (slots.default && !is26Dec && (isHoliday || dayOfWeek === 0)) {
+          sundayMorning.push({ ...slots.default, dateStr, isCustomDay, note: allNotes[dateStr] });
+        } else if (slots.default && !is26Dec && (isCustomDay || dayOfWeek === 0)) {
           // Alle anderen Feiertage (außer 26.12.) = Frühschoppen (rechts)
-          sundayMorning.push({ ...slots.default, dateStr, isHoliday, note: allNotes[dateStr] });
+          sundayMorning.push({ ...slots.default, dateStr, isCustomDay, note: allNotes[dateStr] });
         }
       });
       
@@ -1044,7 +1042,7 @@
             const prefix = isNotSunday ? '! ' : '';
             
             // Prüfe ob unregelmäßig (Feiertag oder Samstag-Frühschoppen)
-            const isIrregular = a.isHoliday || a.isSaturdayMorning;
+            const isIrregular = a.isCustomDay || a.isSaturdayMorning;
             
             // Hintergrund für Tag, Datum, Name (ohne Info)
             if (a.color) {
