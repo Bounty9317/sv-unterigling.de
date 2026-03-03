@@ -582,9 +582,9 @@
         } else if (hasMultiSlots && (!fruehschoppenAssignment || !schiessabendAssignment)) {
           cell.title = fruehschoppenAssignment ? 'Samstag - Nur Frühschoppen eingeteilt' : 'Samstag - Nur Schießabend eingeteilt';
         } else if (!assignment && !hasMultiSlots) {
-          cell.title = isHoliday ? 'Feiertag - Einteilung fehlt!' : 'Einteilung fehlt!';
-        } else if (isHoliday) {
-          cell.title = 'Feiertag';
+          cell.title = isCustomWirteDay ? 'Feiertag/Sondertag - Einteilung fehlt!' : 'Einteilung fehlt!';
+        } else if (isCustomWirteDay) {
+          cell.title = 'Feiertag/Sondertag';
         }
         
         // Render Multi-Slot Assignments (Samstag bei Wirten)
