@@ -65,6 +65,12 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
     
+    // Wirte Days - Admins can read/write, Helpers can read
+    match /wirte-days/{document} {
+      allow read: if isHelper() || isAdmin();
+      allow write: if isAdmin();
+    }
+    
     // Settings - Visitor Counter (allow anyone to read and update)
     match /settings/visitor-counter {
       allow read, write: if true;
