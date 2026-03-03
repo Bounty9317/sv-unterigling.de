@@ -39,6 +39,18 @@
     .btn-delete-assignment:hover { opacity: 1; transform: scale(1.1); box-shadow: 0 2px 8px rgba(198, 40, 40, 0.5); }
     .calendar-header-day { background: #1a472a; color: white; padding: 0.8rem; text-align: center; font-weight: 600; }
 
+    /* Mobile Calendar List View Styles */
+    .calendar-list {
+      display: none; /* Hidden by default, shown on mobile via media query */
+    }
+
+    /* Desktop - Hide List View, Show Grid View */
+    @media (min-width: 769px) {
+      .calendar-list {
+        display: none !important;
+      }
+    }
+
     /* Responsive Layout */
     @media (max-width: 1024px) {
       .dashboard-grid { 
@@ -64,39 +76,123 @@
     }
 
     @media (max-width: 768px) {
+      /* Hide Grid View on Mobile */
+      .calendar-grid {
+        display: none !important;
+      }
+      
+      /* Show List View on Mobile */
+      .calendar-list {
+        display: block;
+        width: 100%;
+      }
+
+      /* Day Card Styles */
+      .day-card {
+        background: #2a2a2a;
+        border-left: 4px solid transparent;
+        border-radius: 8px;
+        margin-bottom: 12px;
+        padding: 16px;
+      }
+
+      .day-card.assigned {
+        border-left-color: #4CAF50;
+      }
+
+      .day-card.missing {
+        border-left-color: #c62828;
+        background: rgba(198, 40, 40, 0.1);
+      }
+
+      .day-card.disabled {
+        opacity: 0.5;
+        background: #1a1a1a;
+      }
+
+      /* Day Card Header */
+      .day-card-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 12px;
+      }
+
+      .day-number {
+        font-size: 24px;
+        font-weight: bold;
+      }
+
+      .day-name {
+        font-size: 14px;
+        color: #999;
+        margin-left: 8px;
+      }
+
+      .day-date {
+        font-size: 14px;
+        color: #999;
+        margin-left: auto;
+      }
+
+      /* Day Card Body */
+      .day-card-body {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      /* Assignment Display */
+      .assignment-display {
+        margin-bottom: 8px;
+      }
+
+      .slot-label {
+        font-size: 12px;
+        color: #999;
+        margin-bottom: 6px;
+        font-weight: 600;
+      }
+
+      /* Assignment Button - Touch-Friendly */
+      .assignment-button {
+        min-height: 44px;
+        min-width: 44px;
+        width: 100%;
+        padding: 12px 16px;
+        border: none;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 600;
+        color: white;
+        cursor: pointer;
+        text-align: left;
+        display: block;
+      }
+
+      .assignment-button:active {
+        transform: scale(0.98);
+      }
+
+      /* Person Name Display */
+      .person-name {
+        font-size: 14px;
+        word-wrap: break-word;
+        white-space: normal;
+      }
+
+      /* Other Mobile Adjustments */
       .container {
-        padding: 0;
+        padding: 0 0.5rem;
         max-width: 100vw;
         margin: 0;
         overflow-x: hidden;
       }
       .calendar-section {
-        padding: 0.2rem;
+        padding: 1rem;
         overflow-x: hidden;
         margin: 0;
         border-radius: 0;
-        width: 100vw;
-      }
-      .calendar-grid {
         width: 100%;
-        gap: 0;
-        font-size: 0.5rem;
-        display: grid;
-        grid-template-columns: repeat(7, 1fr);
-      }
-      .calendar-header-day {
-        padding: 0.2rem 0;
-        font-size: 0.55rem;
-        font-weight: 600;
-        overflow: hidden;
-      }
-      .calendar-day {
-        min-height: 45px;
-        max-height: 45px;
-        padding: 0.1rem;
-        font-size: 0.5rem;
-        border: 1px solid #1a1a1a;
-        overflow: hidden;
       }
       .person-cards {
         gap: 0.3rem;
@@ -170,6 +266,7 @@
           </div>
           <div class="person-cards" id="wirte-cards"></div>
           <div id="wirte-calendar" class="calendar-grid"></div>
+          <div id="wirte-calendar-list" class="calendar-list"></div>
         </div>
         <div class="chat-section">
           <h2>💬 Tausch-Anfragen</h2>
@@ -191,6 +288,7 @@
           </div>
           <div class="person-cards" id="aufsicht-cards"></div>
           <div id="aufsicht-calendar" class="calendar-grid"></div>
+          <div id="aufsicht-calendar-list" class="calendar-list"></div>
         </div>
         <div class="chat-section">
           <h2>💬 Tausch-Anfragen</h2>
@@ -490,7 +588,218 @@
       });
     }
 
-    function renderCalendar(type) {
+    // Mobile List View Functions
+    function createDayCard(type, dateStr, day, dayName, isAllowed, isCustomDay, dayOfWeek) {
+      if (!dateStr || !day || !dayName || typeof dayOfWeek !== 'number') {
+        console.error('Invalid date parameters in createDayCard:', { dateStr, day, dayName, dayOfWeek });
+        const errorCard = document.createElement('div');
+        errorCard.className = 'day-card disabled';
+        errorCard.innerHTML = '<div style="color: #c62828; font-size: 14px;">Ungültiges Datum</div>';
+        return errorCard;
+      }
+      
+      const card = document.createElement('div');
+      card.className = 'day-card';
+      card.dataset.date = dateStr;
+      
+      if (!isAllowed) {
+        card.classList.add('disabled');
+      }
+      
+      const isSaturday = dayOfWeek === 6;
+      const hasMultiSlots = type === 'wirte' && isSaturday;
+      
+      let hasAssignment = false;
+      if (hasMultiSlots) {
+        const frueh = assignments[type][`${dateStr}-fruehschoppen`];
+        const schies = assignments[type][`${dateStr}-schiessabend`];
+        hasAssignment = frueh || schies;
+      } else {
+        hasAssignment = !!assignments[type][dateStr];
+      }
+      
+      if (isAllowed) {
+        card.classList.add(hasAssignment ? 'assigned' : 'missing');
+      }
+      
+      const header = document.createElement('div');
+      header.className = 'day-card-header';
+      header.style.cssText = 'display: flex; align-items: center; margin-bottom: 12px;';
+      
+      const dayNumber = document.createElement('span');
+      dayNumber.className = 'day-number';
+      dayNumber.style.cssText = `font-size: 24px; font-weight: bold; color: ${isCustomDay ? '#ffa726' : '#4CAF50'};`;
+      dayNumber.textContent = `${day}${isCustomDay ? ' 🎉' : ''}`;
+      header.appendChild(dayNumber);
+      
+      const dayNameSpan = document.createElement('span');
+      dayNameSpan.className = 'day-name';
+      dayNameSpan.style.cssText = 'font-size: 14px; color: #999; margin-left: 8px;';
+      dayNameSpan.textContent = dayName;
+      header.appendChild(dayNameSpan);
+      
+      const dayDate = document.createElement('span');
+      dayDate.className = 'day-date';
+      dayDate.style.cssText = 'font-size: 14px; color: #999; margin-left: auto;';
+      const [year, month] = dateStr.split('-');
+      dayDate.textContent = `${String(day).padStart(2, '0')}.${month}.${year}`;
+      header.appendChild(dayDate);
+      
+      card.appendChild(header);
+      
+      const body = document.createElement('div');
+      body.className = 'day-card-body';
+      
+      if (isAllowed) {
+        if (hasMultiSlots) {
+          body.appendChild(createSlotDisplay(type, dateStr, 'fruehschoppen', '☀️ Frühschoppen'));
+          body.appendChild(createSlotDisplay(type, dateStr, 'schiessabend', '🌙 Schießabend'));
+        } else {
+          body.appendChild(createAssignmentDisplay(type, dateStr, null));
+        }
+      } else {
+        const disabledMsg = document.createElement('div');
+        disabledMsg.style.cssText = 'color: #666; font-size: 14px;';
+        disabledMsg.textContent = 'Keine Einteilung möglich';
+        body.appendChild(disabledMsg);
+      }
+      
+      card.appendChild(body);
+      return card;
+    }
+
+    function createSlotDisplay(type, dateStr, slot, label) {
+      const container = document.createElement('div');
+      container.className = 'assignment-display';
+      container.dataset.slot = slot;
+      container.style.marginBottom = '12px';
+      
+      const slotLabel = document.createElement('div');
+      slotLabel.className = 'slot-label';
+      slotLabel.textContent = label;
+      slotLabel.style.cssText = 'font-size: 12px; color: #999; margin-bottom: 6px; font-weight: 600;';
+      container.appendChild(slotLabel);
+      
+      const slotKey = `${dateStr}-${slot}`;
+      const assignment = assignments[type][slotKey];
+      
+      if (assignment) {
+        const button = createAssignmentButton(type, slotKey, assignment);
+        container.appendChild(button);
+      } else {
+        const emptyDiv = document.createElement('div');
+        emptyDiv.style.cssText = 'padding: 12px; background: rgba(198, 40, 40, 0.2); border-radius: 6px; color: #c62828; font-size: 14px;';
+        emptyDiv.textContent = 'Nicht eingeteilt';
+        container.appendChild(emptyDiv);
+      }
+      
+      return container;
+    }
+
+    function createAssignmentDisplay(type, dateStr, slot) {
+      const container = document.createElement('div');
+      container.className = 'assignment-display';
+      
+      const assignment = assignments[type][dateStr];
+      
+      if (assignment) {
+        const button = createAssignmentButton(type, dateStr, assignment);
+        container.appendChild(button);
+      } else {
+        const emptyDiv = document.createElement('div');
+        emptyDiv.style.cssText = 'padding: 12px; background: rgba(198, 40, 40, 0.2); border-radius: 6px; color: #c62828; font-size: 14px;';
+        emptyDiv.textContent = 'Nicht eingeteilt';
+        container.appendChild(emptyDiv);
+      }
+      
+      return container;
+    }
+
+    function createAssignmentButton(type, dateKey, assignment) {
+      if (!assignment) {
+        console.error('Missing assignment data in createAssignmentButton');
+        assignment = { person: 'Unbekannt', color: '#666' };
+      }
+      
+      const validatedAssignment = {
+        person: assignment.person || 'Unbekannt',
+        color: assignment.color || '#666',
+        swappedWith: assignment.swappedWith || null,
+        originalPerson: assignment.originalPerson || null
+      };
+      
+      const button = document.createElement('button');
+      button.className = 'assignment-button';
+      button.style.background = validatedAssignment.color;
+      
+      if (validatedAssignment.swappedWith && validatedAssignment.originalPerson) {
+        button.innerHTML = `
+          <div style="text-decoration: line-through; opacity: 0.7; margin-bottom: 4px;">
+            ${validatedAssignment.originalPerson}
+          </div>
+          <div style="font-size: 12px; color: rgba(255,255,255,0.8); margin-bottom: 4px;">
+            Getauscht mit
+          </div>
+          <div style="font-weight: bold;">
+            ${validatedAssignment.swappedWith}
+          </div>
+        `;
+      } else {
+        button.innerHTML = `<span class="person-name">${validatedAssignment.person}</span>`;
+      }
+      
+      button.addEventListener('click', () => {
+        // Admin can delete assignments by clicking
+        if (confirm(`Einteilung für ${validatedAssignment.person} löschen?`)) {
+          deleteAssignment(type, dateKey);
+        }
+      });
+      
+      return button;
+    }
+
+    function renderCalendarList(type) {
+      const listContainer = document.getElementById(`${type}-calendar-list`);
+      if (!listContainer) return;
+      
+      try {
+        listContainer.innerHTML = '';
+        
+        const [year, month] = currentMonth[type].split('-');
+        const daysInMonth = new Date(parseInt(year), parseInt(month), 0).getDate();
+        
+        for (let day = 1; day <= daysInMonth; day++) {
+          const dateStr = `${year}-${month}-${String(day).padStart(2, '0')}`;
+          const date = new Date(parseInt(year), parseInt(month) - 1, day);
+          const dayOfWeek = date.getDay();
+          
+          const dayNames = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
+          const dayName = dayNames[dayOfWeek];
+          
+          const isCustomWirteDay = customWirteDays.includes(dateStr);
+          
+          let isAllowed = false;
+          if (type === 'aufsicht') {
+            isAllowed = dayOfWeek === 6;
+          } else if (type === 'wirte') {
+            isAllowed = dayOfWeek === 0 || dayOfWeek === 6 || isCustomWirteDay;
+          }
+          
+          const card = createDayCard(type, dateStr, day, dayName, isAllowed, isCustomWirteDay, dayOfWeek);
+          listContainer.appendChild(card);
+        }
+      } catch (error) {
+        console.error('List view rendering failed:', error);
+        listContainer.innerHTML = `
+          <div style="padding: 2rem; text-align: center; color: #c62828;">
+            <p>Fehler beim Laden der Listenansicht.</p>
+            <p style="font-size: 0.9rem; color: #999;">Bitte Seite neu laden oder Desktop-Ansicht verwenden.</p>
+          </div>
+        `;
+      }
+    }
+
+    function renderCalendarGrid(type) {
       const cal = document.getElementById(`${type}-calendar`);
       cal.innerHTML = '';
       
@@ -738,6 +1047,13 @@
         cal.appendChild(cell);
       }
     }
+
+    // Wrapper function to render both grid and list views
+    function renderCalendar(type) {
+      renderCalendarGrid(type);
+      renderCalendarList(type);
+    }
+
 
     function loadSwapRequests(type) {
       onSnapshot(collection(db, `${type}-swaps`), (snapshot) => {
