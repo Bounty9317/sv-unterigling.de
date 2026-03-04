@@ -1524,6 +1524,8 @@
         return;
       }
       
+      // WICHTIG: Type speichern BEVOR Modal geschlossen wird
+      const type = currentPDFType;
       closeDateRangeModal();
       
       try {
@@ -1538,7 +1540,6 @@
         }
         
         const { jsPDF } = window.jspdf;
-        const type = currentPDFType;
         
         console.log('Lade Assignments für', type);
         // Assignments laden
@@ -1610,7 +1611,7 @@
         // Helper function: Zeichne Seiten-Header
         function drawPageHeader(isFirstPage) {
           const title = type === 'wirte' ? 'Wirte Liste' : 'Schießaufsicht Liste';
-          const subtitle = 'Samstag/Feiertage / Sonntag';
+          const subtitle = type === 'wirte' ? 'Samstag/Feiertage / Sonntag' : 'Samstag';
           const [startYear, startMonthNum] = startMonth.split('-');
           const [endYear, endMonthNum] = endMonth.split('-');
           const monthNames = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
@@ -1706,45 +1707,66 @@
         let currentPage = 1;
         drawPageHeader(true);
         
-        const leftX = 20;
-        const rightX = 155;
-        const maxY = 190; // Maximale Y-Position vor Seitenumbruch
         const entriesPerColumn = 17; // Max 17 Einträge pro Spalte
         
-        // Samstag-Spalte (links)
-        let leftY = drawColumnHeaders(leftX, 48, 'Samstag');
-        for (let i = 0; i < saturdays.length; i++) {
-          // Neue Seite wenn Spalte voll
-          if (i > 0 && i % entriesPerColumn === 0) {
-            doc.addPage();
-            currentPage++;
-            drawPageHeader(false);
-            leftY = drawColumnHeaders(leftX, 48, 'Samstag');
-          }
-          leftY = drawRow(leftX, leftY, saturdays[i]);
-        }
-        
-        // Zurück zur ersten Seite für Sonntag-Spalte
-        doc.setPage(1);
-        
-        // Sonntag-Spalte (rechts)
-        let rightY = drawColumnHeaders(rightX, 48, 'Sonntag');
-        let sundayPage = 1;
-        for (let i = 0; i < sundays.length; i++) {
-          // Neue Seite wenn Spalte voll
-          if (i > 0 && i % entriesPerColumn === 0) {
-            sundayPage++;
-            // Prüfe ob Seite existiert, sonst erstelle neue
-            if (sundayPage > currentPage) {
+        // Für Schießaufsicht: Nur Samstag-Spalte (zentriert)
+        // Für Wirte: Zwei Spalten (Samstag links, Sonntag rechts)
+        if (type === 'aufsicht') {
+          // Nur eine zentrierte Spalte für Schießaufsicht
+          const centerX = 88.5; // Zentriert auf A4 Landscape (297mm / 2 - 120mm / 2)
+          let yPos = drawColumnHeaders(centerX, 48, 'Samstag');
+          
+          for (let i = 0; i < saturdays.length; i++) {
+            // Neue Seite wenn Spalte voll
+            if (i > 0 && i % entriesPerColumn === 0) {
               doc.addPage();
               currentPage++;
               drawPageHeader(false);
-            } else {
-              doc.setPage(sundayPage);
+              yPos = drawColumnHeaders(centerX, 48, 'Samstag');
             }
-            rightY = drawColumnHeaders(rightX, 48, 'Sonntag');
+            yPos = drawRow(centerX, yPos, saturdays[i]);
           }
-          rightY = drawRow(rightX, rightY, sundays[i]);
+        } else {
+          // Zwei Spalten für Wirte
+          const leftX = 20;
+          const rightX = 155;
+          
+          // Samstag-Spalte (links)
+          let leftY = drawColumnHeaders(leftX, 48, 'Samstag/Feiertage');
+          for (let i = 0; i < saturdays.length; i++) {
+            // Neue Seite wenn Spalte voll
+            if (i > 0 && i % entriesPerColumn === 0) {
+              doc.addPage();
+              currentPage++;
+              drawPageHeader(false);
+              leftY = drawColumnHeaders(leftX, 48, 'Samstag/Feiertage');
+            }
+            leftY = drawRow(leftX, leftY, saturdays[i]);
+          }
+          
+          // Zurück zur ersten Seite für Sonntag-Spalte
+          doc.setPage(1);
+          
+          // Sonntag-Spalte (rechts)
+          let rightY = drawColumnHeaders(rightX, 48, 'Sonntag');
+          let sundayPage = 1;
+          for (let i = 0; i < sundays.length; i++) {
+            // Neue Seite wenn Spalte voll
+            if (i > 0 && i % entriesPerColumn === 0) {
+              sundayPage++;
+              // Prüfe ob Seite existiert, sonst erstelle neue
+              if (sundayPage > currentPage) {
+                doc.addPage();
+                currentPage++;
+                drawPageHeader(false);
+              } else {
+                doc.setPage(sundayPage);
+                // Header ist bereits vorhanden, da Seite von Samstag-Spalte erstellt wurde
+              }
+              rightY = drawColumnHeaders(rightX, 48, 'Sonntag');
+            }
+            rightY = drawRow(rightX, rightY, sundays[i]);
+          }
         }
         
         // PDF speichern
