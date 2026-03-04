@@ -1702,12 +1702,17 @@
         });
         
         // Display events grouped by month
-        Object.keys(eventsByMonth).sort((a, b) => {
+        const sortedMonthKeys = Object.keys(eventsByMonth).sort((a, b) => {
           const [yearA, monthA] = a.split('-').map(Number);
           const [yearB, monthB] = b.split('-').map(Number);
+          console.log('Sorting:', a, 'vs', b, '→', yearA, monthA, 'vs', yearB, monthB);
           if (yearA !== yearB) return yearA - yearB;
           return monthA - monthB;
-        }).forEach(monthKey => {
+        });
+        
+        console.log('Sorted month keys for homepage:', sortedMonthKeys);
+        
+        sortedMonthKeys.forEach(monthKey => {
           const monthData = eventsByMonth[monthKey];
           
           // Month header
