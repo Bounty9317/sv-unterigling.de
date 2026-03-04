@@ -1819,7 +1819,13 @@
         const renderEvents = (container) => {
           container.innerHTML = '';
           
-          Object.keys(eventsByMonth).sort().forEach(monthKey => {
+          // Sort month keys chronologically (not alphabetically)
+          Object.keys(eventsByMonth).sort((a, b) => {
+            const [yearA, monthA] = a.split('-').map(Number);
+            const [yearB, monthB] = b.split('-').map(Number);
+            if (yearA !== yearB) return yearA - yearB;
+            return monthA - monthB;
+          }).forEach(monthKey => {
             const monthData = eventsByMonth[monthKey];
             
             // Month header
