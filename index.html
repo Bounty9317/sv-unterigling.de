@@ -761,7 +761,7 @@
           
           <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 85%; height: 85%;">
             <div style="background: rgba(30, 30, 30, 0.65); backdrop-filter: blur(8px); border-radius: 12px; padding: 2rem; box-shadow: 0 8px 32px rgba(0,0,0,0.4); height: 100%; overflow-y: auto; border: 2px solid rgba(76, 175, 80, 0.6);">
-              <h3 style="color: #4CAF50; margin-top: 0; text-align: center; margin-bottom: 1.5rem; font-size: 1.8rem;">📅 Termine 2025</h3>
+              <h3 style="color: #4CAF50; margin-top: 0; text-align: center; margin-bottom: 1.5rem; font-size: 1.8rem;">📅 Termine 25/26</h3>
               
               <div id="events-list">
                 <p style="color: #999; text-align: center;">Lade Veranstaltungen...</p>
@@ -1667,7 +1667,7 @@
         console.log('Future events:', allEvents.length);
         
         // Sort by date
-        allEvents.sort((a, b) => a.date - b.date);
+        allEvents.sort((a, b) => a.date.getTime() - b.date.getTime());
         
         // Take only first 10
         const events = allEvents.slice(0, 10);
@@ -1787,7 +1787,7 @@
         });
         
         // Sort by date
-        allEvents.sort((a, b) => a.date - b.date);
+        allEvents.sort((a, b) => a.date.getTime() - b.date.getTime());
         
         if (allEvents.length === 0) {
           const emptyMessage = '<p style="color: #999; text-align: center;">Aktuell keine kommenden Veranstaltungen.</p>';
