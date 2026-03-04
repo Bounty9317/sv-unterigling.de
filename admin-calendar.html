@@ -1577,8 +1577,16 @@
         // Trenne Samstage/Feiertage und Sonntage
         const saturdays = [];
         const sundays = [];
+        const seenDates = new Set(); // Duplikat-Prüfung
         
         filteredAssignments.forEach(a => {
+          // Überspringe Duplikate (gleiches Datum)
+          if (seenDates.has(a.date)) {
+            console.log('Überspringe Duplikat:', a.date, a.person);
+            return;
+          }
+          seenDates.add(a.date);
+          
           const date = new Date(a.date);
           const dayOfWeek = date.getDay();
           const isCustomDay = customDays.includes(a.date);
