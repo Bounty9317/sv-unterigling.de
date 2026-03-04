@@ -810,14 +810,40 @@
         // Sortiere nach Datum
         filteredAssignments.sort((a, b) => new Date(a.date) - new Date(b.date));
         
-        // PDF erstellen
+        // Lade Custom Wirte Days für Feiertage
+        const wirteDaysSnapshot = await getDocs(collection(db, 'wirte-days'));
+        const customDays = [];
+        wirteDaysSnapshot.forEach(d => {
+          customDays.push(d.data().date);
+        });
+        
+        // Trenne Samstage/Feiertage und Sonntage
+        const saturdays = [];
+        const sundays = [];
+        
+        filteredAssignments.forEach(a => {
+          const date = new Date(a.date);
+          const dayOfWeek = date.getDay();
+          const isCustomDay = customDays.includes(a.date);
+          
+          if (dayOfWeek === 0) {
+            // Sonntag
+            sundays.push(a);
+          } else if (dayOfWeek === 6 || (isCustomDay && dayOfWeek !== 0)) {
+            // Samstag ODER Feiertag (aber kein Sonntag)
+            saturdays.push(a);
+          }
+        });
+        
+        // PDF erstellen im neuen Format
         const doc = new jsPDF('landscape', 'mm', 'a4');
         
         // Titel
-        const title = type === 'wirte' ? 'Wirteliste' : 'Schießaufsichtsliste';
+        const title = type === 'wirte' ? 'Wirte Liste' : 'Schießaufsicht Liste';
+        const subtitle = 'Samstag / Sonntag';
         const [startYear, startMonthNum] = startMonth.split('-');
         const [endYear, endMonthNum] = endMonth.split('-');
-        const subtitle = `${startMonthNum}.${startYear} bis ${endMonthNum}.${endYear}`;
+        const dateRange = `Erstellt am: ${new Date().toLocaleDateString('de-DE')}`;
         
         doc.setFontSize(20);
         doc.setFont('helvetica', 'bold');
@@ -825,55 +851,177 @@
         
         doc.setFontSize(14);
         doc.setFont('helvetica', 'normal');
-        doc.text(subtitle, 148, 30, { align: 'center' });
+        doc.text(subtitle, 148, 28, { align: 'center' });
         
-        // Tabelle
-        const tableData = filteredAssignments.map(a => {
-          const date = new Date(a.date);
-          const dayNames = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
-          const dayName = dayNames[date.getDay()];
-          const formattedDate = date.toLocaleDateString('de-DE');
-          
-          return [formattedDate, dayName, a.person];
-        });
+        doc.setFontSize(10);
+        doc.text(dateRange, 148, 35, { align: 'center' });
         
-        let yPos = 45;
-        const rowHeight = 10;
-        const colWidths = [40, 60, 80];
+        // Zwei-Spalten Layout
+        const leftX = 20;
+        const rightX = 155;
+        const colWidth = 120;
+        const rowHeight = 8;
+        let leftY = 45;
+        let rightY = 45;
         
-        // Header
+        // Samstag Header (links)
         doc.setFillColor(26, 71, 42);
-        doc.rect(20, yPos, colWidths[0] + colWidths[1] + colWidths[2], rowHeight, 'F');
+        doc.rect(leftX, 40, colWidth, 8, 'F');
         doc.setTextColor(255, 255, 255);
         doc.setFont('helvetica', 'bold');
-        doc.text('Datum', 25, yPos + 7);
-        doc.text('Tag', 65, yPos + 7);
-        doc.text('Name', 125, yPos + 7);
+        doc.setFontSize(12);
+        doc.text('Samstag', leftX + 5, 45);
         
-        yPos += rowHeight;
+        // Sonntag Header (rechts)
+        doc.setFillColor(26, 71, 42);
+        doc.rect(rightX, 40, colWidth, 8, 'F');
+        doc.setTextColor(255, 255, 255);
+        doc.text('Sonntag', rightX + 5, 45);
         
-        // Daten
+        // Spalten-Header
+        doc.setFontSize(10);
+        doc.setFillColor(200, 200, 200);
+        
+        // Links: Tag, Datum, Name
+        doc.rect(leftX, leftY, 20, rowHeight, 'F');
+        doc.rect(leftX + 20, leftY, 40, rowHeight, 'F');
+        doc.rect(leftX + 60, leftY, 60, rowHeight, 'F');
         doc.setTextColor(0, 0, 0);
-        doc.setFont('helvetica', 'normal');
+        doc.text('Tag', leftX + 5, leftY + 5);
+        doc.text('Datum', leftX + 30, leftY + 5);
+        doc.text('Name', leftX + 75, leftY + 5);
         
-        tableData.forEach((row, index) => {
-          if (yPos > 180) {
+        // Rechts: Tag, Datum, Name
+        doc.rect(rightX, rightY, 20, rowHeight, 'F');
+        doc.rect(rightX + 20, rightY, 40, rowHeight, 'F');
+        doc.rect(rightX + 60, rightY, 60, rowHeight, 'F');
+        doc.text('Tag', rightX + 5, rightY + 5);
+        doc.text('Datum', rightX + 30, rightY + 5);
+        doc.text('Name', rightX + 75, rightY + 5);
+        
+        leftY += rowHeight;
+        rightY += rowHeight;
+        
+        // Daten einfügen
+        const maxRows = Math.max(saturdays.length, sundays.length);
+        
+        for (let i = 0; i < maxRows; i++) {
+          // Neue Seite wenn nötig (beide Spalten synchron)
+          if (leftY > 180 || rightY > 180) {
             doc.addPage();
-            yPos = 20;
+            leftY = 20;
+            rightY = 20;
+            
+            // Header auf neuer Seite wiederholen
+            // Samstag Header (links)
+            doc.setFillColor(26, 71, 42);
+            doc.rect(leftX, leftY, colWidth, 8, 'F');
+            doc.setTextColor(255, 255, 255);
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(12);
+            doc.text('Samstag', leftX + 5, leftY + 5);
+            
+            // Sonntag Header (rechts)
+            doc.setFillColor(26, 71, 42);
+            doc.rect(rightX, rightY, colWidth, 8, 'F');
+            doc.setTextColor(255, 255, 255);
+            doc.text('Sonntag', rightX + 5, rightY + 5);
+            
+            leftY += 8;
+            rightY += 8;
+            
+            // Spalten-Header wiederholen
+            doc.setFontSize(10);
+            doc.setFillColor(200, 200, 200);
+            
+            // Links: Tag, Datum, Name
+            doc.rect(leftX, leftY, 20, rowHeight, 'F');
+            doc.rect(leftX + 20, leftY, 40, rowHeight, 'F');
+            doc.rect(leftX + 60, leftY, 60, rowHeight, 'F');
+            doc.setTextColor(0, 0, 0);
+            doc.text('Tag', leftX + 5, leftY + 5);
+            doc.text('Datum', leftX + 30, leftY + 5);
+            doc.text('Name', leftX + 75, leftY + 5);
+            
+            // Rechts: Tag, Datum, Name
+            doc.rect(rightX, rightY, 20, rowHeight, 'F');
+            doc.rect(rightX + 20, rightY, 40, rowHeight, 'F');
+            doc.rect(rightX + 60, rightY, 60, rowHeight, 'F');
+            doc.text('Tag', rightX + 5, rightY + 5);
+            doc.text('Datum', rightX + 30, rightY + 5);
+            doc.text('Name', rightX + 75, rightY + 5);
+            
+            leftY += rowHeight;
+            rightY += rowHeight;
           }
           
-          // Zebra-Streifen
-          if (index % 2 === 0) {
-            doc.setFillColor(240, 240, 240);
-            doc.rect(20, yPos, colWidths[0] + colWidths[1] + colWidths[2], rowHeight, 'F');
+          // Samstag/Feiertag (links)
+          if (i < saturdays.length) {
+            const a = saturdays[i];
+            const date = new Date(a.date);
+            const dayNames = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
+            const dayName = dayNames[date.getDay()];
+            const formattedDate = date.toLocaleDateString('de-DE');
+            
+            // Farbe basierend auf Person
+            const colorMap = {
+              'Hans Solygan': [100, 200, 200],
+              'Benno Gerum': [255, 150, 150],
+              'Roland Hollmann': [150, 150, 255],
+              'Franz Rupp': [255, 100, 200],
+              'Christian Mader': [255, 180, 100],
+              'Alex Schuster': [150, 255, 150],
+              'Ralf Hollmann': [255, 150, 100],
+              'Korbinian Mayr': [180, 180, 180],
+              'Moritz Schneinder': [180, 180, 180]
+            };
+            
+            const color = colorMap[a.person] || [240, 240, 240];
+            doc.setFillColor(...color);
+            doc.rect(leftX, leftY, colWidth, rowHeight, 'F');
+            
+            doc.setTextColor(0, 0, 0);
+            doc.setFont('helvetica', 'normal');
+            doc.text(dayName, leftX + 5, leftY + 5);
+            doc.text(formattedDate, leftX + 30, leftY + 5);
+            doc.text(a.person, leftX + 75, leftY + 5);
           }
           
-          doc.text(row[0], 25, yPos + 7);
-          doc.text(row[1], 65, yPos + 7);
-          doc.text(row[2], 125, yPos + 7);
+          // Sonntag (rechts)
+          if (i < sundays.length) {
+            const a = sundays[i];
+            const date = new Date(a.date);
+            const dayNames = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
+            const dayName = dayNames[date.getDay()];
+            const formattedDate = date.toLocaleDateString('de-DE');
+            
+            // Farbe basierend auf Person
+            const colorMap = {
+              'Hans Solygan': [100, 200, 200],
+              'Benno Gerum': [255, 150, 150],
+              'Roland Hollmann': [150, 150, 255],
+              'Franz Rupp': [255, 100, 200],
+              'Christian Mader': [255, 180, 100],
+              'Alex Schuster': [150, 255, 150],
+              'Ralf Hollmann': [255, 150, 100],
+              'Korbinian Mayr': [180, 180, 180],
+              'Moritz Schneinder': [180, 180, 180]
+            };
+            
+            const color = colorMap[a.person] || [240, 240, 240];
+            doc.setFillColor(...color);
+            doc.rect(rightX, rightY, colWidth, rowHeight, 'F');
+            
+            doc.setTextColor(0, 0, 0);
+            doc.setFont('helvetica', 'normal');
+            doc.text(dayName, rightX + 5, rightY + 5);
+            doc.text(formattedDate, rightX + 30, rightY + 5);
+            doc.text(a.person, rightX + 75, rightY + 5);
+          }
           
-          yPos += rowHeight;
-        });
+          leftY += rowHeight;
+          rightY += rowHeight;
+        }
         
         // PDF speichern
         console.log('Speichere PDF...');
