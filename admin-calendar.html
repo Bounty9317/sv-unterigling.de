@@ -1629,15 +1629,23 @@
           doc.setFontSize(20);
           doc.setFont('helvetica', 'bold');
           const title = type === 'wirte' ? 'Wirte Liste' : 'Schießaufsicht Liste';
-          const subtitle = type === 'wirte' ? 'Samstag / Sonntag' : 'Samstag';
+          const subtitle = type === 'wirte' ? 'Samstag/Feiertage / Sonntag' : 'Samstag';
           doc.text(title, 148, 20, { align: 'center' });
           doc.setFontSize(14);
           doc.text(subtitle, 148, 28, { align: 'center' });
           
-          // Datum
+          // Datum und Zeitraum
           doc.setFontSize(10);
           doc.setFont('helvetica', 'normal');
           doc.text(`Erstellt am: ${new Date().toLocaleDateString('de-DE')}`, 148, 35, { align: 'center' });
+          
+          // Zeitraum formatieren (z.B. "Apr 25 bis Okt 25")
+          const [startYear, startMonthNum] = startMonth.split('-');
+          const [endYear, endMonthNum] = endMonth.split('-');
+          const startMonthShort = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'][parseInt(startMonthNum) - 1];
+          const endMonthShort = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'][parseInt(endMonthNum) - 1];
+          const timeRange = `${startMonthShort} ${startYear.substring(2)} bis ${endMonthShort} ${endYear.substring(2)}`;
+          doc.text(timeRange, 148, 40, { align: 'center' });
           
           // Tabellen-Startposition
           let startY = 50;
@@ -1656,7 +1664,7 @@
               // Samstag Header (links)
               doc.setFontSize(12);
               doc.setFont('helvetica', 'bold');
-              doc.text('Samstag', 50, yStart);
+              doc.text('Samstag/Feiertage', 70, yStart);
               
               doc.setFontSize(10);
               doc.rect(20, yStart + 5, 30, 8);
