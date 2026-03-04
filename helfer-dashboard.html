@@ -478,21 +478,21 @@
   <header>
     <div class="header-top">
       <div class="logo">
-        <img src="logo.png" alt="Sch++tzenverein Logo" style="height: 60px; width: auto;">
-        <h1>Sch++tzenverein<br>Unterigling e.V.</h1>
+        <img src="logo.png" alt="Sch√ºtzenverein Logo" style="height: 60px; width: auto;">
+        <h1>Sch√ºtzenverein<br>Unterigling e.V.</h1>
       </div>
     </div>
     <nav>
-      <button class="hamburger" id="hamburger" aria-label="Men++ +¬ffnen">
+      <button class="hamburger" id="hamburger" aria-label="Men√º √∂ffnen">
         <span></span>
         <span></span>
         <span></span>
       </button>
       <ul id="nav-menu">
-        <li><a href="index.html">≠É≈· Startseite</a></li>
-        <li><a href="#" onclick="showTab('wirte')">≠ÉÏ¶ Wirte</a></li>
-        <li><a href="#" onclick="showTab('aufsicht')">≠Éƒª Schie+Éaufsicht</a></li>
-        <li><a href="#" id="logout-btn">≠É‹¨ Abmelden</a></li>
+        <li><a href="index.html">üè† Startseite</a></li>
+        <li><a href="#" onclick="showTab('wirte')">üç∫ Wirte</a></li>
+        <li><a href="#" onclick="showTab('aufsicht')">üéØ Schie√üaufsicht</a></li>
+        <li><a href="#" id="logout-btn">üö™ Abmelden</a></li>
       </ul>
     </nav>
   </header>
@@ -500,19 +500,19 @@
     <div id="wirte-tab" class="tab-content active">
       <div class="dashboard-grid">
         <div class="calendar-section">
-          <button class="btn" onclick="openDateRangeModal('wirte')" style="margin-bottom: 1rem; margin-left: 0.5rem; background: #1976d2;">≠ÉÙ‡ Zeitraum w+Òhlen</button>
+          <button class="btn" onclick="openDateRangeModal('wirte')" style="margin-bottom: 1rem; background: #1976d2;">üìÖ Zeitraum w√§hlen</button>
           <h2>Wirte-Kalender</h2>
           <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem; gap: 1rem;">
-            <button class="btn" onclick="previousMonth('wirte')" style="padding: 0.5rem 1rem; font-size: 1.2rem;">‘˘«</button>
+            <button class="btn" onclick="previousMonth('wirte')" style="padding: 0.5rem 1rem; font-size: 1.2rem;">‚óÄ</button>
             <h3 id="wirte-month-display" style="min-width: 200px; text-align: center; color: #4CAF50; font-size: 1.3rem;">Januar 2025</h3>
-            <button class="btn" onclick="nextMonth('wirte')" style="padding: 0.5rem 1rem; font-size: 1.2rem;">‘˚¬</button>
+            <button class="btn" onclick="nextMonth('wirte')" style="padding: 0.5rem 1rem; font-size: 1.2rem;">‚ñ∂</button>
           </div>
           <div class="person-cards" id="wirte-cards"></div>
           <div id="wirte-calendar" class="calendar-grid"></div>
           <div id="wirte-calendar-list" class="calendar-list"></div>
         </div>
         <div class="chat-section">
-          <h2>≠É∆º Tausch-Anfragen & Verlauf</h2>
+          <h2>üí¨ Tausch-Anfragen & Verlauf</h2>
           <div id="wirte-chat"><p style="color: #999;">Keine Anfragen</p></div>
         </div>
       </div>
@@ -520,19 +520,19 @@
     <div id="aufsicht-tab" class="tab-content">
       <div class="dashboard-grid">
         <div class="calendar-section">
-          <button class="btn" onclick="openDateRangeModal('aufsicht')" style="margin-bottom: 1rem; margin-left: 0.5rem; background: #1976d2;">≠ÉÙ‡ Zeitraum w+Òhlen</button>
-          <h2>Schie+Éaufsicht-Kalender</h2>
+          <button class="btn" onclick="openDateRangeModal('aufsicht')" style="margin-bottom: 1rem; background: #1976d2;">üìÖ Zeitraum w√§hlen</button>
+          <h2>Schie√üaufsicht-Kalender</h2>
           <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem; gap: 1rem;">
-            <button class="btn" onclick="previousMonth('aufsicht')" style="padding: 0.5rem 1rem; font-size: 1.2rem;">‘˘«</button>
+            <button class="btn" onclick="previousMonth('aufsicht')" style="padding: 0.5rem 1rem; font-size: 1.2rem;">‚óÄ</button>
             <h3 id="aufsicht-month-display" style="min-width: 200px; text-align: center; color: #4CAF50; font-size: 1.3rem;">Januar 2025</h3>
-            <button class="btn" onclick="nextMonth('aufsicht')" style="padding: 0.5rem 1rem; font-size: 1.2rem;">‘˚¬</button>
+            <button class="btn" onclick="nextMonth('aufsicht')" style="padding: 0.5rem 1rem; font-size: 1.2rem;">‚ñ∂</button>
           </div>
           <div class="person-cards" id="aufsicht-cards"></div>
           <div id="aufsicht-calendar" class="calendar-grid"></div>
           <div id="aufsicht-calendar-list" class="calendar-list"></div>
         </div>
         <div class="chat-section">
-          <h2>≠É∆º Tausch-Anfragen & Verlauf</h2>
+          <h2>üí¨ Tausch-Anfragen & Verlauf</h2>
           <div id="aufsicht-chat"><p style="color: #999;">Keine Anfragen</p></div>
         </div>
       </div>
@@ -607,7 +607,7 @@
       aufsicht: []
     };
 
-    // Mache Variablen global verf++gbar f++r Modal
+    // Mache Variablen global verf√ºgbar f√ºr Modal
     window.globalPersons = persons;
     window.globalDbRef = db;
     window.globalCollectionFunc = collection;
@@ -633,7 +633,7 @@
     const currentYearMonth = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
     let currentMonth = { wirte: currentYearMonth, aufsicht: currentYearMonth };
 
-    const monthNames = ['Januar', 'Februar', 'M+Òrz', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
+    const monthNames = ['Januar', 'Februar', 'M√§rz', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
 
     // Wirte-Tage aus Firebase laden
     let customWirteDays = [];
@@ -656,7 +656,7 @@
       return []; // Leer, da Feiertage jetzt in Firebase verwaltet werden
     }
 
-    // Feiertage f++r 2025 und 2026 vorab berechnen (VERALTET)
+    // Feiertage f√ºr 2025 und 2026 vorab berechnen (VERALTET)
     const holidays2025 = getGermanHolidays(2025);
     const holidays2026 = getGermanHolidays(2026);
     const allHolidays = [...holidays2025, ...holidays2026];
@@ -750,14 +750,14 @@
     };
 
     window.generateDateRangePDF = async () => {
-      console.log('=== PDF GENERATION START - VERSION 2025-01-08-17:00 ===');
+      console.log('=== PDF GENERATION START - VERSION 2025-01-08-20:00 ===');
       const startMonth = document.getElementById('pdf-start-month').value;
       const endMonth = document.getElementById('pdf-end-month').value;
       
       console.log('Start:', startMonth, 'End:', endMonth);
       
       if (!startMonth || !endMonth) {
-        alert('Bitte w+Òhle Start- und End-Monat aus!');
+        alert('Bitte w√§hle Start- und End-Monat aus!');
         return;
       }
       
@@ -782,7 +782,7 @@
         const { jsPDF } = window.jspdf;
         const type = currentPdfType;
         
-        console.log('Lade Assignments f++r', type);
+        console.log('Lade Assignments f√ºr', type);
         // Assignments laden
         const snapshot = await getDocs(collection(db, `${type}-assignments`));
         const allAssignments = [];
@@ -792,7 +792,7 @@
         
         // Filtern nach Zeitraum
         const filteredAssignments = allAssignments.filter(a => {
-          // +£berspringe Eintr+Òge ohne date Feld (z.B. alte Multi-Slot Eintr+Òge)
+          // √úberspringe Eintr√§ge ohne date Feld (z.B. alte Multi-Slot Eintr√§ge)
           if (!a.date) return false;
           const assignmentMonth = a.date.substring(0, 7); // YYYY-MM
           return assignmentMonth >= startMonth && assignmentMonth <= endMonth;
@@ -801,14 +801,14 @@
         console.log('Gefilterte Assignments:', filteredAssignments.length);
         
         if (filteredAssignments.length === 0) {
-          alert('Keine Einteilungen im gew+Òhlten Zeitraum gefunden!');
+          alert('Keine Einteilungen im gew√§hlten Zeitraum gefunden!');
           return;
         }
         
         // Sortiere nach Datum
         filteredAssignments.sort((a, b) => new Date(a.date) - new Date(b.date));
         
-        // Lade Custom Wirte Days f++r Feiertage
+        // Lade Custom Wirte Days f√ºr Feiertage
         const wirteDaysSnapshot = await getDocs(collection(db, 'wirte-days'));
         const customDays = [];
         wirteDaysSnapshot.forEach(d => {
@@ -833,251 +833,166 @@
           }
         });
         
-        // Hilfsfunktion: Hex zu RGB konvertieren
-        const hexToRgb = (hex) => {
-          const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-          return result ? {
-            r: parseInt(result[1], 16),
-            g: parseInt(result[2], 16),
-            b: parseInt(result[3], 16)
-          } : { r: 200, g: 200, b: 200 };
-        };
-
-        // Hilfsfunktion: Namen k++rzen
-        const shortenName = (fullName) => {
-          const parts = fullName.trim().split(' ');
-          if (parts.length < 2) return fullName;
-          const firstName = parts[0];
-          const lastName = parts.slice(1).join(' ');
-          return `${firstName.charAt(0)}. ${lastName}`;
-        };
+        // PDF erstellen im neuen Format
+        const doc = new jsPDF('landscape', 'mm', 'a4');
         
-        // PDF erstellen Funktion mit Logo-Support
-        const createPDF = (withLogo = false, logoData = null) => {
-          const doc = new jsPDF('landscape', 'mm', 'a4');
-          
-          // Logo hinzuf++gen wenn vorhanden (oval wie Original)
-          if (withLogo && logoData) {
-            // Original: 644x387 px = ovale Form
-            // Seitenverh+Òltnis exakt beibehalten: 644/387 = 1.664
-            const logoWidth = 60; // mm
-            const logoHeight = logoWidth / 1.664;
-            
-            // Logo links
-            doc.addImage(logoData, 'PNG', 15, 8, logoWidth, logoHeight);
-            
-            // Logo rechts (A4 Querformat = 297mm breit)
-            doc.addImage(logoData, 'PNG', 297 - 15 - logoWidth, 8, logoWidth, logoHeight);
+        // Helper function: Farbe aus Datenbank konvertieren
+        function hexToRgb(hex) {
+          if (!hex || hex === 'undefined') return [240, 240, 240];
+          hex = hex.replace('#', '');
+          if (hex.length === 3) {
+            hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
           }
-          
-          // +£berschrift
-          doc.setFontSize(20);
-          doc.setFont('helvetica', 'bold');
-          const title = type === 'wirte' ? 'Wirte Liste' : 'Schie+Éaufsicht Liste';
-          const subtitle = type === 'wirte' ? 'Samstag/Feiertage / Sonntag' : 'Samstag';
-          doc.text(title, 148, 20, { align: 'center' });
-          doc.setFontSize(14);
-          doc.text(subtitle, 148, 28, { align: 'center' });
-          
-          // Datum und Zeitraum
-          doc.setFontSize(10);
-          doc.setFont('helvetica', 'normal');
-          doc.text(`Erstellt am: ${new Date().toLocaleDateString('de-DE')}`, 148, 35, { align: 'center' });
-          
-          // Zeitraum formatieren (z.B. "Apr 25 bis Okt 25")
+          const r = parseInt(hex.substring(0, 2), 16);
+          const g = parseInt(hex.substring(2, 4), 16);
+          const b = parseInt(hex.substring(4, 6), 16);
+          return [r, g, b];
+        }
+        
+        // Helper function: Zeichne Seiten-Header
+        function drawPageHeader(isFirstPage) {
+          const title = type === 'wirte' ? 'Wirte Liste' : 'Schie√üaufsicht Liste';
+          const subtitle = 'Samstag/Feiertage / Sonntag';
           const [startYear, startMonthNum] = startMonth.split('-');
           const [endYear, endMonthNum] = endMonth.split('-');
-          const startMonthShort = ['Jan', 'Feb', 'M+Òr', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'][parseInt(startMonthNum) - 1];
-          const endMonthShort = ['Jan', 'Feb', 'M+Òr', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'][parseInt(endMonthNum) - 1];
-          const timeRange = `${startMonthShort} ${startYear.substring(2)} bis ${endMonthShort} ${endYear.substring(2)}`;
-          doc.text(timeRange, 148, 40, { align: 'center' });
+          const monthNames = ['Jan', 'Feb', 'M√§r', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
+          const startMonthName = monthNames[parseInt(startMonthNum) - 1];
+          const endMonthName = monthNames[parseInt(endMonthNum) - 1];
+          const timeRange = `${startMonthName} ${startYear.substring(2)} bis ${endMonthName} ${endYear.substring(2)}`;
+          const dateRange = `Erstellt am: ${new Date().toLocaleDateString('de-DE')}`;
           
-          // Tabellen-Startposition
-          let startY = 50;
-          
-          // Hilfsfunktion: Header f++r neue Seite zeichnen
-          const drawHeaders = (yStart, isFirstPage = false) => {
-            // +£berschriften auf Folgeseiten hinzuf++gen (ohne Logo)
-            if (!isFirstPage) {
-              doc.setFontSize(20);
-              doc.setFont('helvetica', 'bold');
-              doc.text(title, 148, 20, { align: 'center' });
-              doc.setFontSize(14);
-              doc.text(subtitle, 148, 28, { align: 'center' });
-              
-              doc.setFontSize(10);
-              doc.setFont('helvetica', 'normal');
-              doc.text(`Erstellt am: ${new Date().toLocaleDateString('de-DE')}`, 148, 35, { align: 'center' });
-              doc.text(timeRange, 148, 40, { align: 'center' });
+          // Logo nur auf erster Seite
+          if (isFirstPage) {
+            const logoImg = new Image();
+            logoImg.src = 'logo.png';
+            try {
+              const logoWidth = 60;
+              const logoHeight = logoWidth / 1.664;
+              doc.addImage(logoImg, 'PNG', 15, 8, logoWidth, logoHeight);
+              doc.addImage(logoImg, 'PNG', 297 - 15 - logoWidth, 8, logoWidth, logoHeight);
+            } catch (e) {
+              console.log('Logo konnte nicht geladen werden:', e);
             }
-            
-            if (type === 'wirte') {
-              // Spalten++berschriften (ohne "Samstag/Feiertage" und "Sonntag" Text)
-              doc.setFontSize(10);
-              doc.setFont('helvetica', 'bold');
-              doc.rect(20, yStart + 5, 30, 8);
-              doc.rect(50, yStart + 5, 40, 8);
-              doc.rect(90, yStart + 5, 50, 8);
-              doc.text('Tag', 35, yStart + 10, { align: 'center' });
-              doc.text('Datum', 70, yStart + 10, { align: 'center' });
-              doc.text('Name', 115, yStart + 10, { align: 'center' });
-              
-              // Sonntag Spalten++berschriften (rechts)
-              doc.rect(157, yStart + 5, 30, 8);
-              doc.rect(187, yStart + 5, 40, 8);
-              doc.rect(227, yStart + 5, 50, 8);
-              doc.text('Tag', 172, yStart + 10, { align: 'center' });
-              doc.text('Datum', 207, yStart + 10, { align: 'center' });
-              doc.text('Name', 252, yStart + 10, { align: 'center' });
-            } else {
-              // Nur Spalten++berschriften (ohne "Samstag" Text - ist schon im Untertitel)
-              doc.setFontSize(10);
-              doc.setFont('helvetica', 'bold');
-              doc.rect(80, yStart + 5, 30, 8);
-              doc.rect(110, yStart + 5, 50, 8);
-              doc.rect(160, yStart + 5, 60, 8);
-              doc.text('Tag', 95, yStart + 10, { align: 'center' });
-              doc.text('Datum', 135, yStart + 10, { align: 'center' });
-              doc.text('Name', 190, yStart + 10, { align: 'center' });
-            }
-          };
-          
-          if (type === 'wirte') {
-            // Header zeichnen
-            drawHeaders(startY, true);
-            
-            doc.setFont('helvetica', 'normal');
-            let yPos = startY + 13;
-            
-            // Maximale Anzahl Eintr+Òge pro Seite berechnen (ca. 17 Eintr+Òge bei 8mm H+¬he)
-            const maxEntriesPerPage = 17;
-            const maxEntries = Math.max(saturdays.length, sundays.length);
-            
-            for (let i = 0; i < maxEntries; i++) {
-              // Pr++fe ob neue Seite n+¬tig
-              if (i > 0 && i % maxEntriesPerPage === 0) {
-                doc.addPage();
-                yPos = 50; // Gleiche Startposition wie auf erster Seite
-                drawHeaders(yPos, false);
-                yPos += 13;
-              }
-              
-              // Samstag Eintrag (links)
-              if (i < saturdays.length) {
-                const a = saturdays[i];
-                const date = new Date(a.date);
-                const dayName = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'][date.getDay()];
-                const dateStr = date.toLocaleDateString('de-DE');
-                const name = a.swappedWith ? `${a.swappedWith} (f++r ${shortenName(a.originalPerson)})` : a.person;
-                
-                if (a.color) {
-                  const rgb = hexToRgb(a.color);
-                  doc.setFillColor(rgb.r, rgb.g, rgb.b);
-                  doc.rect(20, yPos, 30, 8, 'F');
-                  doc.rect(50, yPos, 40, 8, 'F');
-                  doc.rect(90, yPos, 50, 8, 'F');
-                }
-                doc.setDrawColor(0);
-                doc.rect(20, yPos, 30, 8);
-                doc.rect(50, yPos, 40, 8);
-                doc.rect(90, yPos, 50, 8);
-                doc.setTextColor(255, 255, 255);
-                doc.text(dayName, 35, yPos + 5, { align: 'center' });
-                doc.setFont('helvetica', 'bold');
-                doc.text(dateStr, 70, yPos + 5, { align: 'center' });
-                doc.setFont('helvetica', 'normal');
-                doc.text(name, 92, yPos + 5);
-                doc.setTextColor(0, 0, 0);
-              }
-              
-              // Sonntag Eintrag (rechts) - auf gleicher H+¬he
-              if (i < sundays.length) {
-                const a = sundays[i];
-                const date = new Date(a.date);
-                const dayName = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'][date.getDay()];
-                const dateStr = date.toLocaleDateString('de-DE');
-                const name = a.swappedWith ? `${a.swappedWith} (f++r ${shortenName(a.originalPerson)})` : a.person;
-                
-                if (a.color) {
-                  const rgb = hexToRgb(a.color);
-                  doc.setFillColor(rgb.r, rgb.g, rgb.b);
-                  doc.rect(157, yPos, 30, 8, 'F');
-                  doc.rect(187, yPos, 40, 8, 'F');
-                  doc.rect(227, yPos, 50, 8, 'F');
-                }
-                doc.setDrawColor(0);
-                doc.rect(157, yPos, 30, 8);
-                doc.rect(187, yPos, 40, 8);
-                doc.rect(227, yPos, 50, 8);
-                doc.setTextColor(255, 255, 255);
-                doc.text(dayName, 172, yPos + 5, { align: 'center' });
-                doc.setFont('helvetica', 'bold');
-                doc.text(dateStr, 207, yPos + 5, { align: 'center' });
-                doc.setFont('helvetica', 'normal');
-                doc.text(name, 229, yPos + 5);
-                doc.setTextColor(0, 0, 0);
-              }
-              
-              yPos += 8;
-            }
-          } else {
-            // Nur Samstag Tabelle (zentriert) - f++r Schie+Éaufsicht
-            drawHeaders(startY, true);
-            
-            doc.setFont('helvetica', 'normal');
-            let yPos = startY + 13;
-            
-            // Maximale Anzahl Eintr+Òge pro Seite berechnen
-            const maxEntriesPerPage = 17;
-            
-            saturdays.forEach((a, i) => {
-              // Pr++fe ob neue Seite n+¬tig
-              if (i > 0 && i % maxEntriesPerPage === 0) {
-                doc.addPage();
-                yPos = 50; // Gleiche Startposition wie auf erster Seite
-                drawHeaders(yPos, false);
-                yPos += 13;
-              }
-              
-              const date = new Date(a.date);
-              const dayName = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'][date.getDay()];
-              const dateStr = date.toLocaleDateString('de-DE');
-              const name = a.swappedWith ? `${a.swappedWith} (f++r ${shortenName(a.originalPerson)})` : a.person;
-              
-              if (a.color) {
-                const rgb = hexToRgb(a.color);
-                doc.setFillColor(rgb.r, rgb.g, rgb.b);
-                doc.rect(80, yPos, 30, 8, 'F');
-                doc.rect(110, yPos, 50, 8, 'F');
-                doc.rect(160, yPos, 60, 8, 'F');
-              }
-              doc.setDrawColor(0);
-              doc.rect(80, yPos, 30, 8);
-              doc.rect(110, yPos, 50, 8);
-              doc.rect(160, yPos, 60, 8);
-              doc.setTextColor(255, 255, 255);
-              doc.text(dayName, 95, yPos + 5, { align: 'center' });
-              doc.setFont('helvetica', 'bold');
-              doc.text(dateStr, 135, yPos + 5, { align: 'center' });
-              doc.setFont('helvetica', 'normal');
-              doc.text(name, 162, yPos + 5);
-              doc.setTextColor(0, 0, 0);
-              yPos += 8;
-            });
           }
           
-          // PDF speichern
-          console.log('Speichere PDF...');
-          doc.save(`${type}-liste-${startMonth}-bis-${endMonth}.pdf`);
-          console.log('PDF gespeichert!');
-        };
+          doc.setFontSize(20);
+          doc.setFont('helvetica', 'bold');
+          doc.text(title, 148, 20, { align: 'center' });
+          
+          doc.setFontSize(14);
+          doc.setFont('helvetica', 'normal');
+          doc.text(subtitle, 148, 28, { align: 'center' });
+          
+          doc.setFontSize(10);
+          doc.text(dateRange, 148, 35, { align: 'center' });
+          doc.text(timeRange, 148, 41, { align: 'center' });
+        }
         
-        // Versuche Logo zu laden
-        const logo = new Image();
-        logo.crossOrigin = 'anonymous';
-        logo.onload = () => createPDF(true, logo);
-        logo.onerror = () => createPDF(false);
-        logo.src = 'logo.png';
+        // Helper function: Zeichne Spalten-Header
+        function drawColumnHeaders(x, y, title) {
+          const colWidth = 120;
+          const rowHeight = 8;
+          
+          // Spalten-Titel (Samstag/Sonntag)
+          doc.setFillColor(26, 71, 42);
+          doc.rect(x, y, colWidth, rowHeight, 'F');
+          doc.setTextColor(255, 255, 255);
+          doc.setFont('helvetica', 'bold');
+          doc.setFontSize(12);
+          doc.text(title, x + 5, y + 5);
+          
+          y += rowHeight;
+          
+          // Spalten-Header (Tag, Datum, Name)
+          doc.setFontSize(10);
+          doc.setFillColor(200, 200, 200);
+          doc.rect(x, y, 20, rowHeight, 'FD');
+          doc.rect(x + 20, y, 40, rowHeight, 'FD');
+          doc.rect(x + 60, y, 60, rowHeight, 'FD');
+          doc.setTextColor(0, 0, 0);
+          doc.setFont('helvetica', 'bold');
+          doc.text('Tag', x + 5, y + 5);
+          doc.text('Datum', x + 30, y + 5);
+          doc.text('Name', x + 75, y + 5);
+          
+          return y + rowHeight;
+        }
+        
+        // Helper function: Zeichne eine Zeile
+        function drawRow(x, y, assignment) {
+          const colWidth = 120;
+          const rowHeight = 8;
+          const date = new Date(assignment.date);
+          const dayNames = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
+          const dayName = dayNames[date.getDay()];
+          const formattedDate = date.toLocaleDateString('de-DE');
+          
+          // Farbe aus Datenbank verwenden
+          const color = hexToRgb(assignment.color);
+          doc.setFillColor(...color);
+          doc.rect(x, y, 20, rowHeight, 'FD');
+          doc.rect(x + 20, y, 40, rowHeight, 'FD');
+          doc.rect(x + 60, y, 60, rowHeight, 'FD');
+          
+          doc.setTextColor(255, 255, 255);
+          doc.setFont('helvetica', 'normal');
+          doc.setFontSize(10);
+          doc.text(dayName, x + 5, y + 5);
+          doc.text(formattedDate, x + 30, y + 5);
+          doc.text(assignment.person, x + 75, y + 5);
+          
+          return y + rowHeight;
+        }
+        
+        // Erste Seite initialisieren
+        let currentPage = 1;
+        drawPageHeader(true);
+        
+        const leftX = 20;
+        const rightX = 155;
+        const maxY = 190; // Maximale Y-Position vor Seitenumbruch
+        const entriesPerColumn = 17; // Max 17 Eintr√§ge pro Spalte
+        
+        // Samstag-Spalte (links)
+        let leftY = drawColumnHeaders(leftX, 48, 'Samstag');
+        for (let i = 0; i < saturdays.length; i++) {
+          // Neue Seite wenn Spalte voll
+          if (i > 0 && i % entriesPerColumn === 0) {
+            doc.addPage();
+            currentPage++;
+            drawPageHeader(false);
+            leftY = drawColumnHeaders(leftX, 48, 'Samstag');
+          }
+          leftY = drawRow(leftX, leftY, saturdays[i]);
+        }
+        
+        // Zur√ºck zur ersten Seite f√ºr Sonntag-Spalte
+        doc.setPage(1);
+        
+        // Sonntag-Spalte (rechts)
+        let rightY = drawColumnHeaders(rightX, 48, 'Sonntag');
+        let sundayPage = 1;
+        for (let i = 0; i < sundays.length; i++) {
+          // Neue Seite wenn Spalte voll
+          if (i > 0 && i % entriesPerColumn === 0) {
+            sundayPage++;
+            // Pr√ºfe ob Seite existiert, sonst erstelle neue
+            if (sundayPage > currentPage) {
+              doc.addPage();
+              currentPage++;
+              drawPageHeader(false);
+            } else {
+              doc.setPage(sundayPage);
+            }
+            rightY = drawColumnHeaders(rightX, 48, 'Sonntag');
+          }
+          rightY = drawRow(rightX, rightY, sundays[i]);
+        }
+        
+        // PDF speichern
+        console.log('Speichere PDF...');
+        doc.save(`${type}-liste-${startMonth}-bis-${endMonth}.pdf`);
+        console.log('PDF gespeichert!');
       } catch (error) {
         console.error('Fehler beim PDF-Erstellen:', error);
         alert('Fehler beim Erstellen des PDFs: ' + error.message);
@@ -1119,7 +1034,7 @@
       // Konvertiere zu Mo-So Format (0=Montag, 6=Sonntag)
       startDayOfWeek = startDayOfWeek === 0 ? 6 : startDayOfWeek - 1;
       
-      // Leere Zellen am Anfang f++r Ausrichtung
+      // Leere Zellen am Anfang f√ºr Ausrichtung
       for (let i = 0; i < startDayOfWeek; i++) {
         const emptyCell = document.createElement('div');
         emptyCell.className = 'calendar-day disabled';
@@ -1134,7 +1049,7 @@
         const date = new Date(parseInt(year), parseInt(month) - 1, day);
         const dayOfWeek = date.getDay(); // 0=Sonntag, 6=Samstag
         
-        // Pr++fe ob Tag erlaubt ist
+        // Pr√ºfe ob Tag erlaubt ist
         let isAllowed = false;
         const isCustomWirteDay = customWirteDays.includes(dateStr);
         
@@ -1145,9 +1060,9 @@
           isAllowed = dayOfWeek === 0 || dayOfWeek === 6 || isCustomWirteDay;
         }
         
-        // Pr++fe ob Samstag und Wirte - KEINE Multi-Slots mehr
+        // Pr√ºfe ob Samstag und Wirte - KEINE Multi-Slots mehr
         const isSaturday = dayOfWeek === 6;
-        const hasMultiSlots = false; // Deaktiviert: Samstag = nur Schie+Éabend, Sonntag = nur Fr++hschoppen
+        const hasMultiSlots = false; // Deaktiviert: Samstag = nur Schie√üabend, Sonntag = nur Fr√ºhschoppen
         
         const assignment = assignments[type][dateStr];
         const fruehschoppenAssignment = null; // Nicht mehr verwendet
@@ -1171,7 +1086,7 @@
         }
         
         cell.className = cellClass;
-        cell.innerHTML = `<div style="font-size: 0.9rem; color: ${isCustomWirteDay ? '#ffa726' : '#999'};">${day}${isCustomWirteDay ? ' ≠ÉƒÎ' : ''}</div>`;
+        cell.innerHTML = `<div style="font-size: 0.9rem; color: ${isCustomWirteDay ? '#ffa726' : '#999'};">${day}${isCustomWirteDay ? ' üéâ' : ''}</div>`;
         cell.dataset.date = dateStr;
         
         // Render Multi-Slot Assignments (Samstag bei Wirten)
@@ -1179,7 +1094,7 @@
           if (fruehschoppenAssignment) {
             const slotDiv = document.createElement('div');
             slotDiv.style.cssText = 'margin-bottom: 0.3rem;';
-            slotDiv.innerHTML = `<div style="font-size: 0.7rem; color: #999; margin-bottom: 0.2rem;">‘ˇ«¥©≈ Fr++hschoppen</div>`;
+            slotDiv.innerHTML = `<div style="font-size: 0.7rem; color: #999; margin-bottom: 0.2rem;">‚òÄÔ∏è Fr√ºhschoppen</div>`;
             
             const personDiv = document.createElement('div');
             personDiv.className = 'assigned-person';
@@ -1195,7 +1110,7 @@
           
           if (schiessabendAssignment) {
             const slotDiv = document.createElement('div');
-            slotDiv.innerHTML = `<div style="font-size: 0.7rem; color: #999; margin-bottom: 0.2rem;">≠ÉÓ÷ Schie+Éabend</div>`;
+            slotDiv.innerHTML = `<div style="font-size: 0.7rem; color: #999; margin-bottom: 0.2rem;">üåô Schie√üabend</div>`;
             
             const personDiv = document.createElement('div');
             personDiv.className = 'assigned-person';
@@ -1248,17 +1163,17 @@
       if (date.includes('-fruehschoppen')) {
         const [year, month, day] = date.split('-').slice(0, 3);
         formattedDate = `${day}.${month}.${year}`;
-        slotInfo = ' (‘ˇ«¥©≈ Fr++hschoppen)';
+        slotInfo = ' (‚òÄÔ∏è Fr√ºhschoppen)';
       } else if (date.includes('-schiessabend')) {
         const [year, month, day] = date.split('-').slice(0, 3);
         formattedDate = `${day}.${month}.${year}`;
-        slotInfo = ' (≠ÉÓ÷ Schie+Éabend)';
+        slotInfo = ' (üåô Schie√üabend)';
       } else {
         const [year, month, day] = date.split('-');
         formattedDate = `${day}.${month}.${year}`;
       }
       
-      document.getElementById('swap-modal-title').textContent = `Tausch-Anfrage f++r ${formattedDate}${slotInfo}`;
+      document.getElementById('swap-modal-title').textContent = `Tausch-Anfrage f√ºr ${formattedDate}${slotInfo}`;
       document.getElementById('swap-modal-info').textContent = `Du bist eingeteilt: ${assignment.person}`;
       
       const helperSelect = document.getElementById('helper-select');
@@ -1278,7 +1193,7 @@
       // Erstelle Tausch-Anfrage
       await createSwapRequest(type, assignment.person, date, assignment.color);
       
-      // Aktualisiere die Anfrage mit dem gew+Òhlten Ersatz
+      // Aktualisiere die Anfrage mit dem gew√§hlten Ersatz
       const swapsSnapshot = await getDocs(collection(db, `${type}-swaps`));
       let latestSwapId = null;
       swapsSnapshot.forEach(d => {
@@ -1303,9 +1218,9 @@
 
     // PDF Export Function v2.0
     window.downloadList = async (type) => {
-      console.log('PDF Download gestartet f++r:', type);
+      console.log('PDF Download gestartet f√ºr:', type);
       
-      // Pr++fe ob jsPDF bereits geladen ist
+      // Pr√ºfe ob jsPDF bereits geladen ist
       if (!window.jspdf) {
         console.log('Lade jsPDF...');
         const script = document.createElement('script');
@@ -1337,7 +1252,7 @@
         } : { r: 200, g: 200, b: 200 };
       };
 
-      // Hilfsfunktion: Namen k++rzen (Christian Mader -> C. Mader)
+      // Hilfsfunktion: Namen k√ºrzen (Christian Mader -> C. Mader)
       const shortenName = (fullName) => {
         const parts = fullName.trim().split(' ');
         if (parts.length < 2) return fullName;
@@ -1349,10 +1264,10 @@
       const createPDF = (withLogo = false, logoData = null) => {
         const doc = new jsPDF('landscape', 'mm', 'a4');
         
-        // Logo hinzuf++gen wenn vorhanden (oval wie Original)
+        // Logo hinzuf√ºgen wenn vorhanden (oval wie Original)
         if (withLogo && logoData) {
           // Original: 644x387 px = ovale Form
-          // Seitenverh+Òltnis exakt beibehalten: 644/387 = 1.664
+          // Seitenverh√§ltnis exakt beibehalten: 644/387 = 1.664
           const logoWidth = 60; // mm
           const logoHeight = logoWidth / 1.664;
           
@@ -1363,33 +1278,30 @@
           doc.addImage(logoData, 'PNG', 297 - 15 - logoWidth, 8, logoWidth, logoHeight);
         }
         
-        // +£berschrift
+        // √úberschrift
         doc.setFontSize(20);
         doc.setFont('helvetica', 'bold');
-        const title = type === 'wirte' ? 'Wirte Liste' : 'Schie+Éaufsicht Liste';
-        const subtitle = type === 'wirte' ? 'Samstag/Feiertage / Sonntag' : 'Samstag';
+        const title = type === 'wirte' ? 'Wirte Liste' : 'Schie√üaufsicht Liste';
+        const subtitle = type === 'wirte' ? 'Samstag / Sonntag' : 'Samstag';
         doc.text(title, 148, 20, { align: 'center' });
         doc.setFontSize(14);
         doc.text(subtitle, 148, 28, { align: 'center' });
         
-        // Datum und Zeitraum
+        // Datum
         doc.setFontSize(10);
         doc.setFont('helvetica', 'normal');
         doc.text(`Erstellt am: ${new Date().toLocaleDateString('de-DE')}`, 148, 35, { align: 'center' });
-        
-        // Aktueller Monat als Zeitraum
-        const [year, month] = currentMonth[type].split('-');
-        const monthShort = ['Jan', 'Feb', 'M+Òr', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'][parseInt(month) - 1];
-        const timeRange = `${monthShort} ${year.substring(2)}`;
-        doc.text(timeRange, 148, 40, { align: 'center' });
         
         // Tabellen-Startposition
         let startY = 50;
         
         if (type === 'wirte') {
-          // Spalten++berschriften (ohne "Samstag" und "Sonntag" Text)
-          doc.setFontSize(10);
+          // Samstag Tabelle (links)
+          doc.setFontSize(12);
           doc.setFont('helvetica', 'bold');
+          doc.text('Samstag', 50, startY);
+          
+          doc.setFontSize(10);
           doc.rect(20, startY + 5, 30, 8);
           doc.rect(50, startY + 5, 40, 8);
           doc.rect(90, startY + 5, 50, 8);
@@ -1403,7 +1315,7 @@
             const date = new Date(a.date);
             const dayName = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'][date.getDay()];
             const dateStr = date.toLocaleDateString('de-DE');
-            const name = a.swappedWith ? `${a.swappedWith} (f++r ${shortenName(a.originalPerson)})` : a.person;
+            const name = a.swappedWith ? `${a.swappedWith} (f√ºr ${shortenName(a.originalPerson)})` : a.person;
             
             if (a.color) {
               const rgb = hexToRgb(a.color);
@@ -1426,8 +1338,9 @@
             yPos += 8;
           });
           
-          // Sonntag Spalten++berschriften (rechts)
+          // Sonntag Tabelle (rechts)
           doc.setFont('helvetica', 'bold');
+          doc.text('Sonntag', 200, startY);
           
           doc.rect(157, startY + 5, 30, 8);
           doc.rect(187, startY + 5, 40, 8);
@@ -1442,7 +1355,7 @@
             const date = new Date(a.date);
             const dayName = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'][date.getDay()];
             const dateStr = date.toLocaleDateString('de-DE');
-            const name = a.swappedWith ? `${a.swappedWith} (f++r ${shortenName(a.originalPerson)})` : a.person;
+            const name = a.swappedWith ? `${a.swappedWith} (f√ºr ${shortenName(a.originalPerson)})` : a.person;
             
             if (a.color) {
               const rgb = hexToRgb(a.color);
@@ -1465,9 +1378,12 @@
             yPos += 8;
           });
         } else {
-          // Nur Spalten++berschriften (ohne "Samstag" Text)
-          doc.setFontSize(10);
+          // Nur Samstag Tabelle (zentriert)
+          doc.setFontSize(12);
           doc.setFont('helvetica', 'bold');
+          doc.text('Samstag', 148, startY, { align: 'center' });
+          
+          doc.setFontSize(10);
           doc.rect(80, startY + 5, 30, 8);
           doc.rect(110, startY + 5, 50, 8);
           doc.rect(160, startY + 5, 60, 8);
@@ -1481,7 +1397,7 @@
             const date = new Date(a.date);
             const dayName = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'][date.getDay()];
             const dateStr = date.toLocaleDateString('de-DE');
-            const name = a.swappedWith ? `${a.swappedWith} (f++r ${shortenName(a.originalPerson)})` : a.person;
+            const name = a.swappedWith ? `${a.swappedWith} (f√ºr ${shortenName(a.originalPerson)})` : a.person;
             
             if (a.color) {
               const rgb = hexToRgb(a.color);
@@ -1529,7 +1445,7 @@
         // Return empty card with error indicator
         const errorCard = document.createElement('div');
         errorCard.className = 'day-card disabled';
-        errorCard.innerHTML = '<div style="color: #c62828; font-size: 14px;">Ung++ltiges Datum</div>';
+        errorCard.innerHTML = '<div style="color: #c62828; font-size: 14px;">Ung√ºltiges Datum</div>';
         return errorCard;
       }
       
@@ -1554,11 +1470,11 @@
       header.style.cssText = 'display: flex; align-items: center; margin-bottom: 12px;';
       
       // Style day number with larger font (24px) and green color (#4CAF50)
-      // Add ≠ÉƒÎ emoji to day number if holiday, use orange color (#ffa726)
+      // Add üéâ emoji to day number if holiday, use orange color (#ffa726)
       const dayNumber = document.createElement('span');
       dayNumber.className = 'day-number';
       dayNumber.style.cssText = `font-size: 24px; font-weight: bold; color: ${isHoliday ? '#ffa726' : '#4CAF50'};`;
-      dayNumber.textContent = `${day}${isHoliday ? ' ≠ÉƒÎ' : ''}`;
+      dayNumber.textContent = `${day}${isHoliday ? ' üéâ' : ''}`;
       header.appendChild(dayNumber);
       
       const dayNameSpan = document.createElement('span');
@@ -1584,10 +1500,10 @@
         // Jeder Tag hat nur eine einfache Einteilung
         body.appendChild(createAssignmentDisplay(type, dateStr, null));
       } else {
-        // For disabled days, show "Keine Einteilung m+¬glich" message
+        // For disabled days, show "Keine Einteilung m√∂glich" message
         const disabledMsg = document.createElement('div');
         disabledMsg.style.cssText = 'color: #666; font-size: 14px;';
-        disabledMsg.textContent = 'Keine Einteilung m+¬glich';
+        disabledMsg.textContent = 'Keine Einteilung m√∂glich';
         body.appendChild(disabledMsg);
       }
       
@@ -1788,7 +1704,7 @@
         messages.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
         
         messages.forEach(s => {
-          // +£berspringe Eintr+Òge mit fehlenden Daten
+          // √úberspringe Eintr√§ge mit fehlenden Daten
           if (!s.requestPerson || !s.date) return;
           
           const div = document.createElement('div');
@@ -1801,25 +1717,25 @@
           });
           
           if (s.status === 'pending') {
-            div.innerHTML = `<strong>${s.requestPerson}</strong> sucht Ersatz f++r ${formattedDate}<br>
+            div.innerHTML = `<strong>${s.requestPerson}</strong> sucht Ersatz f√ºr ${formattedDate}<br>
               <div style="margin: 0.5rem 0; font-size: 0.85rem; color: #999;">
                 ${s.replacementPerson ? `Ersatz: ${s.replacementPerson}` : 'Warte auf Zusage...'}
               </div>`;
           } else if (s.status === 'completed' && s.replacementPerson) {
             div.innerHTML = `
               <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
-                <span style="color: #4CAF50; font-size: 1.2rem;">‘£‡</span>
+                <span style="color: #4CAF50; font-size: 1.2rem;">‚úÖ</span>
                 <strong>${s.requestPerson}</strong> 
                 <span style="color: #999;">hat mit</span>
                 <strong>${s.replacementPerson}</strong>
                 <span style="color: #999;">getauscht</span>
               </div>
               <div style="margin-top: 0.3rem; font-size: 0.85rem; color: #ffa726;">
-                ≠ÉÙ‡ Datum: ${formattedDate}
+                üìÖ Datum: ${formattedDate}
               </div>
             `;
           } else {
-            return; // +£berspringe ung++ltige completed swaps
+            return; // √úberspringe ung√ºltige completed swaps
           }
           chat.appendChild(div);
         });
@@ -1836,11 +1752,11 @@
     });
   </script>
 
-  <!-- Modal f++r Helfer hinzuf++gen -->
+  <!-- Modal f√ºr Helfer hinzuf√ºgen -->
   <div id="add-person-modal" class="modal">
     <div class="modal-content">
       <span class="close-modal" onclick="closeAddPersonModal()">&times;</span>
-      <h2 id="modal-title">Helfer hinzuf++gen</h2>
+      <h2 id="modal-title">Helfer hinzuf√ºgen</h2>
       <form id="add-person-form">
         <div class="form-group">
           <label>Vorname</label>
@@ -1854,26 +1770,26 @@
           <label>Kachelfarbe</label>
           <div class="color-picker" id="color-picker"></div>
         </div>
-        <button type="submit" class="btn-add">Hinzuf++gen</button>
+        <button type="submit" class="btn-add">Hinzuf√ºgen</button>
       </form>
     </div>
   </div>
 
-  <!-- Modal f++r Tausch-Anfrage -->
+  <!-- Modal f√ºr Tausch-Anfrage -->
   <div id="swap-modal" class="modal">
     <div class="modal-content">
       <span class="close-modal" onclick="closeSwapModal()">&times;</span>
       <h2 id="swap-modal-title">Tausch-Anfrage</h2>
       <p id="swap-modal-info" style="margin-bottom: 1.5rem; color: #999;"></p>
       <div class="form-group">
-        <label>W+Òhle einen Ersatz-Helfer:</label>
+        <label>W√§hle einen Ersatz-Helfer:</label>
         <div class="helper-select" id="helper-select"></div>
       </div>
     </div>
   </div>
 
   <script>
-    // Diese Variablen m++ssen im globalen Scope sein
+    // Diese Variablen m√ºssen im globalen Scope sein
     const availableColors = ['#e57373', '#64b5f6', '#81c784', '#ffb74d', '#ba68c8', '#4db6ac', '#ff8a65', '#a1887f', '#90a4ae', '#f06292', '#7986cb', '#aed581'];
     let selectedColor = null;
     let currentModalType = null;
@@ -1884,7 +1800,7 @@
 
     window.openAddPersonModal = (type) => {
       currentModalType = type;
-      document.getElementById('modal-title').textContent = type === 'wirte' ? 'Wirt hinzuf++gen' : 'Schie+Éaufsicht hinzuf++gen';
+      document.getElementById('modal-title').textContent = type === 'wirte' ? 'Wirt hinzuf√ºgen' : 'Schie√üaufsicht hinzuf√ºgen';
       document.getElementById('add-person-modal').style.display = 'block';
       renderColorPicker(type);
     };
@@ -1914,7 +1830,7 @@
 
     document.getElementById('add-person-form').addEventListener('submit', async (e) => {
       e.preventDefault();
-      if (!selectedColor) { alert('Bitte w+Òhlen Sie eine Farbe!'); return; }
+      if (!selectedColor) { alert('Bitte w√§hlen Sie eine Farbe!'); return; }
       
       const firstname = document.getElementById('firstname').value.trim();
       const lastname = document.getElementById('lastname').value.trim();
@@ -1929,8 +1845,8 @@
           }
           closeAddPersonModal();
         } catch (error) {
-          console.error('Fehler beim Hinzuf++gen:', error);
-          alert('Fehler beim Hinzuf++gen des Helfers: ' + error.message);
+          console.error('Fehler beim Hinzuf√ºgen:', error);
+          alert('Fehler beim Hinzuf√ºgen des Helfers: ' + error.message);
         }
       } else {
         alert('Firebase nicht initialisiert. Bitte Seite neu laden.');
@@ -1942,7 +1858,7 @@
   <div id="daterange-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999;">
     <div style="background: #2a2a2a; max-width: 500px; margin: 10% auto; padding: 2rem; border-radius: 12px; position: relative;">
       <button onclick="closeDateRangeModal()" style="position: absolute; top: 1rem; right: 1rem; background: transparent; border: none; color: #999; font-size: 2rem; cursor: pointer;">&times;</button>
-      <h2 style="color: #4CAF50; margin-bottom: 1.5rem;">≠ÉÙ‡ Zeitraum f++r PDF w+Òhlen</h2>
+      <h2 style="color: #4CAF50; margin-bottom: 1.5rem;">üìÖ Zeitraum f√ºr PDF w√§hlen</h2>
       
       <div style="margin-bottom: 1.5rem;">
         <label style="display: block; margin-bottom: 0.5rem; color: #4CAF50; font-weight: 600;">Von (Monat/Jahr):</label>
@@ -1956,12 +1872,12 @@
       
       <div style="background: rgba(76, 175, 80, 0.1); border-left: 4px solid #4CAF50; padding: 1rem; margin-bottom: 1.5rem; border-radius: 4px;">
         <p style="color: #999; font-size: 0.9rem; margin: 0;">
-          ‘‰¶¥©≈ Es wird eine PDF mit allen Einteilungen im gew+Òhlten Zeitraum erstellt.
+          ‚ÑπÔ∏è Es wird eine PDF mit allen Einteilungen im gew√§hlten Zeitraum erstellt.
         </p>
       </div>
       
       <div style="display: flex; gap: 1rem;">
-        <button onclick="generateDateRangePDF()" style="flex: 1; background: #4CAF50; color: white; border: none; padding: 1rem; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 1rem;">≠ÉÙ— PDF erstellen</button>
+        <button onclick="generateDateRangePDF()" style="flex: 1; background: #4CAF50; color: white; border: none; padding: 1rem; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 1rem;">üì• PDF erstellen</button>
         <button onclick="closeDateRangeModal()" style="flex: 1; background: #666; color: white; border: none; padding: 1rem; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 1rem;">Abbrechen</button>
       </div>
     </div>
