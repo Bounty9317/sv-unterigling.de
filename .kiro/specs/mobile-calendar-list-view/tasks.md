@@ -135,7 +135,7 @@ This implementation adds a responsive mobile-optimized list view to the Helfer D
     - Run with minimum 100 iterations
     - Tag: "Feature: mobile-calendar-list-view, Property 1"
   
-  - [~] 8.2 Write property test for Property 2: View Switching Preserves Month Selection
+  - [ ] 8.2 Write property test for Property 2: View Switching Preserves Month Selection
     - **Property 2: View Switching Preserves Month Selection**
     - **Validates: Requirements 1.5**
     - Use fast-check to generate random month/year combinations
@@ -145,7 +145,7 @@ This implementation adds a responsive mobile-optimized list view to the Helfer D
     - Tag: "Feature: mobile-calendar-list-view, Property 2"
 
 - [ ] 9. Write property-based tests for list view structure
-  - [~] 9.1 Write property test for Property 3: List View Day Count Matches Month
+  - [ ] 9.1 Write property test for Property 3: List View Day Count Matches Month
     - **Property 3: List View Day Count Matches Month**
     - **Validates: Requirements 2.1, 2.7**
     - Use fast-check to generate random year/month combinations
@@ -155,7 +155,7 @@ This implementation adds a responsive mobile-optimized list view to the Helfer D
     - Run with minimum 100 iterations
     - Tag: "Feature: mobile-calendar-list-view, Property 3"
   
-  - [~] 9.2 Write property test for Property 4: All Day Cards Display Required Information
+  - [ ] 9.2 Write property test for Property 4: All Day Cards Display Required Information
     - **Property 4: All Day Cards Display Required Information**
     - **Validates: Requirements 2.2, 2.3, 2.4**
     - Use fast-check to generate random dates
@@ -164,7 +164,7 @@ This implementation adds a responsive mobile-optimized list view to the Helfer D
     - Run with minimum 100 iterations
     - Tag: "Feature: mobile-calendar-list-view, Property 4"
   
-  - [~] 9.3 Write property test for Property 5: Holiday Days Display Indicator
+  - [ ] 9.3 Write property test for Property 5: Holiday Days Display Indicator
     - **Property 5: Holiday Days Display Indicator**
     - **Validates: Requirements 2.5**
     - Use fast-check to generate random dates including holidays
@@ -173,7 +173,7 @@ This implementation adds a responsive mobile-optimized list view to the Helfer D
     - Run with minimum 100 iterations
     - Tag: "Feature: mobile-calendar-list-view, Property 5"
   
-  - [~] 9.4 Write property test for Property 6: Disabled Days Have Reduced Opacity
+  - [ ] 9.4 Write property test for Property 6: Disabled Days Have Reduced Opacity
     - **Property 6: Disabled Days Have Reduced Opacity**
     - **Validates: Requirements 2.6**
     - Use fast-check to generate random dates
@@ -183,7 +183,7 @@ This implementation adds a responsive mobile-optimized list view to the Helfer D
     - Tag: "Feature: mobile-calendar-list-view, Property 6"
 
 - [ ] 10. Write property-based tests for name display
-  - [~] 10.1 Write property test for Property 7: Person Names Display Without Truncation
+  - [ ] 10.1 Write property test for Property 7: Person Names Display Without Truncation
     - **Property 7: Person Names Display Without Truncation**
     - **Validates: Requirements 3.1**
     - Use fast-check to generate random person names (5-50 characters)
@@ -192,7 +192,7 @@ This implementation adds a responsive mobile-optimized list view to the Helfer D
     - Run with minimum 100 iterations
     - Tag: "Feature: mobile-calendar-list-view, Property 7"
   
-  - [~] 10.2 Write property test for Property 8: Long Names Wrap to Multiple Lines
+  - [ ] 10.2 Write property test for Property 8: Long Names Wrap to Multiple Lines
     - **Property 8: Long Names Wrap to Multiple Lines**
     - **Validates: Requirements 3.2**
     - Use fast-check to generate long person names (30-50 characters)
@@ -202,7 +202,7 @@ This implementation adds a responsive mobile-optimized list view to the Helfer D
     - Tag: "Feature: mobile-calendar-list-view, Property 8"
 
 - [ ] 11. Write property-based tests for touch targets
-  - [~] 11.1 Write property test for Property 9: Assignment Buttons Meet Minimum Size
+  - [ ] 11.1 Write property test for Property 9: Assignment Buttons Meet Minimum Size
     - **Property 9: Assignment Buttons Meet Minimum Size**
     - **Validates: Requirements 4.1**
     - Use fast-check to generate random assignments
@@ -211,7 +211,7 @@ This implementation adds a responsive mobile-optimized list view to the Helfer D
     - Run with minimum 100 iterations
     - Tag: "Feature: mobile-calendar-list-view, Property 9"
   
-  - [~] 11.2 Write property test for Property 10: Adjacent Touch Targets Have Adequate Spacing
+  - [ ] 11.2 Write property test for Property 10: Adjacent Touch Targets Have Adequate Spacing
     - **Property 10: Adjacent Touch Targets Have Adequate Spacing**
     - **Validates: Requirements 4.2**
     - Use fast-check to generate random multi-slot days
@@ -221,7 +221,7 @@ This implementation adds a responsive mobile-optimized list view to the Helfer D
     - Tag: "Feature: mobile-calendar-list-view, Property 10"
 
 - [ ] 12. Write property-based tests for swap modal
-  - [~] 12.1 Write property test for Property 11: Tapping Assignment Opens Swap Modal
+  - [ ] 12.1 Write property test for Property 11: Tapping Assignment Opens Swap Modal
     - **Property 11: Tapping Assignment Opens Swap Modal**
     - **Validates: Requirements 4.3, 5.1**
     - Use fast-check to generate random assignments
@@ -230,7 +230,7 @@ This implementation adds a responsive mobile-optimized list view to the Helfer D
     - Run with minimum 100 iterations
     - Tag: "Feature: mobile-calendar-list-view, Property 11"
   
-  - [~] 12.2 Write property test for Property 12: Swap Modal Displays Assignment Details
+  - [ ] 12.2 Write property test for Property 12: Swap Modal Displays Assignment Details
     - **Property 12: Swap Modal Displays Assignment Details**
     - **Validates: Requirements 5.2**
     - Use fast-check to generate random assignments
@@ -239,7 +239,7 @@ This implementation adds a responsive mobile-optimized list view to the Helfer D
     - Run with minimum 100 iterations
     - Tag: "Feature: mobile-calendar-list-view, Property 12"
   
-  - [~] 12.3 Write property test for Property 13: Swap Modal Displays Available Replacements
+  - [ ] 12.3 Write property test for Property 13: Swap Modal Displays Available Replacements
     - **Property 13: Swap Modal Displays Available Replacements**
     - **Validates: Requirements 5.3**
     - Use fast-check to generate random person lists
@@ -248,7 +248,7 @@ This implementation adds a responsive mobile-optimized list view to the Helfer D
     - Run with minimum 100 iterations
     - Tag: "Feature: mobile-calendar-list-view, Property 13"
   
-  - [~] 12.4 Write property test for Property 14: Selecting Replacement Creates Swap Request
+  - [ ] 12.4 Write property test for Property 14: Selecting Replacement Creates Swap Request
     - **Property 14: Selecting Replacement Creates Swap Request**
     - **Validates: Requirements 5.4**
     - Use fast-check to generate random assignments and replacements
@@ -258,7 +258,7 @@ This implementation adds a responsive mobile-optimized list view to the Helfer D
     - Tag: "Feature: mobile-calendar-list-view, Property 14"
 
 - [ ] 13. Write property-based tests for multi-slot days
-  - [~] 13.1 Write property test for Property 15: Multi-Slot Days Show Both Slots
+  - [ ] 13.1 Write property test for Property 15: Multi-Slot Days Show Both Slots
     - **Property 15: Multi-Slot Days Show Both Slots**
     - **Validates: Requirements 6.1, 6.2**
     - Use fast-check to generate random Saturday dates
@@ -267,7 +267,7 @@ This implementation adds a responsive mobile-optimized list view to the Helfer D
     - Run with minimum 100 iterations
     - Tag: "Feature: mobile-calendar-list-view, Property 15"
   
-  - [~] 13.2 Write property test for Property 16: Slots Display Assigned Person When Present
+  - [ ] 13.2 Write property test for Property 16: Slots Display Assigned Person When Present
     - **Property 16: Slots Display Assigned Person When Present**
     - **Validates: Requirements 6.3**
     - Use fast-check to generate random slot assignments
@@ -276,7 +276,7 @@ This implementation adds a responsive mobile-optimized list view to the Helfer D
     - Run with minimum 100 iterations
     - Tag: "Feature: mobile-calendar-list-view, Property 16"
   
-  - [~] 13.3 Write property test for Property 17: Empty Slots Display Missing Indicator
+  - [ ] 13.3 Write property test for Property 17: Empty Slots Display Missing Indicator
     - **Property 17: Empty Slots Display Missing Indicator**
     - **Validates: Requirements 6.4**
     - Use fast-check to generate random Saturday dates
@@ -285,7 +285,7 @@ This implementation adds a responsive mobile-optimized list view to the Helfer D
     - Run with minimum 100 iterations
     - Tag: "Feature: mobile-calendar-list-view, Property 17"
   
-  - [~] 13.4 Write property test for Property 18: Slot Assignment Tap Opens Modal With Slot Context
+  - [ ] 13.4 Write property test for Property 18: Slot Assignment Tap Opens Modal With Slot Context
     - **Property 18: Slot Assignment Tap Opens Modal With Slot Context**
     - **Validates: Requirements 6.5**
     - Use fast-check to generate random slot assignments
@@ -294,11 +294,11 @@ This implementation adds a responsive mobile-optimized list view to the Helfer D
     - Run with minimum 100 iterations
     - Tag: "Feature: mobile-calendar-list-view, Property 18"
 
-- [~] 14. Checkpoint - Test multi-slot functionality
+- [ ] 14. Checkpoint - Test multi-slot functionality
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 15. Write property-based tests for cross-view consistency
-  - [~] 15.1 Write property test for Property 19: Auto-Rotation Produces Identical Results in Both Views
+  - [ ] 15.1 Write property test for Property 19: Auto-Rotation Produces Identical Results in Both Views
     - **Property 19: Auto-Rotation Produces Identical Results in Both Views**
     - **Validates: Requirements 8.1**
     - Use fast-check to generate random person lists
@@ -308,7 +308,7 @@ This implementation adds a responsive mobile-optimized list view to the Helfer D
     - Run with minimum 100 iterations
     - Tag: "Feature: mobile-calendar-list-view, Property 19"
   
-  - [~] 15.2 Write property test for Property 20: PDF Generation Produces Identical Output in Both Views
+  - [ ] 15.2 Write property test for Property 20: PDF Generation Produces Identical Output in Both Views
     - **Property 20: PDF Generation Produces Identical Output in Both Views**
     - **Validates: Requirements 9.5**
     - Use fast-check to generate random assignments
@@ -318,7 +318,7 @@ This implementation adds a responsive mobile-optimized list view to the Helfer D
     - Run with minimum 100 iterations
     - Tag: "Feature: mobile-calendar-list-view, Property 20"
   
-  - [~] 15.3 Write property test for Property 21: Person Modal Functions Identically in Both Views
+  - [ ] 15.3 Write property test for Property 21: Person Modal Functions Identically in Both Views
     - **Property 21: Person Modal Functions Identically in Both Views**
     - **Validates: Requirements 10.4**
     - Use fast-check to generate random person data
@@ -329,7 +329,7 @@ This implementation adds a responsive mobile-optimized list view to the Helfer D
     - Tag: "Feature: mobile-calendar-list-view, Property 21"
 
 - [ ] 16. Write property-based tests for navigation and indicators
-  - [~] 16.1 Write property test for Property 22: Month Navigation Updates Display Correctly
+  - [ ] 16.1 Write property test for Property 22: Month Navigation Updates Display Correctly
     - **Property 22: Month Navigation Updates Display Correctly**
     - **Validates: Requirements 12.2, 12.3**
     - Use fast-check to generate random starting months
@@ -339,7 +339,7 @@ This implementation adds a responsive mobile-optimized list view to the Helfer D
     - Run with minimum 100 iterations
     - Tag: "Feature: mobile-calendar-list-view, Property 22"
   
-  - [~] 16.2 Write property test for Property 23: Assigned Days Display Green Indicator
+  - [ ] 16.2 Write property test for Property 23: Assigned Days Display Green Indicator
     - **Property 23: Assigned Days Display Green Indicator**
     - **Validates: Requirements 13.1**
     - Use fast-check to generate random assignments
@@ -348,7 +348,7 @@ This implementation adds a responsive mobile-optimized list view to the Helfer D
     - Run with minimum 100 iterations
     - Tag: "Feature: mobile-calendar-list-view, Property 23"
   
-  - [~] 16.3 Write property test for Property 24: Unassigned Allowed Days Display Red Indicator
+  - [ ] 16.3 Write property test for Property 24: Unassigned Allowed Days Display Red Indicator
     - **Property 24: Unassigned Allowed Days Display Red Indicator**
     - **Validates: Requirements 13.2**
     - Use fast-check to generate random allowed dates without assignments
@@ -357,7 +357,7 @@ This implementation adds a responsive mobile-optimized list view to the Helfer D
     - Run with minimum 100 iterations
     - Tag: "Feature: mobile-calendar-list-view, Property 24"
   
-  - [~] 16.4 Write property test for Property 25: Disabled Days Show No Warning Indicator
+  - [ ] 16.4 Write property test for Property 25: Disabled Days Show No Warning Indicator
     - **Property 25: Disabled Days Show No Warning Indicator**
     - **Validates: Requirements 13.3**
     - Use fast-check to generate random disabled dates
@@ -367,7 +367,7 @@ This implementation adds a responsive mobile-optimized list view to the Helfer D
     - Run with minimum 100 iterations
     - Tag: "Feature: mobile-calendar-list-view, Property 25"
   
-  - [~] 16.5 Write property test for Property 26: Multi-Slot Days Show Independent Status Per Slot
+  - [ ] 16.5 Write property test for Property 26: Multi-Slot Days Show Independent Status Per Slot
     - **Property 26: Multi-Slot Days Show Independent Status Per Slot**
     - **Validates: Requirements 13.4**
     - Use fast-check to generate random Saturday assignments (some slots filled, some empty)
@@ -377,7 +377,7 @@ This implementation adds a responsive mobile-optimized list view to the Helfer D
     - Tag: "Feature: mobile-calendar-list-view, Property 26"
 
 - [ ] 17. Write property-based tests for swapped assignments
-  - [~] 17.1 Write property test for Property 27: Swapped Assignments Display Replacement Name
+  - [ ] 17.1 Write property test for Property 27: Swapped Assignments Display Replacement Name
     - **Property 27: Swapped Assignments Display Replacement Name**
     - **Validates: Requirements 14.1**
     - Use fast-check to generate random swapped assignments
@@ -386,7 +386,7 @@ This implementation adds a responsive mobile-optimized list view to the Helfer D
     - Run with minimum 100 iterations
     - Tag: "Feature: mobile-calendar-list-view, Property 27"
   
-  - [~] 17.2 Write property test for Property 28: Swapped Assignments Display Original Name With Strikethrough
+  - [ ] 17.2 Write property test for Property 28: Swapped Assignments Display Original Name With Strikethrough
     - **Property 28: Swapped Assignments Display Original Name With Strikethrough**
     - **Validates: Requirements 14.2**
     - Use fast-check to generate random swapped assignments
@@ -395,7 +395,7 @@ This implementation adds a responsive mobile-optimized list view to the Helfer D
     - Run with minimum 100 iterations
     - Tag: "Feature: mobile-calendar-list-view, Property 28"
   
-  - [~] 17.3 Write property test for Property 29: Swapped Assignments Display Label
+  - [ ] 17.3 Write property test for Property 29: Swapped Assignments Display Label
     - **Property 29: Swapped Assignments Display Label**
     - **Validates: Requirements 14.3**
     - Use fast-check to generate random swapped assignments
@@ -404,7 +404,7 @@ This implementation adds a responsive mobile-optimized list view to the Helfer D
     - Run with minimum 100 iterations
     - Tag: "Feature: mobile-calendar-list-view, Property 29"
   
-  - [~] 17.4 Write property test for Property 30: Swap Information Displays Without Truncation
+  - [ ] 17.4 Write property test for Property 30: Swap Information Displays Without Truncation
     - **Property 30: Swap Information Displays Without Truncation**
     - **Validates: Requirements 14.5**
     - Use fast-check to generate random swapped assignments with long names
@@ -414,7 +414,7 @@ This implementation adds a responsive mobile-optimized list view to the Helfer D
     - Tag: "Feature: mobile-calendar-list-view, Property 30"
 
 - [ ] 18. Write property-based tests for accessibility
-  - [~] 18.1 Write property test for Property 31: List View Uses Minimum Font Sizes
+  - [ ] 18.1 Write property test for Property 31: List View Uses Minimum Font Sizes
     - **Property 31: List View Uses Minimum Font Sizes**
     - **Validates: Requirements 15.1, 15.2**
     - Use fast-check to generate random day cards
@@ -424,7 +424,7 @@ This implementation adds a responsive mobile-optimized list view to the Helfer D
     - Run with minimum 100 iterations
     - Tag: "Feature: mobile-calendar-list-view, Property 31"
   
-  - [~] 18.2 Write property test for Property 32: List View Provides Sufficient Contrast
+  - [ ] 18.2 Write property test for Property 32: List View Provides Sufficient Contrast
     - **Property 32: List View Provides Sufficient Contrast**
     - **Validates: Requirements 15.3**
     - Use fast-check to generate random color combinations
@@ -434,7 +434,7 @@ This implementation adds a responsive mobile-optimized list view to the Helfer D
     - Run with minimum 100 iterations
     - Tag: "Feature: mobile-calendar-list-view, Property 32"
   
-  - [~] 18.3 Write property test for Property 33: List View Elements Have Adequate Spacing
+  - [ ] 18.3 Write property test for Property 33: List View Elements Have Adequate Spacing
     - **Property 33: List View Elements Have Adequate Spacing**
     - **Validates: Requirements 15.4**
     - Use fast-check to generate random day cards
@@ -445,33 +445,33 @@ This implementation adds a responsive mobile-optimized list view to the Helfer D
     - Tag: "Feature: mobile-calendar-list-view, Property 33"
 
 - [ ] 19. Write unit tests for edge cases
-  - [~] 19.1 Write unit test for February in leap year (29 days)
+  - [ ] 19.1 Write unit test for February in leap year (29 days)
     - Test list view renders exactly 29 day cards for February 2024
   
-  - [~] 19.2 Write unit test for February in non-leap year (28 days)
+  - [ ] 19.2 Write unit test for February in non-leap year (28 days)
     - Test list view renders exactly 28 day cards for February 2025
   
-  - [~] 19.3 Write unit test for month boundary navigation
+  - [ ] 19.3 Write unit test for month boundary navigation
     - Test navigation from December to January (year increment)
     - Test navigation from January to December (year decrement)
   
-  - [~] 19.4 Write unit test for very long person names
+  - [ ] 19.4 Write unit test for very long person names
     - Test name with 50+ characters wraps correctly
     - Test no horizontal scrolling occurs
   
-  - [~] 19.5 Write unit test for rapid view switching
+  - [ ] 19.5 Write unit test for rapid view switching
     - Test multiple rapid viewport resizes
     - Verify no rendering errors or data loss
   
-  - [~] 19.6 Write unit test for missing assignment data
+  - [ ] 19.6 Write unit test for missing assignment data
     - Test rendering with assignment missing person field
     - Verify default value "Unbekannt" is used
   
-  - [~] 19.7 Write unit test for invalid date strings
+  - [ ] 19.7 Write unit test for invalid date strings
     - Test rendering with malformed date strings
     - Verify error handling prevents crashes
   
-  - [~] 19.8 Write unit test for viewport at exactly 768px
+  - [ ] 19.8 Write unit test for viewport at exactly 768px
     - Test which view is displayed at breakpoint
     - Verify consistent behavior
 
