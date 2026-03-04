@@ -1549,10 +1549,20 @@
         
         console.log('Alle Assignments:', allAssignments.length);
         
+        // Deduplizierung: Nur ein Eintrag pro Datum (neuester gewinnt)
+        const assignmentsByDate = new Map();
+        allAssignments.forEach(a => {
+          if (!a.date) return; // Überspringe Einträge ohne date
+          // Wenn Datum bereits existiert, überschreibe nur wenn neuer
+          if (!assignmentsByDate.has(a.date)) {
+            assignmentsByDate.set(a.date, a);
+          }
+        });
+        
+        console.log('Nach Deduplizierung:', assignmentsByDate.size);
+        
         // Filtern nach Zeitraum
-        const filteredAssignments = allAssignments.filter(a => {
-          // Überspringe Einträge ohne date Feld (z.B. alte Multi-Slot Einträge)
-          if (!a.date) return false;
+        const filteredAssignments = Array.from(assignmentsByDate.values()).filter(a => {
           const assignmentMonth = a.date.substring(0, 7); // YYYY-MM
           return assignmentMonth >= startMonth && assignmentMonth <= endMonth;
         });
@@ -1577,16 +1587,8 @@
         // Trenne Samstage/Feiertage und Sonntage
         const saturdays = [];
         const sundays = [];
-        const seenDates = new Set(); // Duplikat-Prüfung
         
         filteredAssignments.forEach(a => {
-          // Überspringe Duplikate (gleiches Datum)
-          if (seenDates.has(a.date)) {
-            console.log('Überspringe Duplikat:', a.date, a.person);
-            return;
-          }
-          seenDates.add(a.date);
-          
           const date = new Date(a.date);
           const dayOfWeek = date.getDay();
           const isCustomDay = customDays.includes(a.date);
