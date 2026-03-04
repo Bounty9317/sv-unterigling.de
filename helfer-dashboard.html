@@ -874,105 +874,145 @@
         // Tabellen-Startposition
         let startY = 50;
         
+        // Hilfsfunktion: Header für neue Seite zeichnen
+        const drawHeaders = (yStart) => {
+          if (type === 'wirte') {
+            // Samstag Header (links)
+            doc.setFontSize(12);
+            doc.setFont('helvetica', 'bold');
+            doc.text('Samstag', 50, yStart);
+            
+            doc.setFontSize(10);
+            doc.rect(20, yStart + 5, 30, 8);
+            doc.rect(50, yStart + 5, 40, 8);
+            doc.rect(90, yStart + 5, 50, 8);
+            doc.text('Tag', 35, yStart + 10, { align: 'center' });
+            doc.text('Datum', 70, yStart + 10, { align: 'center' });
+            doc.text('Name', 115, yStart + 10, { align: 'center' });
+            
+            // Sonntag Header (rechts)
+            doc.setFont('helvetica', 'bold');
+            doc.text('Sonntag', 200, yStart);
+            
+            doc.rect(157, yStart + 5, 30, 8);
+            doc.rect(187, yStart + 5, 40, 8);
+            doc.rect(227, yStart + 5, 50, 8);
+            doc.text('Tag', 172, yStart + 10, { align: 'center' });
+            doc.text('Datum', 207, yStart + 10, { align: 'center' });
+            doc.text('Name', 252, yStart + 10, { align: 'center' });
+          } else {
+            // Nur Samstag Header (zentriert)
+            doc.setFontSize(12);
+            doc.setFont('helvetica', 'bold');
+            doc.text('Samstag', 148, yStart, { align: 'center' });
+            
+            doc.setFontSize(10);
+            doc.rect(80, yStart + 5, 30, 8);
+            doc.rect(110, yStart + 5, 50, 8);
+            doc.rect(160, yStart + 5, 60, 8);
+            doc.text('Tag', 95, yStart + 10, { align: 'center' });
+            doc.text('Datum', 135, yStart + 10, { align: 'center' });
+            doc.text('Name', 190, yStart + 10, { align: 'center' });
+          }
+        };
+        
         if (type === 'wirte') {
-          // Samstag Tabelle (links)
-          doc.setFontSize(12);
-          doc.setFont('helvetica', 'bold');
-          doc.text('Samstag', 50, startY);
-          
-          doc.setFontSize(10);
-          doc.rect(20, startY + 5, 30, 8);
-          doc.rect(50, startY + 5, 40, 8);
-          doc.rect(90, startY + 5, 50, 8);
-          doc.text('Tag', 35, startY + 10, { align: 'center' });
-          doc.text('Datum', 70, startY + 10, { align: 'center' });
-          doc.text('Name', 115, startY + 10, { align: 'center' });
+          // Header zeichnen
+          drawHeaders(startY);
           
           doc.setFont('helvetica', 'normal');
           let yPos = startY + 13;
-          saturdays.forEach(a => {
-            const date = new Date(a.date);
-            const dayName = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'][date.getDay()];
-            const dateStr = date.toLocaleDateString('de-DE');
-            const name = a.swappedWith ? `${a.swappedWith} (für ${shortenName(a.originalPerson)})` : a.person;
-            
-            if (a.color) {
-              const rgb = hexToRgb(a.color);
-              doc.setFillColor(rgb.r, rgb.g, rgb.b);
-              doc.rect(20, yPos, 30, 8, 'F');
-              doc.rect(50, yPos, 40, 8, 'F');
-              doc.rect(90, yPos, 50, 8, 'F');
+          
+          // Maximale Anzahl Einträge pro Seite berechnen (ca. 17 Einträge bei 8mm Höhe)
+          const maxEntriesPerPage = 17;
+          const maxEntries = Math.max(saturdays.length, sundays.length);
+          
+          for (let i = 0; i < maxEntries; i++) {
+            // Prüfe ob neue Seite nötig
+            if (i > 0 && i % maxEntriesPerPage === 0) {
+              doc.addPage();
+              yPos = 20;
+              drawHeaders(yPos);
+              yPos += 13;
             }
-            doc.setDrawColor(0);
-            doc.rect(20, yPos, 30, 8);
-            doc.rect(50, yPos, 40, 8);
-            doc.rect(90, yPos, 50, 8);
-            doc.setTextColor(255, 255, 255);
-            doc.text(dayName, 35, yPos + 5, { align: 'center' });
-            doc.setFont('helvetica', 'bold');
-            doc.text(dateStr, 70, yPos + 5, { align: 'center' });
-            doc.setFont('helvetica', 'normal');
-            doc.text(name, 92, yPos + 5);
-            doc.setTextColor(0, 0, 0);
-            yPos += 8;
-          });
-          
-          // Sonntag Tabelle (rechts)
-          doc.setFont('helvetica', 'bold');
-          doc.text('Sonntag', 200, startY);
-          
-          doc.rect(157, startY + 5, 30, 8);
-          doc.rect(187, startY + 5, 40, 8);
-          doc.rect(227, startY + 5, 50, 8);
-          doc.text('Tag', 172, startY + 10, { align: 'center' });
-          doc.text('Datum', 207, startY + 10, { align: 'center' });
-          doc.text('Name', 252, startY + 10, { align: 'center' });
-          
-          doc.setFont('helvetica', 'normal');
-          yPos = startY + 13;
-          sundays.forEach(a => {
-            const date = new Date(a.date);
-            const dayName = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'][date.getDay()];
-            const dateStr = date.toLocaleDateString('de-DE');
-            const name = a.swappedWith ? `${a.swappedWith} (für ${shortenName(a.originalPerson)})` : a.person;
             
-            if (a.color) {
-              const rgb = hexToRgb(a.color);
-              doc.setFillColor(rgb.r, rgb.g, rgb.b);
-              doc.rect(157, yPos, 30, 8, 'F');
-              doc.rect(187, yPos, 40, 8, 'F');
-              doc.rect(227, yPos, 50, 8, 'F');
+            // Samstag Eintrag (links)
+            if (i < saturdays.length) {
+              const a = saturdays[i];
+              const date = new Date(a.date);
+              const dayName = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'][date.getDay()];
+              const dateStr = date.toLocaleDateString('de-DE');
+              const name = a.swappedWith ? `${a.swappedWith} (für ${shortenName(a.originalPerson)})` : a.person;
+              
+              if (a.color) {
+                const rgb = hexToRgb(a.color);
+                doc.setFillColor(rgb.r, rgb.g, rgb.b);
+                doc.rect(20, yPos, 30, 8, 'F');
+                doc.rect(50, yPos, 40, 8, 'F');
+                doc.rect(90, yPos, 50, 8, 'F');
+              }
+              doc.setDrawColor(0);
+              doc.rect(20, yPos, 30, 8);
+              doc.rect(50, yPos, 40, 8);
+              doc.rect(90, yPos, 50, 8);
+              doc.setTextColor(255, 255, 255);
+              doc.text(dayName, 35, yPos + 5, { align: 'center' });
+              doc.setFont('helvetica', 'bold');
+              doc.text(dateStr, 70, yPos + 5, { align: 'center' });
+              doc.setFont('helvetica', 'normal');
+              doc.text(name, 92, yPos + 5);
+              doc.setTextColor(0, 0, 0);
             }
-            doc.setDrawColor(0);
-            doc.rect(157, yPos, 30, 8);
-            doc.rect(187, yPos, 40, 8);
-            doc.rect(227, yPos, 50, 8);
-            doc.setTextColor(255, 255, 255);
-            doc.text(dayName, 172, yPos + 5, { align: 'center' });
-            doc.setFont('helvetica', 'bold');
-            doc.text(dateStr, 207, yPos + 5, { align: 'center' });
-            doc.setFont('helvetica', 'normal');
-            doc.text(name, 229, yPos + 5);
-            doc.setTextColor(0, 0, 0);
+            
+            // Sonntag Eintrag (rechts) - auf gleicher Höhe
+            if (i < sundays.length) {
+              const a = sundays[i];
+              const date = new Date(a.date);
+              const dayName = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'][date.getDay()];
+              const dateStr = date.toLocaleDateString('de-DE');
+              const name = a.swappedWith ? `${a.swappedWith} (für ${shortenName(a.originalPerson)})` : a.person;
+              
+              if (a.color) {
+                const rgb = hexToRgb(a.color);
+                doc.setFillColor(rgb.r, rgb.g, rgb.b);
+                doc.rect(157, yPos, 30, 8, 'F');
+                doc.rect(187, yPos, 40, 8, 'F');
+                doc.rect(227, yPos, 50, 8, 'F');
+              }
+              doc.setDrawColor(0);
+              doc.rect(157, yPos, 30, 8);
+              doc.rect(187, yPos, 40, 8);
+              doc.rect(227, yPos, 50, 8);
+              doc.setTextColor(255, 255, 255);
+              doc.text(dayName, 172, yPos + 5, { align: 'center' });
+              doc.setFont('helvetica', 'bold');
+              doc.text(dateStr, 207, yPos + 5, { align: 'center' });
+              doc.setFont('helvetica', 'normal');
+              doc.text(name, 229, yPos + 5);
+              doc.setTextColor(0, 0, 0);
+            }
+            
             yPos += 8;
-          });
+          }
         } else {
-          // Nur Samstag Tabelle (zentriert)
-          doc.setFontSize(12);
-          doc.setFont('helvetica', 'bold');
-          doc.text('Samstag', 148, startY, { align: 'center' });
-          
-          doc.setFontSize(10);
-          doc.rect(80, startY + 5, 30, 8);
-          doc.rect(110, startY + 5, 50, 8);
-          doc.rect(160, startY + 5, 60, 8);
-          doc.text('Tag', 95, startY + 10, { align: 'center' });
-          doc.text('Datum', 135, startY + 10, { align: 'center' });
-          doc.text('Name', 190, startY + 10, { align: 'center' });
+          // Nur Samstag Tabelle (zentriert) - für Schießaufsicht
+          drawHeaders(startY);
           
           doc.setFont('helvetica', 'normal');
           let yPos = startY + 13;
-          saturdays.forEach(a => {
+          
+          // Maximale Anzahl Einträge pro Seite berechnen
+          const maxEntriesPerPage = 17;
+          
+          saturdays.forEach((a, i) => {
+            // Prüfe ob neue Seite nötig
+            if (i > 0 && i % maxEntriesPerPage === 0) {
+              doc.addPage();
+              yPos = 20;
+              drawHeaders(yPos);
+              yPos += 13;
+            }
+            
             const date = new Date(a.date);
             const dayName = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'][date.getDay()];
             const dateStr = date.toLocaleDateString('de-DE');
