@@ -897,14 +897,20 @@
           // Tabellen-Startposition
           let startY = 50;
           
-          // Hilfsfunktion: Header für neue Seite zeichnen (mit Logo)
+          // Hilfsfunktion: Header für neue Seite zeichnen
           const drawHeaders = (yStart, isFirstPage = false) => {
-            // Logo auf neuen Seiten hinzufügen
-            if (!isFirstPage && withLogo && logoData) {
-              const logoWidth = 60;
-              const logoHeight = logoWidth / 1.664;
-              doc.addImage(logoData, 'PNG', 15, 8, logoWidth, logoHeight);
-              doc.addImage(logoData, 'PNG', 297 - 15 - logoWidth, 8, logoWidth, logoHeight);
+            // Überschriften auf Folgeseiten hinzufügen (ohne Logo)
+            if (!isFirstPage) {
+              doc.setFontSize(20);
+              doc.setFont('helvetica', 'bold');
+              doc.text(title, 148, 20, { align: 'center' });
+              doc.setFontSize(14);
+              doc.text(subtitle, 148, 28, { align: 'center' });
+              
+              doc.setFontSize(10);
+              doc.setFont('helvetica', 'normal');
+              doc.text(`Erstellt am: ${new Date().toLocaleDateString('de-DE')}`, 148, 35, { align: 'center' });
+              doc.text(timeRange, 148, 40, { align: 'center' });
             }
             
             if (type === 'wirte') {
