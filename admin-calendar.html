@@ -1541,6 +1541,9 @@
       const allAssignments = {};
       snapshot.forEach(d => {
         const data = d.data();
+        // Überspringe Einträge ohne date Feld
+        if (!data.date) return;
+        
         if (data.slot) {
           const slotKey = `${data.date}-${data.slot}`;
           allAssignments[slotKey] = { ...data, id: d.id };

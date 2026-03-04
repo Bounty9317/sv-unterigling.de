@@ -6,6 +6,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
+  <!-- VERSION: 2025-01-08-FIX-PDF-BUG -->
   <title>Helfer Dashboard</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -736,6 +737,154 @@
       });
     }
 
+    // Zeitraum PDF Modal Funktionen
+    let currentPdfType = null;
+
+    window.openDateRangeModal = (type) => {
+      currentPdfType = type;
+      document.getElementById('daterange-modal').style.display = 'block';
+    };
+
+    window.closeDateRangeModal = () => {
+      document.getElementById('daterange-modal').style.display = 'none';
+      document.getElementById('pdf-start-month').value = '';
+      document.getElementById('pdf-end-month').value = '';
+    };
+
+    window.generateDateRangePDF = async () => {
+      console.log('=== PDF GENERATION START - VERSION 2025-01-08-17:00 ===');
+      const startMonth = document.getElementById('pdf-start-month').value;
+      const endMonth = document.getElementById('pdf-end-month').value;
+      
+      console.log('Start:', startMonth, 'End:', endMonth);
+      
+      if (!startMonth || !endMonth) {
+        alert('Bitte wähle Start- und End-Monat aus!');
+        return;
+      }
+      
+      if (startMonth > endMonth) {
+        alert('Start-Monat muss vor End-Monat liegen!');
+        return;
+      }
+      
+      window.closeDateRangeModal();
+      
+      try {
+        // jsPDF laden falls noch nicht geladen
+        if (!window.jspdf) {
+          console.log('Lade jsPDF...');
+          const script = document.createElement('script');
+          script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+          document.head.appendChild(script);
+          await new Promise(resolve => script.onload = resolve);
+          console.log('jsPDF geladen');
+        }
+        
+        const { jsPDF } = window.jspdf;
+        const type = currentPdfType;
+        
+        console.log('Lade Assignments für', type);
+        // Assignments laden
+        const snapshot = await getDocs(collection(db, `${type}-assignments`));
+        const allAssignments = [];
+        snapshot.forEach(d => { allAssignments.push(d.data()); });
+        
+        console.log('Alle Assignments:', allAssignments.length);
+        
+        // Filtern nach Zeitraum
+        const filteredAssignments = allAssignments.filter(a => {
+          // Überspringe Einträge ohne date Feld (z.B. alte Multi-Slot Einträge)
+          if (!a.date) return false;
+          const assignmentMonth = a.date.substring(0, 7); // YYYY-MM
+          return assignmentMonth >= startMonth && assignmentMonth <= endMonth;
+        });
+        
+        console.log('Gefilterte Assignments:', filteredAssignments.length);
+        
+        if (filteredAssignments.length === 0) {
+          alert('Keine Einteilungen im gewählten Zeitraum gefunden!');
+          return;
+        }
+        
+        // Sortiere nach Datum
+        filteredAssignments.sort((a, b) => new Date(a.date) - new Date(b.date));
+        
+        // PDF erstellen
+        const doc = new jsPDF('landscape', 'mm', 'a4');
+        
+        // Titel
+        const title = type === 'wirte' ? 'Wirteliste' : 'Schießaufsichtsliste';
+        const [startYear, startMonthNum] = startMonth.split('-');
+        const [endYear, endMonthNum] = endMonth.split('-');
+        const subtitle = `${startMonthNum}.${startYear} bis ${endMonthNum}.${endYear}`;
+        
+        doc.setFontSize(20);
+        doc.setFont('helvetica', 'bold');
+        doc.text(title, 148, 20, { align: 'center' });
+        
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'normal');
+        doc.text(subtitle, 148, 30, { align: 'center' });
+        
+        // Tabelle
+        const tableData = filteredAssignments.map(a => {
+          const date = new Date(a.date);
+          const dayNames = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
+          const dayName = dayNames[date.getDay()];
+          const formattedDate = date.toLocaleDateString('de-DE');
+          
+          return [formattedDate, dayName, a.person];
+        });
+        
+        let yPos = 45;
+        const rowHeight = 10;
+        const colWidths = [40, 60, 80];
+        
+        // Header
+        doc.setFillColor(26, 71, 42);
+        doc.rect(20, yPos, colWidths[0] + colWidths[1] + colWidths[2], rowHeight, 'F');
+        doc.setTextColor(255, 255, 255);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Datum', 25, yPos + 7);
+        doc.text('Tag', 65, yPos + 7);
+        doc.text('Name', 125, yPos + 7);
+        
+        yPos += rowHeight;
+        
+        // Daten
+        doc.setTextColor(0, 0, 0);
+        doc.setFont('helvetica', 'normal');
+        
+        tableData.forEach((row, index) => {
+          if (yPos > 180) {
+            doc.addPage();
+            yPos = 20;
+          }
+          
+          // Zebra-Streifen
+          if (index % 2 === 0) {
+            doc.setFillColor(240, 240, 240);
+            doc.rect(20, yPos, colWidths[0] + colWidths[1] + colWidths[2], rowHeight, 'F');
+          }
+          
+          doc.text(row[0], 25, yPos + 7);
+          doc.text(row[1], 65, yPos + 7);
+          doc.text(row[2], 125, yPos + 7);
+          
+          yPos += rowHeight;
+        });
+        
+        // PDF speichern
+        console.log('Speichere PDF...');
+        doc.save(`${type}-liste-${startMonth}-bis-${endMonth}.pdf`);
+        console.log('PDF gespeichert!');
+      } catch (error) {
+        console.error('Fehler beim PDF-Erstellen:', error);
+        alert('Fehler beim Erstellen des PDFs: ' + error.message);
+      }
+    };
+
     window.rejectSwap = async (type, id) => { 
       await deleteDoc(doc(db, `${type}-swaps`, id)); 
     };
@@ -1172,134 +1321,7 @@
       logo.src = 'logo.png';
     };
 
-    // Zeitraum PDF Modal Funktionen
-    let currentPdfType = null;
 
-    window.openDateRangeModal = (type) => {
-      currentPdfType = type;
-      document.getElementById('daterange-modal').style.display = 'block';
-    };
-
-    window.closeDateRangeModal = () => {
-      document.getElementById('daterange-modal').style.display = 'none';
-      document.getElementById('pdf-start-month').value = '';
-      document.getElementById('pdf-end-month').value = '';
-    };
-
-    window.generateDateRangePDF = async () => {
-      const startMonth = document.getElementById('pdf-start-month').value;
-      const endMonth = document.getElementById('pdf-end-month').value;
-      
-      if (!startMonth || !endMonth) {
-        alert('Bitte wähle Start- und End-Monat aus!');
-        return;
-      }
-      
-      if (startMonth > endMonth) {
-        alert('Start-Monat muss vor End-Monat liegen!');
-        return;
-      }
-      
-      closeDateRangeModal();
-      
-      // jsPDF laden falls noch nicht geladen
-      if (!window.jspdf) {
-        const script = document.createElement('script');
-        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
-        document.head.appendChild(script);
-        await new Promise(resolve => script.onload = resolve);
-      }
-      
-      const { jsPDF } = window.jspdf;
-      const type = currentPdfType;
-      
-      // Assignments laden
-      const snapshot = await getDocs(collection(db, `${type}-assignments`));
-      const allAssignments = [];
-      snapshot.forEach(d => { allAssignments.push(d.data()); });
-      
-      // Filtern nach Zeitraum
-      const filteredAssignments = allAssignments.filter(a => {
-        const assignmentMonth = a.date.substring(0, 7); // YYYY-MM
-        return assignmentMonth >= startMonth && assignmentMonth <= endMonth;
-      });
-      
-      if (filteredAssignments.length === 0) {
-        alert('Keine Einteilungen im gewählten Zeitraum gefunden!');
-        return;
-      }
-      
-      // Sortiere nach Datum
-      filteredAssignments.sort((a, b) => new Date(a.date) - new Date(b.date));
-      
-      // PDF erstellen
-      const doc = new jsPDF('landscape', 'mm', 'a4');
-      
-      // Titel
-      const title = type === 'wirte' ? 'Wirteliste' : 'Schießaufsichtsliste';
-      const [startYear, startMonthNum] = startMonth.split('-');
-      const [endYear, endMonthNum] = endMonth.split('-');
-      const subtitle = `${startMonthNum}.${startYear} bis ${endMonthNum}.${endYear}`;
-      
-      doc.setFontSize(20);
-      doc.setFont('helvetica', 'bold');
-      doc.text(title, 148, 20, { align: 'center' });
-      
-      doc.setFontSize(14);
-      doc.setFont('helvetica', 'normal');
-      doc.text(subtitle, 148, 30, { align: 'center' });
-      
-      // Tabelle
-      const tableData = filteredAssignments.map(a => {
-        const date = new Date(a.date);
-        const dayNames = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
-        const dayName = dayNames[date.getDay()];
-        const formattedDate = date.toLocaleDateString('de-DE');
-        
-        return [formattedDate, dayName, a.person];
-      });
-      
-      let yPos = 45;
-      const rowHeight = 10;
-      const colWidths = [40, 60, 80];
-      
-      // Header
-      doc.setFillColor(26, 71, 42);
-      doc.rect(20, yPos, colWidths[0] + colWidths[1] + colWidths[2], rowHeight, 'F');
-      doc.setTextColor(255, 255, 255);
-      doc.setFont('helvetica', 'bold');
-      doc.text('Datum', 25, yPos + 7);
-      doc.text('Tag', 65, yPos + 7);
-      doc.text('Name', 125, yPos + 7);
-      
-      yPos += rowHeight;
-      
-      // Daten
-      doc.setTextColor(0, 0, 0);
-      doc.setFont('helvetica', 'normal');
-      
-      tableData.forEach((row, index) => {
-        if (yPos > 180) {
-          doc.addPage();
-          yPos = 20;
-        }
-        
-        // Zebra-Streifen
-        if (index % 2 === 0) {
-          doc.setFillColor(240, 240, 240);
-          doc.rect(20, yPos, colWidths[0] + colWidths[1] + colWidths[2], rowHeight, 'F');
-        }
-        
-        doc.text(row[0], 25, yPos + 7);
-        doc.text(row[1], 65, yPos + 7);
-        doc.text(row[2], 125, yPos + 7);
-        
-        yPos += rowHeight;
-      });
-      
-      // PDF speichern
-      doc.save(`${type}-liste-${startMonth}-bis-${endMonth}.pdf`);
-    };
 
     // Create Day Card for List View
     function createDayCard(type, dateStr, day, dayName, isAllowed, isHoliday, dayOfWeek) {
