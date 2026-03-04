@@ -499,7 +499,8 @@
     <div id="wirte-tab" class="tab-content active">
       <div class="dashboard-grid">
         <div class="calendar-section">
-          <button class="btn" onclick="downloadList('wirte')" style="margin-bottom: 1rem; background: #2d5a3d;">📥 Wirteliste herunterladen</button>
+          <button class="btn" onclick="downloadList('wirte')" style="margin-bottom: 1rem; background: #2d5a3d;">📥 Aktueller Monat</button>
+          <button class="btn" onclick="openDateRangeModal('wirte')" style="margin-bottom: 1rem; margin-left: 0.5rem; background: #1976d2;">📅 Zeitraum wählen</button>
           <h2>Wirte-Kalender</h2>
           <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem; gap: 1rem;">
             <button class="btn" onclick="previousMonth('wirte')" style="padding: 0.5rem 1rem; font-size: 1.2rem;">◀</button>
@@ -519,7 +520,8 @@
     <div id="aufsicht-tab" class="tab-content">
       <div class="dashboard-grid">
         <div class="calendar-section">
-          <button class="btn" onclick="downloadList('aufsicht')" style="margin-bottom: 1rem; background: #2d5a3d;">📥 Schießaufsichtsliste herunterladen</button>
+          <button class="btn" onclick="downloadList('aufsicht')" style="margin-bottom: 1rem; background: #2d5a3d;">📥 Aktueller Monat</button>
+          <button class="btn" onclick="openDateRangeModal('aufsicht')" style="margin-bottom: 1rem; margin-left: 0.5rem; background: #1976d2;">📅 Zeitraum wählen</button>
           <h2>Schießaufsicht-Kalender</h2>
           <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem; gap: 1rem;">
             <button class="btn" onclick="previousMonth('aufsicht')" style="padding: 0.5rem 1rem; font-size: 1.2rem;">◀</button>
@@ -1170,6 +1172,135 @@
       logo.src = 'logo.png';
     };
 
+    // Zeitraum PDF Modal Funktionen
+    let currentPdfType = null;
+
+    window.openDateRangeModal = (type) => {
+      currentPdfType = type;
+      document.getElementById('daterange-modal').style.display = 'block';
+    };
+
+    window.closeDateRangeModal = () => {
+      document.getElementById('daterange-modal').style.display = 'none';
+      document.getElementById('pdf-start-month').value = '';
+      document.getElementById('pdf-end-month').value = '';
+    };
+
+    window.generateDateRangePDF = async () => {
+      const startMonth = document.getElementById('pdf-start-month').value;
+      const endMonth = document.getElementById('pdf-end-month').value;
+      
+      if (!startMonth || !endMonth) {
+        alert('Bitte wähle Start- und End-Monat aus!');
+        return;
+      }
+      
+      if (startMonth > endMonth) {
+        alert('Start-Monat muss vor End-Monat liegen!');
+        return;
+      }
+      
+      closeDateRangeModal();
+      
+      // jsPDF laden falls noch nicht geladen
+      if (!window.jspdf) {
+        const script = document.createElement('script');
+        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+        document.head.appendChild(script);
+        await new Promise(resolve => script.onload = resolve);
+      }
+      
+      const { jsPDF } = window.jspdf;
+      const type = currentPdfType;
+      
+      // Assignments laden
+      const snapshot = await getDocs(collection(db, `${type}-assignments`));
+      const allAssignments = [];
+      snapshot.forEach(d => { allAssignments.push(d.data()); });
+      
+      // Filtern nach Zeitraum
+      const filteredAssignments = allAssignments.filter(a => {
+        const assignmentMonth = a.date.substring(0, 7); // YYYY-MM
+        return assignmentMonth >= startMonth && assignmentMonth <= endMonth;
+      });
+      
+      if (filteredAssignments.length === 0) {
+        alert('Keine Einteilungen im gewählten Zeitraum gefunden!');
+        return;
+      }
+      
+      // Sortiere nach Datum
+      filteredAssignments.sort((a, b) => new Date(a.date) - new Date(b.date));
+      
+      // PDF erstellen
+      const doc = new jsPDF('landscape', 'mm', 'a4');
+      
+      // Titel
+      const title = type === 'wirte' ? 'Wirteliste' : 'Schießaufsichtsliste';
+      const [startYear, startMonthNum] = startMonth.split('-');
+      const [endYear, endMonthNum] = endMonth.split('-');
+      const subtitle = `${startMonthNum}.${startYear} bis ${endMonthNum}.${endYear}`;
+      
+      doc.setFontSize(20);
+      doc.setFont('helvetica', 'bold');
+      doc.text(title, 148, 20, { align: 'center' });
+      
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'normal');
+      doc.text(subtitle, 148, 30, { align: 'center' });
+      
+      // Tabelle
+      const tableData = filteredAssignments.map(a => {
+        const date = new Date(a.date);
+        const dayNames = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
+        const dayName = dayNames[date.getDay()];
+        const formattedDate = date.toLocaleDateString('de-DE');
+        
+        return [formattedDate, dayName, a.person];
+      });
+      
+      let yPos = 45;
+      const rowHeight = 10;
+      const colWidths = [40, 60, 80];
+      
+      // Header
+      doc.setFillColor(26, 71, 42);
+      doc.rect(20, yPos, colWidths[0] + colWidths[1] + colWidths[2], rowHeight, 'F');
+      doc.setTextColor(255, 255, 255);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Datum', 25, yPos + 7);
+      doc.text('Tag', 65, yPos + 7);
+      doc.text('Name', 125, yPos + 7);
+      
+      yPos += rowHeight;
+      
+      // Daten
+      doc.setTextColor(0, 0, 0);
+      doc.setFont('helvetica', 'normal');
+      
+      tableData.forEach((row, index) => {
+        if (yPos > 180) {
+          doc.addPage();
+          yPos = 20;
+        }
+        
+        // Zebra-Streifen
+        if (index % 2 === 0) {
+          doc.setFillColor(240, 240, 240);
+          doc.rect(20, yPos, colWidths[0] + colWidths[1] + colWidths[2], rowHeight, 'F');
+        }
+        
+        doc.text(row[0], 25, yPos + 7);
+        doc.text(row[1], 65, yPos + 7);
+        doc.text(row[2], 125, yPos + 7);
+        
+        yPos += rowHeight;
+      });
+      
+      // PDF speichern
+      doc.save(`${type}-liste-${startMonth}-bis-${endMonth}.pdf`);
+    };
+
     // Create Day Card for List View
     function createDayCard(type, dateStr, day, dayName, isAllowed, isHoliday, dayOfWeek) {
       // Validate date parameters
@@ -1586,5 +1717,34 @@
       }
     });
   </script>
+
+  <!-- Zeitraum PDF Modal -->
+  <div id="daterange-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999;">
+    <div style="background: #2a2a2a; max-width: 500px; margin: 10% auto; padding: 2rem; border-radius: 12px; position: relative;">
+      <button onclick="closeDateRangeModal()" style="position: absolute; top: 1rem; right: 1rem; background: transparent; border: none; color: #999; font-size: 2rem; cursor: pointer;">&times;</button>
+      <h2 style="color: #4CAF50; margin-bottom: 1.5rem;">📅 Zeitraum für PDF wählen</h2>
+      
+      <div style="margin-bottom: 1.5rem;">
+        <label style="display: block; margin-bottom: 0.5rem; color: #4CAF50; font-weight: 600;">Von (Monat/Jahr):</label>
+        <input type="month" id="pdf-start-month" style="width: 100%; padding: 0.8rem; background: #1a1a1a; border: 2px solid #3a3a3a; border-radius: 6px; color: #e0e0e0; font-size: 1rem;">
+      </div>
+      
+      <div style="margin-bottom: 1.5rem;">
+        <label style="display: block; margin-bottom: 0.5rem; color: #4CAF50; font-weight: 600;">Bis (Monat/Jahr):</label>
+        <input type="month" id="pdf-end-month" style="width: 100%; padding: 0.8rem; background: #1a1a1a; border: 2px solid #3a3a3a; border-radius: 6px; color: #e0e0e0; font-size: 1rem;">
+      </div>
+      
+      <div style="background: rgba(76, 175, 80, 0.1); border-left: 4px solid #4CAF50; padding: 1rem; margin-bottom: 1.5rem; border-radius: 4px;">
+        <p style="color: #999; font-size: 0.9rem; margin: 0;">
+          ℹ️ Es wird eine PDF mit allen Einteilungen im gewählten Zeitraum erstellt.
+        </p>
+      </div>
+      
+      <div style="display: flex; gap: 1rem;">
+        <button onclick="generateDateRangePDF()" style="flex: 1; background: #4CAF50; color: white; border: none; padding: 1rem; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 1rem;">📥 PDF erstellen</button>
+        <button onclick="closeDateRangeModal()" style="flex: 1; background: #666; color: white; border: none; padding: 1rem; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 1rem;">Abbrechen</button>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
