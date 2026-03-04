@@ -1229,11 +1229,24 @@
         doc.setFontSize(20);
         doc.setFont('helvetica', 'bold');
         doc.text(type === 'wirte' ? 'Wirte Liste Lamm' : 'Schießaufsicht Liste', 148.5, startY, { align: 'center' });
+        
+        // Untertitel
+        doc.setFontSize(14);
+        const subtitle = type === 'wirte' ? 'Samstag/Feiertage / Sonntag' : 'Samstag';
+        doc.text(subtitle, 148.5, startY + 7, { align: 'center' });
+        
+        // Datum und Zeitraum
         doc.setFontSize(10);
         doc.setFont('helvetica', 'normal');
-        doc.text(`Erstellt am: ${new Date().toLocaleDateString('de-DE')}`, 148.5, startY + 6, { align: 'center' });
+        doc.text(`Erstellt am: ${new Date().toLocaleDateString('de-DE')}`, 148.5, startY + 13, { align: 'center' });
         
-        let yPos = startY + 12;
+        // Aktueller Monat als Zeitraum
+        const [year, month] = currentMonth[type].split('-');
+        const monthShort = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'][parseInt(month) - 1];
+        const timeRange = `${monthShort} ${year.substring(2)}`;
+        doc.text(timeRange, 148.5, startY + 18, { align: 'center' });
+        
+        let yPos = startY + 24;
         const rowHeight = 6;
         const colWidths = [11, 24, 42, 24]; // Tag, Datum, Name, Info
         const tableWidth = colWidths[0] + colWidths[1] + colWidths[2] + colWidths[3]; // 101mm

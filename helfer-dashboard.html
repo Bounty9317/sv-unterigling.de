@@ -1369,26 +1369,29 @@
         doc.setFontSize(20);
         doc.setFont('helvetica', 'bold');
         const title = type === 'wirte' ? 'Wirte Liste' : 'Schießaufsicht Liste';
-        const subtitle = type === 'wirte' ? 'Samstag / Sonntag' : 'Samstag';
+        const subtitle = type === 'wirte' ? 'Samstag/Feiertage / Sonntag' : 'Samstag';
         doc.text(title, 148, 20, { align: 'center' });
         doc.setFontSize(14);
         doc.text(subtitle, 148, 28, { align: 'center' });
         
-        // Datum
+        // Datum und Zeitraum
         doc.setFontSize(10);
         doc.setFont('helvetica', 'normal');
         doc.text(`Erstellt am: ${new Date().toLocaleDateString('de-DE')}`, 148, 35, { align: 'center' });
+        
+        // Aktueller Monat als Zeitraum
+        const [year, month] = currentMonth[type].split('-');
+        const monthShort = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'][parseInt(month) - 1];
+        const timeRange = `${monthShort} ${year.substring(2)}`;
+        doc.text(timeRange, 148, 40, { align: 'center' });
         
         // Tabellen-Startposition
         let startY = 50;
         
         if (type === 'wirte') {
-          // Samstag Tabelle (links)
-          doc.setFontSize(12);
-          doc.setFont('helvetica', 'bold');
-          doc.text('Samstag', 50, startY);
-          
+          // Spaltenüberschriften (ohne "Samstag" und "Sonntag" Text)
           doc.setFontSize(10);
+          doc.setFont('helvetica', 'bold');
           doc.rect(20, startY + 5, 30, 8);
           doc.rect(50, startY + 5, 40, 8);
           doc.rect(90, startY + 5, 50, 8);
@@ -1425,9 +1428,8 @@
             yPos += 8;
           });
           
-          // Sonntag Tabelle (rechts)
+          // Sonntag Spaltenüberschriften (rechts)
           doc.setFont('helvetica', 'bold');
-          doc.text('Sonntag', 200, startY);
           
           doc.rect(157, startY + 5, 30, 8);
           doc.rect(187, startY + 5, 40, 8);
@@ -1465,12 +1467,9 @@
             yPos += 8;
           });
         } else {
-          // Nur Samstag Tabelle (zentriert)
-          doc.setFontSize(12);
-          doc.setFont('helvetica', 'bold');
-          doc.text('Samstag', 148, startY, { align: 'center' });
-          
+          // Nur Spaltenüberschriften (ohne "Samstag" Text)
           doc.setFontSize(10);
+          doc.setFont('helvetica', 'bold');
           doc.rect(80, startY + 5, 30, 8);
           doc.rect(110, startY + 5, 50, 8);
           doc.rect(160, startY + 5, 60, 8);
