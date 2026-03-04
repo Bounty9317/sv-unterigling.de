@@ -1819,13 +1819,18 @@
           container.innerHTML = '';
           
           // Sort month keys chronologically (not alphabetically)
-          Object.keys(eventsByMonth).sort((a, b) => {
+          const sortedMonthKeys = Object.keys(eventsByMonth).sort((a, b) => {
             const [yearA, monthA] = a.split('-').map(Number);
             const [yearB, monthB] = b.split('-').map(Number);
             if (yearA !== yearB) return yearA - yearB;
             return monthA - monthB;
-          }).forEach(monthKey => {
+          });
+          
+          console.log('Sorted month keys:', sortedMonthKeys);
+          
+          sortedMonthKeys.forEach(monthKey => {
             const monthData = eventsByMonth[monthKey];
+            console.log('Rendering month:', monthKey, monthData.name, monthData.year);
             
             // Month header
             const monthHeader = document.createElement('div');
