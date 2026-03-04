@@ -999,10 +999,13 @@
               if (sundayPage > currentPage) {
                 doc.addPage();
                 currentPage++;
-                drawPageHeader(false);
               } else {
                 doc.setPage(sundayPage);
-                // Header ist bereits vorhanden, da Seite von Samstag-Spalte erstellt wurde
+              }
+              // WICHTIG: Header IMMER zeichnen, auch wenn Seite bereits existiert
+              // (außer auf Seite 1, da die bereits komplett ist)
+              if (sundayPage > 1) {
+                drawPageHeader(false);
               }
               rightY = drawColumnHeaders(rightX, 48, 'Sonntag');
             }
