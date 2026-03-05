@@ -1582,8 +1582,7 @@
         const customDays = [];
         wirteDaysSnapshot.forEach(d => {
           const data = d.data();
-          console.log('Wirte-Day Rohdaten:', data);
-          const holidayName = data.info || data.name || data.label || '';
+          const holidayName = data.description || data.info || data.name || data.label || '';
           if (data.date) {
             customDays.push({ date: data.date, name: holidayName });
             if (holidayName) {
