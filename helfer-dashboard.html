@@ -1006,7 +1006,7 @@
           
           // Samstag-Spalte (links)
           doc.setPage(1);
-          let leftY = drawColumnHeaders(leftX, 48, 'Samstag/Feiertage');
+          let leftY = drawColumnHeaders(leftX, 48, 'Samstag');
           let saturdayPage = 1;
           
           for (let i = 0; i < saturdays.length; i++) {
@@ -1014,14 +1014,14 @@
             if (i > 0 && i % entriesPerColumn === 0) {
               saturdayPage++;
               doc.setPage(saturdayPage);
-              leftY = drawColumnHeaders(leftX, 48, 'Samstag/Feiertage');
+              leftY = drawColumnHeaders(leftX, 48, 'Samstag');
             }
             leftY = drawRow(leftX, leftY, saturdays[i]);
           }
           
           // Sonntag-Spalte (rechts)
           doc.setPage(1);
-          let rightY = drawColumnHeaders(rightX, 48, 'Sonntag');
+          let rightY = drawColumnHeaders(rightX, 48, 'Sonntag/Feiertage');
           let sundayPage = 1;
           
           for (let i = 0; i < sundays.length; i++) {
@@ -1029,7 +1029,7 @@
             if (i > 0 && i % entriesPerColumn === 0) {
               sundayPage++;
               doc.setPage(sundayPage);
-              rightY = drawColumnHeaders(rightX, 48, 'Sonntag');
+              rightY = drawColumnHeaders(rightX, 48, 'Sonntag/Feiertage');
             }
             rightY = drawRow(rightX, rightY, sundays[i]);
           }
