@@ -1582,10 +1582,13 @@
         const customDays = [];
         wirteDaysSnapshot.forEach(d => {
           const data = d.data();
-          customDays.push({ date: data.date, name: data.info || '' });
+          if (data.date && data.info) {
+            customDays.push({ date: data.date, name: data.info });
+            console.log('Feiertag geladen:', data.date, '→', data.info);
+          }
         });
         
-        console.log('Custom Days geladen:', customDays);
+        console.log('Gesamt Custom Days:', customDays.length, customDays);
         
         // Trenne Samstage/Feiertage und Sonntage
         const saturdays = [];
