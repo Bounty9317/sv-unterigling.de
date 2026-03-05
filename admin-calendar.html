@@ -1581,7 +1581,8 @@
         const wirteDaysSnapshot = await getDocs(collection(db, 'wirte-days'));
         const customDays = [];
         wirteDaysSnapshot.forEach(d => {
-          customDays.push(d.data().date);
+          const data = d.data();
+          customDays.push({ date: data.date, name: data.name || '' });
         });
         
         // Trenne Samstage/Feiertage und Sonntage
@@ -1591,7 +1592,7 @@
         filteredAssignments.forEach(a => {
           const date = new Date(a.date);
           const dayOfWeek = date.getDay();
-          const isCustomDay = customDays.includes(a.date);
+          const isCustomDay = customDays.some(d => d.date === a.date);
           
           if (dayOfWeek === 6) {
             // Nur Samstag
@@ -1672,17 +1673,19 @@
           
           y += rowHeight;
           
-          // Spalten-Header (Tag, Datum, Name)
+          // Spalten-Header (Tag, Datum, Name, Bemerkung)
           doc.setFontSize(10);
           doc.setFillColor(200, 200, 200);
           doc.rect(x, y, 20, rowHeight, 'FD');
-          doc.rect(x + 20, y, 40, rowHeight, 'FD');
-          doc.rect(x + 60, y, 60, rowHeight, 'FD');
+          doc.rect(x + 20, y, 30, rowHeight, 'FD');
+          doc.rect(x + 50, y, 35, rowHeight, 'FD');
+          doc.rect(x + 85, y, 35, rowHeight, 'FD');
           doc.setTextColor(0, 0, 0);
           doc.setFont('helvetica', 'bold');
           doc.text('Tag', x + 5, y + 5);
-          doc.text('Datum', x + 30, y + 5);
-          doc.text('Name', x + 75, y + 5);
+          doc.text('Datum', x + 25, y + 5);
+          doc.text('Name', x + 58, y + 5);
+          doc.text('Bemerkung', x + 88, y + 5);
           
           return y + rowHeight;
         }
@@ -1696,18 +1699,29 @@
           const dayName = dayNames[date.getDay()];
           const formattedDate = date.toLocaleDateString('de-DE');
           
+          // Prüfe ob es ein Feiertag ist
+          const customDay = customDays.find(d => d.date === assignment.date);
+          const remark = customDay ? customDay.name : '';
+          
           // Farbe aus Datenbank verwenden
           const color = hexToRgb(assignment.color);
           doc.setFillColor(...color);
           doc.rect(x, y, 20, rowHeight, 'FD');
-          doc.rect(x + 20, y, 40, rowHeight, 'FD');
-          doc.rect(x + 60, y, 60, rowHeight, 'FD');
+          doc.rect(x + 20, y, 30, rowHeight, 'FD');
+          doc.rect(x + 50, y, 35, rowHeight, 'FD');
+          doc.rect(x + 85, y, 35, rowHeight, 'FD');
           
           doc.setTextColor(255, 255, 255);
           doc.setFont('helvetica', 'normal');
-          doc.setFontSize(10);
+          doc.setFontSize(9);
           doc.text(dayName, x + 5, y + 5);
-          doc.text(formattedDate, x + 30, y + 5);
+          doc.text(formattedDate, x + 23, y + 5);
+          doc.text(assignment.person, x + 53, y + 5);
+          doc.setFontSize(8);
+          doc.text(remark, x + 88, y + 5);
+          
+          return y + rowHeight;
+        }
           doc.text(assignment.person, x + 75, y + 5);
           
           return y + rowHeight;
