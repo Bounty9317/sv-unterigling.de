@@ -1582,7 +1582,7 @@
         const customDays = [];
         wirteDaysSnapshot.forEach(d => {
           const data = d.data();
-          customDays.push({ date: data.date, name: data.name || '' });
+          customDays.push({ date: data.date, name: data.info || '' });
         });
         
         console.log('Custom Days geladen:', customDays);
