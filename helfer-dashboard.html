@@ -826,6 +826,8 @@
           customDays.push({ date: data.date, name: data.name || '' });
         });
         
+        console.log('Custom Days geladen:', customDays);
+        
         // Trenne Samstage/Feiertage und Sonntage
         const saturdays = [];
         const sundays = [];
@@ -943,6 +945,8 @@
           // Prüfe ob es ein Feiertag ist
           const customDay = customDays.find(d => d.date === assignment.date);
           const remark = customDay ? customDay.name : '';
+          
+          console.log('Assignment:', assignment.date, 'CustomDay:', customDay, 'Remark:', remark);
           
           // Farbe aus Datenbank verwenden
           const color = hexToRgb(assignment.color);
