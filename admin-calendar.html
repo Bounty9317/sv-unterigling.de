@@ -1593,12 +1593,12 @@
           const dayOfWeek = date.getDay();
           const isCustomDay = customDays.includes(a.date);
           
-          if (dayOfWeek === 0) {
-            // Sonntag
-            sundays.push(a);
-          } else if (dayOfWeek === 6 || (isCustomDay && dayOfWeek !== 0)) {
-            // Samstag ODER Feiertag (aber kein Sonntag)
+          if (dayOfWeek === 6) {
+            // Nur Samstag
             saturdays.push(a);
+          } else if (dayOfWeek === 0 || isCustomDay) {
+            // Sonntag ODER Feiertag
+            sundays.push(a);
           }
         });
         
@@ -1621,7 +1621,7 @@
         // Helper function: Zeichne Seiten-Header
         function drawPageHeader(isFirstPage) {
           const title = type === 'wirte' ? 'Wirte Liste' : 'Schießaufsicht Liste';
-          const subtitle = type === 'wirte' ? 'Samstag/Feiertage / Sonntag' : 'Samstag';
+          const subtitle = type === 'wirte' ? 'Samstag / Sonntag/Feiertage' : 'Samstag';
           const [startYear, startMonthNum] = startMonth.split('-');
           const [endYear, endMonthNum] = endMonth.split('-');
           const monthNames = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
