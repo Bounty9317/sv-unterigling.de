@@ -842,15 +842,16 @@
           const date = new Date(a.date);
           const dayOfWeek = date.getDay();
           const isCustomDay = customDays.some(d => d.date === a.date);
+          const hasRemark = customDays.find(d => d.date === a.date)?.name; // Hat eine Bemerkung
           
-          // Wenn Samstag UND Feiertag → rechts (Sonntag/Feiertage)
-          // Wenn nur Samstag → links (Samstag)
+          // Wenn Samstag MIT Bemerkung → rechts (Sonntag/Feiertage)
+          // Wenn nur Samstag OHNE Bemerkung → links (Samstag)
           // Wenn Sonntag oder Feiertag → rechts (Sonntag/Feiertage)
-          if (dayOfWeek === 6 && !isCustomDay) {
-            // Nur Samstag (kein Feiertag)
+          if (dayOfWeek === 6 && !hasRemark) {
+            // Nur Samstag (keine Bemerkung)
             saturdays.push(a);
-          } else if (dayOfWeek === 0 || isCustomDay) {
-            // Sonntag ODER Feiertag (auch Samstags-Feiertage)
+          } else if (dayOfWeek === 0 || isCustomDay || hasRemark) {
+            // Sonntag ODER Feiertag ODER hat Bemerkung
             sundays.push(a);
           }
         });
