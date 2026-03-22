@@ -2156,57 +2156,83 @@
         modal.style.display = 'none';
       }
     }
+  </script>
 
-    // Countdown to next shooting event (Saturday 19:30)
-    function updateCountdown() {
+  <!-- COUNTDOWN TIMER -->
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+    import { getFirestore, collection, getDocs } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+    // Countdown to next shooting event based on actual assignments
+    async function updateCountdown() {
       const now = new Date();
-      const currentDay = now.getDay(); // 0 = Sunday, 6 = Saturday
-      const currentHour = now.getHours();
-      const currentMinute = now.getMinutes();
       
-      // Calculate next Saturday 19:30
-      let daysUntilSaturday = (6 - currentDay + 7) % 7;
-      
-      // If today is Saturday
-      if (currentDay === 6) {
-        // If it's before 19:30, target is today
-        if (currentHour < 19 || (currentHour === 19 && currentMinute < 30)) {
-          daysUntilSaturday = 0;
-        } else {
-          // If it's after 19:30, target is next Saturday
-          daysUntilSaturday = 7;
+      // Prüfe ob es Schießaufsicht-Einteilungen gibt
+      try {
+        const countdownApp = initializeApp({
+          apiKey: "AIzaSyA6hD3scwCcytwkAoNhbNq6-lrYUcl8Fjk",
+          authDomain: "schuetzenverein-12cfa.firebaseapp.com",
+          projectId: "schuetzenverein-12cfa",
+          storageBucket: "schuetzenverein-12cfa.firebasestorage.app",
+          messagingSenderId: "791385091582",
+          appId: "1:791385091582:web:b4c5aae9ddb155f10ee4af"
+        }, 'countdown');
+        const countdownDb = getFirestore(countdownApp, 'vorstandschaftschuetzen');
+        
+        const snapshot = await getDocs(collection(countdownDb, 'aufsicht-assignments'));
+        const assignments = [];
+        snapshot.forEach(d => {
+          const data = d.data();
+          if (data.date) {
+            assignments.push(data.date);
+          }
+        });
+        
+        // Wenn keine Einteilungen vorhanden sind, zeige Sommerpause
+        if (assignments.length === 0) {
+          document.getElementById('countdown-timer').textContent = 'Sommerpause bis Okt';
+          return;
         }
-      } else if (daysUntilSaturday === 0) {
-        // If today is not Saturday and calculation gives 0, it means next Saturday
-        daysUntilSaturday = 7;
+        
+        // Finde nächste Einteilung in der Zukunft
+        const futureAssignments = assignments
+          .map(dateStr => new Date(dateStr + 'T19:30:00'))
+          .filter(date => date > now)
+          .sort((a, b) => a - b);
+        
+        // Wenn keine zukünftigen Einteilungen, zeige Sommerpause
+        if (futureAssignments.length === 0) {
+          document.getElementById('countdown-timer').textContent = 'Sommerpause bis Okt';
+          return;
+        }
+        
+        const nextShooting = futureAssignments[0];
+        const diff = nextShooting - now;
+        
+        if (diff <= 0) {
+          document.getElementById('countdown-timer').textContent = 'Jetzt!';
+          return;
+        }
+        
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+        
+        let countdownText = '';
+        if (days > 0) {
+          countdownText = `${days}T ${hours}h ${minutes}m ${seconds}s`;
+        } else if (hours > 0) {
+          countdownText = `${hours}h ${minutes}m ${seconds}s`;
+        } else {
+          countdownText = `${minutes}m ${seconds}s`;
+        }
+        
+        document.getElementById('countdown-timer').textContent = countdownText;
+      } catch (error) {
+        console.error('Countdown error:', error);
+        document.getElementById('countdown-timer').textContent = 'Sommerpause bis Okt';
       }
-      
-      const nextSaturday = new Date(now);
-      nextSaturday.setDate(now.getDate() + daysUntilSaturday);
-      nextSaturday.setHours(19, 30, 0, 0);
-      
-      const diff = nextSaturday - now;
-      
-      if (diff <= 0) {
-        document.getElementById('countdown-timer').textContent = 'Jetzt!';
-        return;
-      }
-      
-      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-      
-      let countdownText = '';
-      if (days > 0) {
-        countdownText = `${days}T ${hours}h ${minutes}m`;
-      } else if (hours > 0) {
-        countdownText = `${hours}h ${minutes}m ${seconds}s`;
-      } else {
-        countdownText = `${minutes}m ${seconds}s`;
-      }
-      
-      document.getElementById('countdown-timer').textContent = countdownText;
     }
     
     // Update countdown every second
