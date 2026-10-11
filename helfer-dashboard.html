@@ -512,8 +512,9 @@
           <div id="wirte-calendar-list" class="calendar-list"></div>
         </div>
         <div class="chat-section">
-          <h2>💬 Tausch-Anfragen & Verlauf</h2>
-          <div id="wirte-chat"><p style="color: #999;">Keine Anfragen</p></div>
+          <h2>👤 Personen-Filter</h2>
+          <p style="color: #999; font-size: 0.85rem; margin-bottom: 1rem;">Klicke auf eine Person um eine PDF mit allen Terminen zu erstellen:</p>
+          <div id="wirte-person-filter" style="display: flex; flex-direction: column; gap: 0.5rem;"></div>
         </div>
       </div>
     </div>
@@ -532,8 +533,9 @@
           <div id="aufsicht-calendar-list" class="calendar-list"></div>
         </div>
         <div class="chat-section">
-          <h2>💬 Tausch-Anfragen & Verlauf</h2>
-          <div id="aufsicht-chat"><p style="color: #999;">Keine Anfragen</p></div>
+          <h2>👤 Personen-Filter</h2>
+          <p style="color: #999; font-size: 0.85rem; margin-bottom: 1rem;">Klicke auf eine Person um eine PDF mit allen Terminen zu erstellen:</p>
+          <div id="aufsicht-person-filter" style="display: flex; flex-direction: column; gap: 0.5rem;"></div>
         </div>
       </div>
     </div>
@@ -621,6 +623,36 @@
       });
       window.globalPersons = persons; // Update global reference
       renderPersonCards(type);
+      renderPersonFilter(type);
+    }
+    
+    function renderPersonFilter(type) {
+      const filterDiv = document.getElementById(`${type}-person-filter`);
+      if (!filterDiv) return;
+      
+      // Sortiere Personen alphabetisch
+      const sortedPersons = [...persons[type]].sort((a, b) => a.name.localeCompare(b.name));
+      
+      filterDiv.innerHTML = sortedPersons.map(p => 
+        `<button 
+          onclick="generatePersonPDF('${type}', '${p.name}', '${p.color}')" 
+          style="
+            padding: 0.8rem; 
+            background: ${p.color}; 
+            color: white; 
+            border: none; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            font-weight: 600;
+            text-align: left;
+            transition: opacity 0.2s;
+          "
+          onmouseover="this.style.opacity='0.8'" 
+          onmouseout="this.style.opacity='1'"
+        >
+          📄 ${p.name}
+        </button>`
+      ).join('');
     }
 
     window.globalLoadPersons = loadPersons;
@@ -818,21 +850,65 @@
         // Sortiere nach Datum
         filteredAssignments.sort((a, b) => new Date(a.date) - new Date(b.date));
         
-        // Lade Custom Wirte Days für Feiertage
-        const wirteDaysSnapshot = await getDocs(collection(db, 'wirte-days'));
-        const customDays = [];
-        wirteDaysSnapshot.forEach(d => {
-          const data = d.data();
-          const holidayName = data.description || data.info || data.name || data.label || '';
-          if (data.date) {
-            customDays.push({ date: data.date, name: holidayName });
-            if (holidayName) {
-              console.log('Feiertag geladen:', data.date, '→', holidayName);
-            }
+        // Lade SCHIESAUFSICHT-SPEZIFISCHE Notizen/Bemerkungen (NICHT Wirte-Days!)
+        let aufsichtNotes = [];
+        if (type === 'aufsicht') {
+          try {
+            const notesSnapshot = await getDocs(collection(db, 'aufsicht-notes'));
+            notesSnapshot.forEach(d => {
+              const data = d.data();
+              if (data.date && data.note) {
+                aufsichtNotes.push({ date: data.date, note: data.note });
+                console.log('Aufsicht-Notiz geladen:', data.date, '→', data.note);
+              }
+            });
+          } catch (error) {
+            console.log('Keine Aufsicht-Notizen gefunden:', error);
           }
-        });
+        }
+        
+        // Für WIRTE: Lade Custom Wirte Days für Feiertage (nur für Wirte relevant!)
+        const customDays = [];
+        if (type === 'wirte') {
+          const wirteDaysSnapshot = await getDocs(collection(db, 'wirte-days'));
+          wirteDaysSnapshot.forEach(d => {
+            const data = d.data();
+            const holidayName = data.description || data.info || data.name || data.label || '';
+            if (data.date) {
+              customDays.push({ date: data.date, name: holidayName });
+              if (holidayName) {
+                console.log('Feiertag geladen:', data.date, '→', holidayName);
+              }
+            }
+          });
+        }
         
         console.log('Gesamt Custom Days:', customDays.length, customDays);
+        console.log('Aufsicht Notes:', aufsichtNotes.length);
+        
+        // Für Schießaufsicht: Finde Saison-Grenzen (Anfangsschießen und Endschießen)
+        let seasonStart = null;
+        let seasonEnd = null;
+        
+        if (type === 'aufsicht') {
+          aufsichtNotes.forEach(note => {
+            const lowerNote = note.note.toLowerCase();
+            if (lowerNote.includes('anfangsschießen') || lowerNote.includes('anfangsschiessen')) {
+              const noteDate = new Date(note.date);
+              if (!seasonStart || noteDate < new Date(seasonStart)) {
+                seasonStart = note.date;
+              }
+            }
+            if (lowerNote.includes('endschießen') || lowerNote.includes('endschiessen')) {
+              const noteDate = new Date(note.date);
+              if (!seasonEnd || noteDate > new Date(seasonEnd)) {
+                seasonEnd = note.date;
+              }
+            }
+          });
+          
+          console.log('Saison:', seasonStart, 'bis', seasonEnd);
+        }
         
         // Trenne Samstage/Feiertage und Sonntage
         const saturdays = [];
@@ -842,17 +918,29 @@
           const date = new Date(a.date);
           const dayOfWeek = date.getDay();
           const isCustomDay = customDays.some(d => d.date === a.date);
-          const hasRemark = customDays.find(d => d.date === a.date)?.name; // Hat eine Bemerkung
+          const hasRemark = customDays.find(d => d.date === a.date)?.name;
           
-          // Wenn Samstag MIT Bemerkung → rechts (Sonntag/Feiertage)
-          // Wenn nur Samstag OHNE Bemerkung → links (Samstag)
-          // Wenn Sonntag oder Feiertag → rechts (Sonntag/Feiertage)
-          if (dayOfWeek === 6 && !hasRemark) {
-            // Nur Samstag (keine Bemerkung)
-            saturdays.push(a);
-          } else if (dayOfWeek === 0 || isCustomDay || hasRemark) {
-            // Sonntag ODER Feiertag ODER hat Bemerkung
-            sundays.push(a);
+          if (type === 'aufsicht') {
+            // SCHIESSAUFSICHT: Nur Samstage IN DER SAISON
+            if (dayOfWeek === 6) {
+              // Prüfe ob in der Saison
+              const assignmentDate = a.date;
+              const isInSeason = (!seasonStart || assignmentDate >= seasonStart) && 
+                                 (!seasonEnd || assignmentDate <= seasonEnd);
+              
+              if (isInSeason) {
+                saturdays.push(a);
+              } else {
+                console.log('Außerhalb der Saison:', assignmentDate);
+              }
+            }
+          } else {
+            // WIRTE: Unterscheide zwischen Samstag und Sonntag/Feiertag
+            if (dayOfWeek === 6 && !hasRemark) {
+              saturdays.push(a);
+            } else if (dayOfWeek === 0 || isCustomDay || hasRemark) {
+              sundays.push(a);
+            }
           }
         });
         
@@ -952,11 +1040,19 @@
           const dayName = dayNames[date.getDay()];
           const formattedDate = date.toLocaleDateString('de-DE');
           
-          // Prüfe ob es ein Feiertag ist
-          const customDay = customDays.find(d => d.date === assignment.date);
-          const remark = customDay ? customDay.name : '';
+          // Prüfe Bemerkung je nach Typ
+          let remark = '';
+          if (type === 'aufsicht') {
+            // Für Schießaufsicht: Verwende aufsicht-notes
+            const note = aufsichtNotes.find(n => n.date === assignment.date);
+            remark = note ? note.note : '';
+          } else {
+            // Für Wirte: Verwende customDays (Feiertage)
+            const customDay = customDays.find(d => d.date === assignment.date);
+            remark = customDay ? customDay.name : '';
+          }
           
-          console.log('Assignment:', assignment.date, 'CustomDay:', customDay, 'Remark:', remark);
+          console.log('Assignment:', assignment.date, 'Type:', type, 'Remark:', remark);
           
           // Farbe aus Datenbank verwenden
           const color = hexToRgb(assignment.color);
@@ -989,23 +1085,19 @@
           // Berechne Anzahl benötigter Seiten
           const totalPages = Math.ceil(saturdays.length / entriesPerColumn);
           
-          // Erstelle alle Seiten und zeichne Header
-          for (let page = 1; page <= totalPages; page++) {
-            if (page > 1) {
-              doc.addPage();
-            }
-            drawPageHeader(page === 1);
-          }
+          console.log('Schießaufsicht: Total Pages:', totalPages, 'Saturdays:', saturdays.length);
           
-          // Jetzt Daten einfügen
+          // Erstelle erste Seite mit Header
+          drawPageHeader(true);
           let yPos = drawColumnHeaders(centerX, 48, 'Samstag');
           let currentPage = 1;
           
           for (let i = 0; i < saturdays.length; i++) {
             // Neue Seite wenn Spalte voll
             if (i > 0 && i % entriesPerColumn === 0) {
+              doc.addPage();
               currentPage++;
-              doc.setPage(currentPage);
+              drawPageHeader(false);
               yPos = drawColumnHeaders(centerX, 48, 'Samstag');
             }
             yPos = drawRow(centerX, yPos, saturdays[i]);
@@ -1020,30 +1112,27 @@
           const sundayPages = Math.ceil(sundays.length / entriesPerColumn);
           const totalPages = Math.max(saturdayPages, sundayPages);
           
-          // Erstelle alle Seiten und zeichne Header
-          for (let page = 1; page <= totalPages; page++) {
-            if (page > 1) {
-              doc.addPage();
-            }
-            drawPageHeader(page === 1);
-          }
+          console.log('Wirte: Total Pages:', totalPages, 'Saturdays:', saturdays.length, 'Sundays:', sundays.length);
+          
+          // Erste Seite mit Header
+          drawPageHeader(true);
           
           // Samstag-Spalte (links)
-          doc.setPage(1);
           let leftY = drawColumnHeaders(leftX, 48, 'Samstag');
           let saturdayPage = 1;
           
           for (let i = 0; i < saturdays.length; i++) {
             // Neue Seite wenn Spalte voll
             if (i > 0 && i % entriesPerColumn === 0) {
+              doc.addPage();
               saturdayPage++;
-              doc.setPage(saturdayPage);
+              drawPageHeader(false);
               leftY = drawColumnHeaders(leftX, 48, 'Samstag');
             }
             leftY = drawRow(leftX, leftY, saturdays[i]);
           }
           
-          // Sonntag-Spalte (rechts)
+          // Gehe zurück zur ersten Seite für Sonntag-Spalte
           doc.setPage(1);
           let rightY = drawColumnHeaders(rightX, 48, 'Sonntag/Feiertage');
           let sundayPage = 1;
@@ -1066,6 +1155,204 @@
       } catch (error) {
         console.error('Fehler beim PDF-Erstellen:', error);
         alert('Fehler beim Erstellen des PDFs: ' + error.message);
+      }
+    };
+
+    // === PERSONEN-PDF FUNKTION ===
+    window.generatePersonPDF = async (type, personName, personColor) => {
+      try {
+        console.log('Erstelle Personen-PDF für:', personName, 'Type:', type);
+        
+        // jsPDF laden falls noch nicht geladen
+        if (!window.jspdf) {
+          const script = document.createElement('script');
+          script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+          document.head.appendChild(script);
+          await new Promise(resolve => script.onload = resolve);
+        }
+        
+        const { jsPDF } = window.jspdf;
+        
+        // Lade Notizen/Bemerkungen UND finde Saison-Grenzen für Schießaufsicht
+        let notes = [];
+        let seasonStart = null;
+        let seasonEnd = null;
+        
+        if (type === 'aufsicht') {
+          const notesSnapshot = await getDocs(collection(db, 'aufsicht-notes'));
+          notesSnapshot.forEach(d => {
+            const data = d.data();
+            if (data.date && data.note) {
+              notes.push({ date: data.date, note: data.note });
+              
+              // Finde Saison-Grenzen (neueste/aktuellste Saison)
+              const lowerNote = data.note.toLowerCase();
+              if (lowerNote.includes('anfangsschießen') || lowerNote.includes('anfangsschiessen')) {
+                const noteDate = new Date(data.date);
+                // Nimm das NEUESTE Anfangsschießen (größtes Datum)
+                if (!seasonStart || noteDate > new Date(seasonStart)) {
+                  seasonStart = data.date;
+                }
+              }
+              if (lowerNote.includes('endschießen') || lowerNote.includes('endschiessen')) {
+                const noteDate = new Date(data.date);
+                // Nimm das NEUESTE Endschießen (größtes Datum)
+                if (!seasonEnd || noteDate > new Date(seasonEnd)) {
+                  seasonEnd = data.date;
+                }
+              }
+            }
+          });
+          console.log('Saison für Personen-PDF:', seasonStart, 'bis', seasonEnd);
+          console.log('Alle Notizen:', notes.map(n => `${n.date}: ${n.note}`));
+        } else {
+          const wirteDaysSnapshot = await getDocs(collection(db, 'wirte-days'));
+          wirteDaysSnapshot.forEach(d => {
+            const data = d.data();
+            const holidayName = data.description || data.info || data.name || data.label || '';
+            if (data.date && holidayName) {
+              notes.push({ date: data.date, note: holidayName });
+            }
+          });
+        }
+        
+        // Alle Assignments für diese Person laden
+        const snapshot = await getDocs(collection(db, `${type}-assignments`));
+        const personAssignments = [];
+        const seenDates = new Set(); // Verhindere Duplikate
+        
+        // Heute als Vergleichsdatum (00:00 Uhr)
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const todayStr = today.toISOString().split('T')[0];
+        
+        snapshot.forEach(d => { 
+          const data = d.data();
+          if (data.person === personName) {
+            // Prüfe ob wir dieses Datum schon haben
+            if (seenDates.has(data.date)) {
+              console.log('Duplikat gefiltert:', data.date, 'Slot:', data.slot);
+              return; // Überspringe Duplikate
+            }
+            seenDates.add(data.date);
+            
+            // Für Schießaufsicht: Nur Termine in der Saison
+            if (type === 'aufsicht') {
+              const isInSeason = (!seasonStart || data.date >= seasonStart) && 
+                                 (!seasonEnd || data.date <= seasonEnd);
+              if (isInSeason) {
+                personAssignments.push(data);
+              } else {
+                console.log('Außerhalb der Saison gefiltert:', data.date);
+              }
+            } else {
+              // Für Wirte: Nur zukünftige Termine (ab heute)
+              if (data.date >= todayStr) {
+                personAssignments.push(data);
+              } else {
+                console.log('Vergangener Termin gefiltert:', data.date);
+              }
+            }
+          }
+        });
+        
+        if (personAssignments.length === 0) {
+          alert(`Keine ${type === 'aufsicht' ? 'Einteilungen in der aktuellen Saison' : 'zukünftigen Einteilungen'} für ${personName} gefunden!`);
+          return;
+        }
+        
+        // Sortiere nach Datum
+        personAssignments.sort((a, b) => new Date(a.date) - new Date(b.date));
+        
+        // PDF erstellen
+        const doc = new jsPDF('portrait', 'mm', 'a4');
+        
+        // Header
+        const title = type === 'wirte' ? 'Wirte-Einteilungen' : 'Schießaufsicht-Einteilungen';
+        
+        doc.setFontSize(20);
+        doc.setFont('helvetica', 'bold');
+        doc.text(title, 105, 20, { align: 'center' });
+        
+        doc.setFontSize(16);
+        doc.setFont('helvetica', 'normal');
+        doc.text(personName, 105, 30, { align: 'center' });
+        
+        doc.setFontSize(10);
+        doc.text(`Erstellt am: ${new Date().toLocaleDateString('de-DE')}`, 105, 38, { align: 'center' });
+        doc.text(`Anzahl Termine: ${personAssignments.length}`, 105, 44, { align: 'center' });
+        
+        // Tabellen-Header
+        let y = 55;
+        const colWidths = [20, 30, 100]; // Tag, Datum, Bemerkung
+        const rowHeight = 8;
+        
+        doc.setFillColor(26, 71, 42);
+        doc.rect(20, y, colWidths[0] + colWidths[1] + colWidths[2], rowHeight, 'F');
+        doc.setTextColor(255, 255, 255);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(10);
+        doc.text('Tag', 25, y + 5);
+        doc.text('Datum', 45, y + 5);
+        doc.text('Bemerkung', 75, y + 5);
+        
+        y += rowHeight;
+        
+        // Farbe aus Datenbank verwenden
+        function hexToRgbArray(hex) {
+          if (!hex || hex === 'undefined') return [240, 240, 240];
+          hex = hex.replace('#', '');
+          if (hex.length === 3) {
+            hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
+          }
+          const r = parseInt(hex.substring(0, 2), 16);
+          const g = parseInt(hex.substring(2, 4), 16);
+          const b = parseInt(hex.substring(4, 6), 16);
+          return [r, g, b];
+        }
+        
+        const color = hexToRgbArray(personColor);
+        const dayNames = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
+        
+        // Einträge zeichnen
+        for (const assignment of personAssignments) {
+          // Neue Seite wenn nötig
+          if (y > 270) {
+            doc.addPage();
+            y = 20;
+          }
+          
+          const date = new Date(assignment.date);
+          const dayName = dayNames[date.getDay()];
+          const formattedDate = date.toLocaleDateString('de-DE');
+          
+          // Finde Bemerkung
+          const note = notes.find(n => n.date === assignment.date);
+          const remark = note ? note.note : '';
+          
+          // Zeile zeichnen
+          doc.setFillColor(...color);
+          doc.rect(20, y, colWidths[0], rowHeight, 'FD');
+          doc.rect(20 + colWidths[0], y, colWidths[1], rowHeight, 'FD');
+          doc.rect(20 + colWidths[0] + colWidths[1], y, colWidths[2], rowHeight, 'FD');
+          
+          doc.setTextColor(0, 0, 0);
+          doc.setFont('helvetica', 'bold');
+          doc.setFontSize(9);
+          doc.text(dayName, 25, y + 5);
+          doc.text(formattedDate, 23 + colWidths[0], y + 5);
+          doc.setFontSize(8);
+          doc.text(remark, 23 + colWidths[0] + colWidths[1], y + 5);
+          
+          y += rowHeight;
+        }
+        
+        // PDF speichern
+        doc.save(`${type}-${personName.replace(/\s+/g, '-')}.pdf`);
+        console.log('Personen-PDF gespeichert!');
+      } catch (error) {
+        console.error('Fehler beim Erstellen der Personen-PDF:', error);
+        alert('Fehler beim Erstellen der PDF: ' + error.message);
       }
     };
 
