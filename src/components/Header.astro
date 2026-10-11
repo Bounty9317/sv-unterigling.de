@@ -1,0 +1,602 @@
+---
+import { Image } from 'astro:assets';
+import { ArrowRight, Lock, LogIn, Menu, Moon, Sun, Users, X } from '@lucide/astro';
+import logo from '../assets/images/logo.png';
+import { hauptnavigation, verein } from '../data/verein';
+
+const currentPath = Astro.url.pathname.replace(/\.html$/, '').replace(/\/$/, '') || '/';
+const isCurrent = (href: string) =>
+  href === '/' ? currentPath === '/' : currentPath === href || currentPath.startsWith(`${href}/`);
+---
+
+<header class="site-header" data-site-header>
+  <div class="site-header__bar">
+    <a href="/" class="brand" aria-label={`${verein.name} – zur Startseite`}>
+      <Image src={logo} alt="" width={96} height={58} loading="eager" class="brand__logo" />
+      <span class="brand__text">
+        <span class="brand__name">Schützenverein Unterigling</span>
+        <span class="brand__meta">e.V. · seit {verein.gegruendet}</span>
+      </span>
+    </a>
+
+    <nav class="nav" aria-label="Hauptnavigation">
+      <ul role="list">
+        {
+          hauptnavigation.slice(1).map((item) => (
+            <li>
+              <a href={item.href} aria-current={isCurrent(item.href) ? 'page' : undefined}>
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <div class="tools">
+      <a class="countdown-pill" href="/veranstaltungen" data-countdown aria-live="off">
+        <span class="live-dot" aria-hidden="true"></span>
+        <span class="countdown-pill__text">
+          <span class="countdown-pill__label">Nächstes Schießen</span>
+          <span class="countdown-pill__timer" data-countdown-timer>Lädt…</span>
+        </span>
+        <span class="visually-hidden" data-countdown-date></span>
+      </a>
+
+      <button type="button" class="tool-btn" popovertarget="login-menu" aria-label="Login für Helfer und Vorstand">
+        <LogIn aria-hidden="true" />
+        <span class="tool-btn__label">Login</span>
+      </button>
+      <div id="login-menu" popover class="login-menu">
+        <p class="login-menu__title">Interner Bereich</p>
+        <a href="/helfer/login" class="login-menu__item">
+          <Users aria-hidden="true" />
+          <span><strong>Helfer</strong><small>Wirte &amp; Schießaufsicht</small></span>
+          <ArrowRight aria-hidden="true" class="login-menu__arrow" />
+        </a>
+        <a href="/vorstand/login" class="login-menu__item">
+          <Lock aria-hidden="true" />
+          <span><strong>Vorstand</strong><small>Verwaltung</small></span>
+          <ArrowRight aria-hidden="true" class="login-menu__arrow" />
+        </a>
+      </div>
+
+      <button type="button" class="tool-btn tool-btn--icon" data-theme-toggle aria-label="Farbschema wechseln">
+        <Sun class="theme-toggle__sun" aria-hidden="true" />
+        <Moon class="theme-toggle__moon" aria-hidden="true" />
+      </button>
+
+      <button type="button" class="tool-btn menu-button" data-menu-open aria-haspopup="dialog" aria-controls="mobile-menu">
+        <Menu aria-hidden="true" />
+        <span class="tool-btn__label">Menü</span>
+      </button>
+    </div>
+  </div>
+  <div class="xmas-lights" data-xmas-lights hidden aria-hidden="true"></div>
+  <p class="xmas-banner" data-xmas-banner hidden>🎄 Frohe Weihnachten! 🎄</p>
+</header>
+
+<dialog id="mobile-menu" class="mobile-menu" aria-label="Menü">
+  <div class="mobile-menu__header">
+    <span class="mobile-menu__title">Menü</span>
+    <button type="button" class="tool-btn tool-btn--icon" data-menu-close aria-label="Menü schließen">
+      <X aria-hidden="true" />
+    </button>
+  </div>
+  <nav aria-label="Hauptnavigation (mobil)">
+    <ol class="mobile-menu__list">
+      {
+        hauptnavigation.map((item, index) => (
+          <li>
+            <a href={item.href} aria-current={isCurrent(item.href) ? 'page' : undefined}>
+              <span class="mobile-menu__nr">{String(index + 1).padStart(2, '0')}</span>
+              {item.label}
+            </a>
+          </li>
+        ))
+      }
+    </ol>
+  </nav>
+  <div class="mobile-menu__footer">
+    <a class="btn btn--on-dark" href="/helfer/login"><Users aria-hidden="true" /> Helfer Login</a>
+    <a class="btn btn--on-dark" href="/vorstand/login"><Lock aria-hidden="true" /> Vorstand Login</a>
+    <button type="button" class="btn btn--on-dark" data-theme-toggle>
+      <Sun class="theme-toggle__sun" aria-hidden="true" />
+      <Moon class="theme-toggle__moon" aria-hidden="true" />
+      <span>Hell / Dunkel</span>
+    </button>
+  </div>
+</dialog>
+
+<style>
+  .site-header {
+    position: fixed;
+    inset: var(--space-s) 0 auto;
+    z-index: var(--z-header);
+    width: min(100% - 2 * var(--gutter), 84rem);
+    margin-inline: auto;
+    view-transition-name: site-header;
+  }
+
+  .site-header__bar {
+    display: flex;
+    align-items: center;
+    gap: var(--space-s);
+    padding: 0.55rem 0.6rem 0.55rem 0.9rem;
+    border-radius: var(--radius-pill);
+    background: var(--glass-dark);
+    -webkit-backdrop-filter: var(--glass-blur);
+    backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.08),
+      0 10px 40px -12px rgb(0 0 0 / 0.45);
+    color: var(--c-on-brand);
+  }
+
+  /* Beim Scrollen wird die Leiste kompakter und dichter */
+  @supports (animation-timeline: scroll()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .site-header__bar {
+        animation: header-compact linear both;
+        animation-timeline: scroll(root);
+        animation-range: 0 220px;
+      }
+    }
+  }
+
+  @supports (animation-timeline: scroll()) {
+    .xmas-banner {
+      animation: fade-away linear both;
+      animation-timeline: scroll(root);
+      animation-range: 0 140px;
+    }
+  }
+
+  @keyframes fade-away {
+    to {
+      opacity: 0;
+      visibility: hidden;
+    }
+  }
+
+  @keyframes header-compact {
+    to {
+      padding-block: 0.35rem;
+      background: var(--glass-dark-strong);
+      box-shadow:
+        inset 0 1px 0 rgb(255 255 255 / 0.06),
+        0 14px 40px -14px rgb(0 0 0 / 0.6);
+    }
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    flex: none;
+    color: inherit;
+    text-decoration: none;
+    min-width: 0;
+  }
+
+  .brand:hover {
+    color: inherit;
+  }
+
+  .brand__logo {
+    width: 3.3rem;
+    height: auto;
+    flex: none;
+    filter: drop-shadow(0 2px 6px rgb(0 0 0 / 0.35));
+  }
+
+  .brand__text {
+    display: grid;
+    line-height: 1.1;
+  }
+
+  .brand__name {
+    font-family: var(--font-heading);
+    font-size: 1.08rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+  }
+
+  .brand__meta {
+    font-size: 0.66rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--c-on-brand-muted);
+  }
+
+  .nav {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    min-width: 0;
+  }
+
+  .nav ul {
+    display: flex;
+    gap: 0.1rem;
+    padding: 0.25rem;
+    border-radius: var(--radius-pill);
+    background: rgb(255 255 255 / 0.05);
+  }
+
+  .nav a {
+    display: block;
+    padding: 0.45rem 0.7rem;
+    border-radius: var(--radius-pill);
+    color: var(--c-on-brand-muted);
+    text-decoration: none;
+    font-weight: 550;
+    font-size: 0.9rem;
+    white-space: nowrap;
+    transition:
+      background var(--duration) ease,
+      color var(--duration) ease;
+  }
+
+  .nav a:hover {
+    color: #fff;
+    background: rgb(255 255 255 / 0.08);
+  }
+
+  .nav a[aria-current='page'] {
+    color: #10170f;
+    background: var(--c-cream-strong, #f6efd6);
+  }
+
+  .tools {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin-left: auto;
+    flex: none;
+  }
+
+  .countdown-pill {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.35rem 0.85rem 0.35rem 0.7rem;
+    border-radius: var(--radius-pill);
+    background: rgb(255 255 255 / 0.07);
+    border: 1px solid rgb(255 255 255 / 0.1);
+    color: inherit;
+    text-decoration: none;
+    line-height: 1.15;
+  }
+
+  .countdown-pill:hover {
+    color: inherit;
+    background: rgb(255 255 255 / 0.12);
+  }
+
+  .countdown-pill__text {
+    display: grid;
+  }
+
+  .countdown-pill__label {
+    font-size: 0.64rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--c-on-brand-muted);
+    white-space: nowrap;
+  }
+
+  .countdown-pill__timer {
+    font-size: 0.86rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--c-accent-strong);
+    white-space: nowrap;
+  }
+
+  .xmas-banner {
+    position: absolute;
+    top: calc(100% + 1.3rem);
+    left: 50%;
+    translate: -50% 0;
+    margin: 0;
+    padding: 0.3rem 0.8rem;
+    border-radius: var(--radius-pill);
+    background: linear-gradient(135deg, #c41e3a, #8b0000);
+    color: #ffd700;
+    font-weight: 700;
+    font-size: 0.8rem;
+    border: 1px solid #ffd700;
+    white-space: nowrap;
+  }
+
+  .tool-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    height: 2.6rem;
+    min-width: 2.6rem;
+    padding: 0 0.9rem;
+    border: 1px solid rgb(255 255 255 / 0.14);
+    border-radius: var(--radius-pill);
+    background: rgb(255 255 255 / 0.06);
+    color: var(--c-on-brand);
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: background var(--duration) ease;
+  }
+
+  .tool-btn:hover {
+    background: rgb(255 255 255 / 0.14);
+  }
+
+  .tool-btn--icon {
+    padding: 0;
+  }
+
+  .tool-btn :global(svg) {
+    width: 1.1rem;
+    height: 1.1rem;
+  }
+
+  :global(.theme-toggle__moon) {
+    display: none;
+  }
+
+  :global(:root[data-theme='dark'] .theme-toggle__sun) {
+    display: none;
+  }
+
+  :global(:root[data-theme='dark'] .theme-toggle__moon) {
+    display: block;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :global(:root:not([data-theme='light']) .theme-toggle__sun) {
+      display: none;
+    }
+    :global(:root:not([data-theme='light']) .theme-toggle__moon) {
+      display: block;
+    }
+  }
+
+  /* Login-Menü (Popover-API: schließt bei Klick daneben oder Esc von selbst) */
+  .login-menu {
+    position: fixed;
+    inset: calc(var(--space-s) + 4.4rem) max(var(--gutter), (100vw - 84rem) / 2) auto auto;
+    width: 17rem;
+    margin: 0;
+    padding: 0.5rem;
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-l);
+    background: var(--glass-dark-strong);
+    -webkit-backdrop-filter: var(--glass-blur);
+    backdrop-filter: var(--glass-blur);
+    color: var(--c-on-brand);
+    box-shadow: var(--shadow-l);
+  }
+
+  .login-menu:popover-open {
+    animation: menu-in 200ms var(--ease-out);
+  }
+
+  @keyframes menu-in {
+    from {
+      opacity: 0;
+      transform: translateY(-6px) scale(0.98);
+    }
+  }
+
+  .login-menu__title {
+    padding: 0.4rem 0.6rem 0.5rem;
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--c-on-brand-muted);
+  }
+
+  .login-menu__item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.7rem 0.7rem;
+    border-radius: var(--radius-m);
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .login-menu__item:hover {
+    background: rgb(255 255 255 / 0.08);
+    color: #fff;
+  }
+
+  .login-menu__item > :global(svg:first-child) {
+    width: 1.25rem;
+    height: 1.25rem;
+    color: var(--c-accent-strong);
+  }
+
+  .login-menu__item span {
+    display: grid;
+    flex: 1;
+    line-height: 1.25;
+  }
+
+  .login-menu__item small {
+    color: var(--c-on-brand-muted);
+  }
+
+  .login-menu__item :global(.login-menu__arrow) {
+    width: 1rem;
+    height: 1rem;
+    opacity: 0.6;
+  }
+
+  .menu-button {
+    display: none;
+  }
+
+  @media (max-width: 1560px) {
+    .countdown-pill__label {
+      display: none;
+    }
+  }
+
+  @media (max-width: 1220px) {
+    .nav {
+      display: none;
+    }
+
+    .menu-button {
+      display: inline-flex;
+    }
+
+    .tools {
+      margin-left: auto;
+    }
+  }
+
+  @media (max-width: 720px) {
+    .xmas-banner,
+    .countdown-pill,
+    .tools > [popovertarget],
+    .tools > [data-theme-toggle] {
+      display: none;
+    }
+
+    .site-header {
+      inset-block-start: 0.5rem;
+    }
+
+    .brand__logo {
+      width: 2.8rem;
+    }
+  }
+
+  @media (max-width: 400px) {
+    .brand__meta,
+    .menu-button .tool-btn__label {
+      display: none;
+    }
+
+    .brand__name {
+      font-size: 0.98rem;
+    }
+  }
+
+  /* Mobiles Menü als Vollbild-Ebene */
+  .mobile-menu {
+    width: 100vw;
+    max-width: 100vw;
+    height: 100dvh;
+    max-height: 100dvh;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    color: var(--c-on-brand);
+    background:
+      radial-gradient(40rem 30rem at 100% 0%, rgb(184 138 50 / 0.18), transparent 60%),
+      radial-gradient(40rem 30rem at 0% 100%, rgb(90 160 110 / 0.16), transparent 60%),
+      #0c1d13;
+  }
+
+  .mobile-menu::backdrop {
+    background: rgb(0 0 0 / 0.5);
+  }
+
+  .mobile-menu[open] {
+    display: flex;
+    flex-direction: column;
+    animation: sheet-in 300ms var(--ease-out);
+  }
+
+  @keyframes sheet-in {
+    from {
+      opacity: 0;
+      transform: translateY(-2%);
+    }
+  }
+
+  .mobile-menu__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem var(--gutter) 0.5rem;
+  }
+
+  .mobile-menu__title {
+    font-size: 0.75rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--c-on-brand-muted);
+  }
+
+  .mobile-menu__list {
+    flex: 1;
+    list-style: none;
+    padding: 0.5rem var(--gutter);
+    overflow: auto;
+  }
+
+  .mobile-menu__list li {
+    border-bottom: 1px solid rgb(255 255 255 / 0.08);
+    animation: intro-up 520ms var(--ease-out) both;
+    animation-delay: 80ms;
+  }
+
+  .mobile-menu__list li:nth-child(2) { animation-delay: 125ms; }
+  .mobile-menu__list li:nth-child(3) { animation-delay: 170ms; }
+  .mobile-menu__list li:nth-child(4) { animation-delay: 215ms; }
+  .mobile-menu__list li:nth-child(5) { animation-delay: 260ms; }
+  .mobile-menu__list li:nth-child(6) { animation-delay: 305ms; }
+  .mobile-menu__list li:nth-child(7) { animation-delay: 350ms; }
+  .mobile-menu__list li:nth-child(8) { animation-delay: 395ms; }
+
+  .mobile-menu__list a {
+    display: flex;
+    align-items: baseline;
+    gap: 0.9rem;
+    padding: 0.75rem 0;
+    color: var(--c-on-brand);
+    font-family: var(--font-heading);
+    font-size: clamp(1.6rem, 1.2rem + 2vw, 2.2rem);
+    font-weight: 500;
+    letter-spacing: -0.015em;
+    text-decoration: none;
+  }
+
+  .mobile-menu__list a[aria-current='page'] {
+    color: var(--c-accent-strong);
+  }
+
+  .mobile-menu__nr {
+    font-family: var(--font-body);
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--c-on-brand-muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .mobile-menu__footer {
+    display: grid;
+    gap: 0.6rem;
+    padding: 1rem var(--gutter) max(1.5rem, env(safe-area-inset-bottom));
+  }
+
+  .xmas-lights {
+    position: absolute;
+    left: 1.5rem;
+    right: 1.5rem;
+    bottom: -18px;
+    height: 30px;
+    pointer-events: none;
+  }
+</style>
+
+<script>
+  import { initHeader } from '../scripts/header';
+  initHeader();
+</script>

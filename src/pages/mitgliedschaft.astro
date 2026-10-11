@@ -1,0 +1,260 @@
+---
+import { Crown, Crosshair, Download, Euro, Handshake, Lightbulb, Mail, PartyPopper, Star } from '@lucide/astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHeader from '../components/PageHeader.astro';
+import { verein } from '../data/verein';
+---
+
+<BaseLayout
+  title="Mitgliedschaft"
+  description="Mitglied im Schützenverein Unterigling werden: Vollmitgliedschaft für 15 € pro Jahr – mit Königsschießen-Wertung und 10 € für den besten 10er an jedem Schießabend."
+>
+  <PageHeader
+    eyebrow="Mitglied werden"
+    title="Mitgliedschaft"
+    intro="Werden Sie Teil unserer Vereinsfamilie! Wir freuen uns über jedes neue Mitglied, das unsere Leidenschaft für den Schießsport teilt."
+  />
+
+  <section class="section">
+    <div class="container membership">
+      <div class="price-card">
+        <p class="price-card__label">Vollmitgliedschaft</p>
+        <p class="price-card__price">{verein.mitgliedsbeitrag}</p>
+        <p class="price-card__period">pro Jahr</p>
+        <a class="btn btn--accent btn--lg btn--block" href={verein.mitgliedsantrag} download>
+          <Download aria-hidden="true" /> Mitgliedsantrag herunterladen
+        </a>
+      </div>
+
+      <div class="benefits">
+        <h2>Was beinhaltet die Mitgliedschaft?</h2>
+        <p class="benefits__intro">Eine Mitgliedschaft beinhaltet die Nutzung unseres Schießstands als vollwertiges Mitglied.</p>
+        <h3>Das bedeutet für Sie:</h3>
+        <ul role="list" class="benefit-list reveal-stagger">
+          <li>
+            <Crown aria-hidden="true" />
+            <span>Ihr Schießergebnis zählt in die Wertung des <strong>Königsschießens</strong></span>
+          </li>
+          <li>
+            <Euro aria-hidden="true" />
+            <span>An jedem Schießabend wird für den besten 10er (letzter Schuss) <strong>1x 10 €</strong> vergeben</span>
+          </li>
+          <li>
+            <Crosshair aria-hidden="true" />
+            <span>Nutzung unserer modernen Schießstände</span>
+          </li>
+          <li>
+            <PartyPopper aria-hidden="true" />
+            <span>Gesellige Veranstaltungen und Vereinsfeste</span>
+          </li>
+          <li>
+            <Handshake aria-hidden="true" />
+            <span>Kameradschaft und Gemeinschaft</span>
+          </li>
+        </ul>
+        <div class="alert alert--warning highlight">
+          <Star aria-hidden="true" />
+          <div>
+            <p><strong>Besonderes Highlight:</strong></p>
+            <p>
+              Jeden Schießabend haben Sie die Chance, mit Ihrem letzten Schuss einen 10er zu treffen und 10 € zu
+              gewinnen!
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--alt" aria-labelledby="mitglied-werden">
+    <div class="container container--narrow join">
+      <h2 id="mitglied-werden">Mitglied werden</h2>
+      <p class="lead">
+        Interessiert? Kommen Sie einfach zu einem unserer Trainingstage vorbei oder kontaktieren Sie uns. Wir bieten auch
+        Schnuppertraining für Neueinsteiger an!
+      </p>
+
+      <article class="card join__card reveal">
+        <h3>Mitgliedsantrag</h3>
+        <p>
+          Laden Sie den Mitgliedsantrag herunter, drucken Sie ihn aus, füllen Sie ihn aus und bringen Sie ihn zu einem
+          Schießabend mit.
+        </p>
+        <p class="join__how">So geht's:</p>
+        <ol class="steps" role="list">
+          <li><span class="steps__nr">1</span> Antrag downloaden und ausdrucken</li>
+          <li><span class="steps__nr">2</span> Formular ausfüllen</li>
+          <li><span class="steps__nr">3</span> Zu einem Schießabend mitbringen</li>
+          <li><span class="steps__nr">4</span> Bei einem Verantwortlichen (Schießaufsicht/Ausschank) abgeben</li>
+        </ol>
+        <a class="btn btn--primary btn--lg" href={verein.mitgliedsantrag} download>
+          <Download aria-hidden="true" /> Mitgliedsantrag herunterladen
+        </a>
+        <p class="alert alert--brand join__tip">
+          <Lightbulb aria-hidden="true" />
+          <span><strong>Tipp:</strong> Du kannst den Mitgliedsantrag auch bei einem unserer Schießabende persönlich abholen!</span>
+        </p>
+      </article>
+
+      <div class="join__contact">
+        <a class="btn btn--accent btn--lg" href="/kontakt"><Mail aria-hidden="true" /> Jetzt Kontakt aufnehmen</a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .membership {
+    display: grid;
+    grid-template-columns: 20rem minmax(0, 1fr);
+    gap: var(--space-2xl);
+    align-items: start;
+  }
+
+  .price-card {
+    position: sticky;
+    top: calc(var(--header-height) + 1.5rem);
+    display: grid;
+    justify-items: center;
+    gap: 0.25rem;
+    padding: var(--space-xl) var(--space-l);
+    border-radius: var(--radius-xl);
+    background:
+      radial-gradient(18rem 12rem at 50% 0%, rgb(255 255 255 / 0.12), transparent 70%),
+      linear-gradient(160deg, #1a472a 0%, #2d5a3d 100%);
+    color: #fff;
+    text-align: center;
+    box-shadow: var(--shadow-l);
+  }
+
+  .price-card__label {
+    font-family: var(--font-heading);
+    font-size: var(--step-2);
+    font-weight: 600;
+  }
+
+  .price-card__price {
+    font-family: var(--font-heading);
+    font-size: clamp(3.5rem, 3rem + 2vw, 4.5rem);
+    font-weight: 650;
+    line-height: 1.05;
+    color: var(--c-accent-strong);
+  }
+
+  .price-card__period {
+    margin-bottom: var(--space-m);
+    font-size: var(--step-1);
+    color: rgb(255 255 255 / 0.85);
+  }
+
+  .benefits {
+    display: grid;
+    gap: var(--space-m);
+  }
+
+  .benefits__intro {
+    font-size: var(--step-1);
+    color: var(--c-text-muted);
+  }
+
+  .benefits h3 {
+    font-size: var(--step-1);
+    font-family: var(--font-body);
+    font-weight: 700;
+    color: var(--c-primary);
+  }
+
+  .benefit-list {
+    display: grid;
+    gap: var(--space-xs);
+  }
+
+  .benefit-list li {
+    display: flex;
+    align-items: center;
+    gap: var(--space-s);
+    padding: var(--space-s) var(--space-m);
+    border-radius: var(--radius-m);
+    background: var(--c-surface);
+    border: 1px solid var(--c-border);
+  }
+
+  .benefit-list :global(svg) {
+    flex: none;
+    width: 2.25rem;
+    height: 2.25rem;
+    padding: 0.45rem;
+    border-radius: 50%;
+    background: var(--c-primary-soft);
+    color: var(--c-primary);
+  }
+
+  .highlight p + p {
+    margin-top: 0.25rem;
+  }
+
+  .join {
+    display: grid;
+    gap: var(--space-m);
+  }
+
+  .join__card {
+    display: grid;
+    gap: var(--space-s);
+    justify-items: start;
+  }
+
+  .join__card h3 {
+    font-size: var(--step-2);
+  }
+
+  .join__how {
+    font-weight: 700;
+  }
+
+  .steps {
+    display: grid;
+    gap: 0.6rem;
+    margin-bottom: var(--space-xs);
+  }
+
+  .steps li {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .steps__nr {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    background: var(--c-primary);
+    color: var(--c-on-primary);
+    font-weight: 700;
+    font-size: var(--step--1);
+  }
+
+  .join__tip {
+    margin-top: var(--space-xs);
+    width: 100%;
+  }
+
+  .join__contact {
+    text-align: center;
+    margin-top: var(--space-s);
+  }
+
+  @media (max-width: 900px) {
+    .membership {
+      grid-template-columns: 1fr;
+      gap: var(--space-xl);
+    }
+
+    .price-card {
+      position: static;
+    }
+  }
+</style>

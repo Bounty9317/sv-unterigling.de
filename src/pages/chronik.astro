@@ -1,0 +1,426 @@
+---
+import { Award, Beer, Briefcase, Crown, Hammer, Info, Landmark, PartyPopper, Sprout, Swords, Target } from '@lucide/astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHeader from '../components/PageHeader.astro';
+import { chronik, chronikTitel, chronikUntertitel, type ChronikIcon } from '../data/chronik';
+
+const icons: Record<ChronikIcon, typeof Landmark> = {
+  landmark: Landmark,
+  sprout: Sprout,
+  swords: Swords,
+  target: Target,
+  hammer: Hammer,
+  beer: Beer,
+  party: PartyPopper,
+  briefcase: Briefcase,
+  crown: Crown,
+  award: Award,
+};
+---
+
+<BaseLayout
+  title="Chronik"
+  description="Chronik der Schützengesellschaft Unterigling 1898–1998: 100 Jahre Tradition, Gemeinschaft und Schießsport, Schützenmeister und Schützenkönige."
+>
+  <PageHeader eyebrow="1898 – 1998" title={chronikTitel} intro={chronikUntertitel} />
+
+  <section class="section">
+    <div class="container chronik-layout">
+      <nav class="toc" aria-label="Kapitel der Chronik">
+        <p class="toc__title">Kapitel</p>
+        <ol role="list">
+          {
+            chronik.map((abschnitt) => (
+              <li>
+                <a href={`#kapitel-${abschnitt.nummer}`}>
+                  <span class="toc__nr">{abschnitt.nummer}</span>
+                  <span>{abschnitt.titel}</span>
+                </a>
+              </li>
+            ))
+          }
+        </ol>
+      </nav>
+
+      <ol role="list" class="timeline">
+        {
+          chronik.map((abschnitt) => {
+            const Icon = icons[abschnitt.icon];
+            return (
+              <li class="timeline__item" id={`kapitel-${abschnitt.nummer}`}>
+                <span class="timeline__marker" aria-hidden="true">
+                  <Icon />
+                </span>
+                <article class="chapter reveal">
+                  <header class="chapter__header">
+                    <span class="badge badge--accent">{abschnitt.zeitraum}</span>
+                    <h2>
+                      {abschnitt.nummer}. {abschnitt.titel}
+                    </h2>
+                  </header>
+                  <div class="chapter__body">
+                    {abschnitt.bloecke.map((block) => {
+                      if (block.typ === 'absatz') return <p set:html={block.html} />;
+                      if (block.typ === 'liste')
+                        return (
+                          <ul class="chapter__list">
+                            {block.punkte.map((punkt) => (
+                              <li set:html={punkt} />
+                            ))}
+                          </ul>
+                        );
+                      if (block.typ === 'hinweis')
+                        return (
+                          <p class:list={['highlight', { 'highlight--large': block.gross }]}>
+                            <Info aria-hidden="true" />
+                            <span set:html={block.html} />
+                          </p>
+                        );
+                      // Lange Listen (Schützenkönige) werden auf zwei Tabellen nebeneinander verteilt.
+                      const half = Math.ceil(block.zeilen.length / 2);
+                      const teile =
+                        block.zeilen.length > 20
+                          ? [block.zeilen.slice(0, half), block.zeilen.slice(half)]
+                          : [block.zeilen];
+                      return (
+                        <div class:list={['tables', { 'tables--split': teile.length > 1 }]}>
+                          {teile.map((zeilen) => (
+                            <div class="table-wrap">
+                              <table class="chronik-table">
+                                <thead>
+                                  <tr>
+                                    {block.kopf.map((spalte) => (
+                                      <th scope="col">{spalte}</th>
+                                    ))}
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {zeilen.map((zeile) => (
+                                    <tr>
+                                      {zeile.map((zelle) => (
+                                        <td set:html={zelle} />
+                                      ))}
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+                          ))}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </article>
+              </li>
+            );
+          })
+        }
+      </ol>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .chronik-layout {
+    display: grid;
+    grid-template-columns: 15rem minmax(0, 1fr);
+    gap: var(--space-2xl);
+    align-items: start;
+  }
+
+  .toc {
+    position: sticky;
+    top: calc(var(--header-height) + 1.5rem);
+    max-height: calc(100dvh - var(--header-height) - 3rem);
+    overflow: auto;
+  }
+
+  .toc__title {
+    margin-bottom: var(--space-xs);
+    font-size: var(--step--1);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--c-text-subtle);
+  }
+
+  .toc ol {
+    display: grid;
+    gap: 0.15rem;
+  }
+
+  .toc a {
+    display: flex;
+    gap: 0.6rem;
+    padding: 0.45rem 0.6rem;
+    border-radius: var(--radius-s);
+    color: var(--c-text-muted);
+    font-size: var(--step--1);
+    line-height: 1.35;
+    text-decoration: none;
+  }
+
+  .toc a:hover {
+    background: var(--c-surface-2);
+    color: var(--c-text);
+  }
+
+  .toc__nr {
+    flex: none;
+    width: 1.5rem;
+    color: var(--c-accent);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .timeline {
+    position: relative;
+    display: grid;
+    gap: var(--space-l);
+  }
+
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 1.4rem;
+    top: 0.5rem;
+    bottom: 0.5rem;
+    width: 2px;
+    background: linear-gradient(var(--c-primary), var(--c-accent-strong));
+    opacity: 0.35;
+  }
+
+  /* Fortschrittslinie füllt sich beim Lesen */
+  .timeline::after {
+    content: '';
+    position: absolute;
+    left: 1.4rem;
+    top: 0.5rem;
+    bottom: 0.5rem;
+    width: 2px;
+    background: linear-gradient(var(--c-primary), var(--c-accent-strong));
+    transform-origin: top;
+    transform: scaleY(0);
+  }
+
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .timeline::after {
+        animation: timeline-fill linear both;
+        animation-timeline: view();
+        animation-range: cover 10% cover 90%;
+      }
+    }
+  }
+
+  @supports not (animation-timeline: view()) {
+    .timeline::after {
+      transform: none;
+    }
+  }
+
+  @keyframes timeline-fill {
+    to {
+      transform: scaleY(1);
+    }
+  }
+
+  .timeline__item {
+    position: relative;
+    display: grid;
+    grid-template-columns: 2.8rem minmax(0, 1fr);
+    gap: var(--space-m);
+    scroll-margin-top: calc(var(--header-height) + 1rem);
+  }
+
+  .timeline__marker {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    place-items: center;
+    width: 2.8rem;
+    height: 2.8rem;
+    border-radius: 50%;
+    background: var(--c-primary);
+    color: var(--c-on-primary);
+    box-shadow: 0 0 0 6px var(--c-bg);
+  }
+
+  .timeline__marker :global(svg) {
+    width: 1.3rem;
+    height: 1.3rem;
+  }
+
+  .chapter {
+    padding: clamp(1.25rem, 1rem + 1.2vw, 2.25rem);
+    border-radius: var(--radius-l);
+    background: var(--c-surface);
+    border: 1px solid var(--c-border);
+    box-shadow: var(--shadow-xs);
+  }
+
+  .chapter__header {
+    display: grid;
+    gap: 0.6rem;
+    justify-items: start;
+    margin-bottom: var(--space-m);
+  }
+
+  .chapter__header h2 {
+    font-size: var(--step-3);
+  }
+
+  .chapter__body {
+    display: grid;
+    gap: var(--space-s);
+    line-height: 1.75;
+  }
+
+  .chapter__body p {
+    color: var(--c-text-muted);
+  }
+
+  .chapter__body :global(strong) {
+    color: var(--c-text);
+  }
+
+  .chapter__list {
+    display: grid;
+    gap: 0.4rem;
+    padding: 0;
+    list-style: none;
+  }
+
+  .chapter__list li {
+    position: relative;
+    padding-left: 1.5rem;
+  }
+
+  .chapter__list li::before {
+    content: '';
+    position: absolute;
+    left: 0.25rem;
+    top: 0.68em;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    border: 2px solid var(--c-primary);
+  }
+
+  .highlight {
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+    padding: var(--space-s) var(--space-m);
+    border-radius: var(--radius-m);
+    background: var(--c-brand-dark);
+    color: var(--c-on-brand) !important;
+    border-left: 4px solid var(--c-accent-strong);
+  }
+
+  .highlight :global(strong) {
+    color: #fff !important;
+  }
+
+  .highlight :global(svg) {
+    flex: none;
+    width: 1.25rem;
+    height: 1.25rem;
+    margin-top: 0.3rem;
+    color: var(--c-accent-strong);
+  }
+
+  .highlight--large {
+    justify-content: center;
+    text-align: center;
+    font-size: var(--step-1);
+    padding: var(--space-m);
+  }
+
+  .highlight--large :global(svg) {
+    display: none;
+  }
+
+  .table-wrap {
+    overflow-x: auto;
+    border-radius: var(--radius-m);
+    border: 1px solid var(--c-border);
+  }
+
+  .chronik-table {
+    font-size: var(--step--1);
+  }
+
+  .chronik-table th {
+    padding: 0.75rem 1rem;
+    background: var(--c-brand-dark);
+    color: var(--c-on-brand);
+    text-align: left;
+    font-weight: 650;
+  }
+
+  .chronik-table td {
+    padding: 0.6rem 1rem;
+    border-top: 1px solid var(--c-border);
+  }
+
+  .chronik-table td:first-child {
+    width: 8rem;
+    font-weight: 650;
+    color: var(--c-primary);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .chronik-table tbody tr:nth-child(even) {
+    background: var(--c-surface-2);
+  }
+
+  .tables {
+    display: grid;
+    gap: var(--space-s);
+    align-items: start;
+  }
+
+  /* Lange Königsliste: auf großen Bildschirmen zweispaltig */
+  @media (min-width: 760px) {
+    .tables--split {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  @media (max-width: 1000px) {
+    .chronik-layout {
+      grid-template-columns: 1fr;
+    }
+
+    .toc {
+      display: none;
+    }
+  }
+
+  @media (max-width: 560px) {
+    .timeline::before,
+    .timeline::after {
+      left: 1.1rem;
+    }
+
+    .timeline__item {
+      grid-template-columns: 2.2rem minmax(0, 1fr);
+      gap: var(--space-xs);
+    }
+
+    .timeline__marker {
+      width: 2.2rem;
+      height: 2.2rem;
+    }
+
+    .timeline__marker :global(svg) {
+      width: 1.05rem;
+      height: 1.05rem;
+    }
+
+    .chronik-table td:first-child {
+      width: 6rem;
+    }
+  }
+</style>

@@ -1,0 +1,927 @@
+---
+import { Image } from 'astro:assets';
+import {
+  ArrowRight,
+  Beer,
+  CalendarDays,
+  Crosshair,
+  Crown,
+  Fish,
+  Gift,
+  Handshake,
+  Heart,
+  Landmark,
+  Mail,
+  MapPin,
+  MessageCircle,
+  PartyPopper,
+  Snowflake,
+  Sun,
+  Target,
+  Trophy,
+  Users,
+} from '@lucide/astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHeader from '../components/PageHeader.astro';
+import gasthausLamm from '../assets/images/gasthaus-lamm.jpg';
+import vorstandschaft from '../assets/images/vorstandschaft.png';
+import koenigsschiessen from '../assets/images/koenigsschiessen.jpg';
+import { adresseEinzeilig, oeffnungszeiten, verein } from '../data/verein';
+
+const jahre = new Date().getFullYear() - verein.gegruendet;
+
+const fakten = [
+  { wert: String(verein.gegruendet), text: 'im Herbst gegründet – als Schützengesellschaft Unterigling' },
+  { wert: '6', text: 'Schießstände für Luftgewehr und Pistole' },
+  { wert: '10 + 3', text: 'Gewehre und Pistolen – für Rechts- und Linkshänder' },
+  { wert: verein.mitgliedsbeitrag, text: 'Jahresbeitrag inklusive Königsschießen' },
+];
+
+const angebote = [
+  {
+    icon: Crosshair,
+    titel: 'Schießabend',
+    text: `Jeden Samstag von ${oeffnungszeiten.samstag.zeitraum}: am Stand von ${oeffnungszeiten.schiessstand.tagZeiten}, danach gemütlich bis ${oeffnungszeiten.samstag.zeiten.replace(/^Ab 19:30 - /, '')}. Für den besten 10er gibt es an jedem Schießabend 10 €.`,
+  },
+  {
+    icon: Crown,
+    titel: 'Königsschießen',
+    text: 'Jeder 10er zählt! Gesucht werden Brezen-, Wurst- und Schützenkönig bzw. -königin – dazu ein Pistolen- und ein Gewehrpokal.',
+  },
+  {
+    icon: Beer,
+    titel: 'Frühschoppen',
+    text: `${oeffnungszeiten.sonntag.hinweis} von ${oeffnungszeiten.sonntag.zeiten} – Treffpunkt für alle, die auf eine Halbe und ein Gespräch vorbeischauen.`,
+  },
+  {
+    icon: Users,
+    titel: 'Für Jung und Alt',
+    text: 'Zwei Jugendgewehre für den Nachwuchs, Auflage-Böcke für alle ab 65 und Waffen für Rechts- und Linkshänder: Bei uns findet jeder seinen Platz am Stand.',
+  },
+];
+
+const schuetzenjahr = [
+  {
+    zeit: 'Oktober',
+    icon: Target,
+    titel: 'Anfangsschießen',
+    text: 'Start in die Saison – mit Essen, Schießen und der Proklamation der Könige der vergangenen Saison.',
+  },
+  {
+    zeit: 'Oktober bis März',
+    icon: Trophy,
+    titel: 'Schießabende & Königsschießen',
+    text: 'Samstags wird geschossen – an den Königsschießen-Abenden geht es um Brezen-, Wurst- und Schützenkönig.',
+  },
+  {
+    zeit: 'Dezember',
+    icon: Gift,
+    titel: 'Adventsfeier & Weihnachtsschießen',
+    text: 'Bratwurst und Glühwein vor dem Lamm – und am 26. Dezember das traditionelle Weihnachtsschießen.',
+  },
+  {
+    zeit: 'Januar',
+    icon: Landmark,
+    titel: 'Generalversammlung',
+    text: 'Rückblick und Ausblick – und wenn es ansteht, wählen die Mitglieder hier die Vorstandschaft.',
+  },
+  {
+    zeit: 'Fasching',
+    icon: PartyPopper,
+    titel: 'Lumpiger Donnerstag & Faschingsumzug',
+    text: 'Weißwurstessen am Lumpigen Donnerstag und Bewirtung beim Iglinger Faschingsumzug – Faschingswägen haben bei uns lange Tradition.',
+  },
+  {
+    zeit: 'März',
+    icon: Snowflake,
+    titel: 'Endschießen',
+    text: 'Der Abschluss der Schießsaison – bevor es in die Sommerpause geht.',
+  },
+  {
+    zeit: 'Frühjahr & Sommer',
+    icon: Fish,
+    titel: 'Steckerlfisch & Sommerfest',
+    text: 'Steckerlfisch-Essen im Frühjahr und unser Sommerfest – 2025 feierten wir bei strahlendem Sonnenschein mit über 100 Gästen.',
+  },
+  {
+    zeit: 'Das ganze Jahr',
+    icon: Sun,
+    titel: 'Frühschoppen',
+    text: `Sonn- und feiertags von ${oeffnungszeiten.sonntag.zeiten} – auch in der Sommerpause.`,
+  },
+];
+
+const meilensteine = [
+  { jahr: '1898', text: 'Gründung der Schützengesellschaft im Herbst – geschossen wird im „Weißen Lamm“' },
+  { jahr: '1950', text: 'Wiedergründung nach dem Vereinsverbot als „Sport- und Schützenverein Unterigling“' },
+  { jahr: '1961', text: 'Mit Anneliese Gossner regiert die erste Schützenkönigin' },
+  { jahr: '1972', text: 'Umbenennung in „Schützengesellschaft Unterigling“' },
+  { jahr: '1985', text: 'Die neue Schießanlage im Obergeschoss ist fertig' },
+  { jahr: '1998', text: '100-jähriges Jubiläum mit 128 Mitgliedern' },
+];
+---
+
+<BaseLayout
+  title="Über uns"
+  description={`Seit ${verein.gegruendet} im Weißen Lamm zu Hause: der Schützenverein Unterigling – Schießabende, Königsschießen, Frühschoppen, Vereinsfeste und Vorstandschaft im Überblick.`}
+>
+  <PageHeader
+    eyebrow="Wer wir sind"
+    title="Über uns"
+    intro="Der Schützenverein Unterigling ist mehr als nur ein Sportverein – wir sind eine Gemeinschaft, die Tradition und Moderne verbindet. Seit unserer Gründung stehen wir für Präzision, Fairness und Kameradschaft."
+  />
+
+  <!-- Wer wir sind -->
+  <section class="section" aria-labelledby="philosophie">
+    <div class="container who">
+      <div class="who__text reveal">
+        <p class="eyebrow">Seit über {Math.floor(jahre / 5) * 5} Jahren</p>
+        <h2 id="philosophie">Ein Dorfverein mit Herz</h2>
+        <p class="lead">
+          Wir fördern den Schießsport in all seinen Facetten und legen besonderen Wert auf die Jugendarbeit. Bei uns steht
+          nicht nur der sportliche Erfolg im Vordergrund, sondern auch das Miteinander und die Pflege unserer Traditionen.
+        </p>
+        <p>
+          Wir sind ein Hobbyverein und schießen aus Spaß an der Sache – ohne Wettkämpfe oder Ligen. Wer bei uns
+          vorbeischaut, findet einen Platz am Stand, eine gemütliche Runde danach und Leute, die sich auf jedes neue
+          Gesicht freuen.
+        </p>
+        <ul role="list" class="values">
+          <li><Target aria-hidden="true" /> Präzision</li>
+          <li><Handshake aria-hidden="true" /> Fairness</li>
+          <li><Heart aria-hidden="true" /> Kameradschaft</li>
+        </ul>
+      </div>
+
+      <dl class="facts reveal-stagger">
+        {
+          fakten.map((f) => (
+            <div class="fact">
+              <dt>{f.wert}</dt>
+              <dd>{f.text}</dd>
+            </div>
+          ))
+        }
+      </dl>
+    </div>
+  </section>
+
+  <!-- Zuhause -->
+  <section class="section section--alt" aria-labelledby="zuhause">
+    <div class="container home">
+      <div class="home__media reveal-scale">
+        <Image
+          src={gasthausLamm}
+          alt="Das Gasthaus „Zum Weißen Lamm“ in Unterigling"
+          width={1200}
+          widths={[600, 900, 1200]}
+          sizes="(min-width: 960px) 50vw, 100vw"
+          class="home__image"
+        />
+        <span class="home__badge">
+          <MapPin aria-hidden="true" />
+          {adresseEinzeilig}
+        </span>
+      </div>
+      <div class="home__text reveal">
+        <p class="eyebrow">Unser Zuhause</p>
+        <h2 id="zuhause">Das „Weiße Lamm“</h2>
+        <p>
+          Schon in den ersten Jahren nach der Gründung {verein.gegruendet} trafen sich die Männer des Dorfes im Gasthaus
+          „Zum Weißen Lamm“ zu Schießabenden und Preisschießen, und nach dem Ersten Weltkrieg fanden die Schützen hier wieder
+          zusammen. Nach der Wiedergründung 1950 war der Schießbetrieb improvisiert: Aus der Gaststube wurde durch ein Loch in
+          der Wand in die Küche geschossen.
+        </p>
+        <p>
+          Ab 1976 durfte die Schützengesellschaft das Gasthaus zeitweise selbst betreiben, die Mitglieder renovierten das
+          Schützenheim in Eigenleistung, und 1985 wurde die neue Schießanlage im Obergeschoss fertig. Bis heute ist das
+          Lamm unser Treffpunkt – vom Schießabend bis zur Adventsfeier mit Bratwurst und Glühwein vor dem Haus.
+        </p>
+        <div class="home__hours">
+          <div>
+            <strong>{oeffnungszeiten.samstag.titel} ({oeffnungszeiten.samstag.zeitraum})</strong>
+            <span>{oeffnungszeiten.samstag.zeiten}</span>
+          </div>
+          <div>
+            <strong>{oeffnungszeiten.sonntag.bezeichnung}</strong>
+            <span>{oeffnungszeiten.sonntag.zeiten} · {oeffnungszeiten.sonntag.hinweis}</span>
+          </div>
+        </div>
+        <a class="link-arrow" href="/kontakt">Anfahrt &amp; Kontakt <ArrowRight aria-hidden="true" /></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Was uns ausmacht -->
+  <section class="section" aria-labelledby="angebot">
+    <div class="container">
+      <header class="section-head reveal">
+        <div>
+          <p class="eyebrow">Was uns ausmacht</p>
+          <h2 id="angebot">Schießsport und Geselligkeit</h2>
+        </div>
+        <a class="link-arrow" href="/sport">Schießstände &amp; Disziplinen <ArrowRight aria-hidden="true" /></a>
+      </header>
+      <div class="offers">
+        <figure class="offers__photo reveal-scale">
+          <Image
+            src={koenigsschiessen}
+            alt="Königsschießen mit Brezen-, Wurst- und Schützenkönig"
+            width={900}
+            widths={[500, 900]}
+            sizes="(min-width: 1000px) 33vw, 100vw"
+          />
+        </figure>
+        <ul role="list" class="offers__list reveal-stagger">
+          {
+            angebote.map((a) => (
+              <li class="offer card card--glow">
+                <span class="offer__icon">
+                  <a.icon aria-hidden="true" />
+                </span>
+                <h3>{a.titel}</h3>
+                <p>{a.text}</p>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- Einblicke: Fotos aus der Galerie -->
+  <section class="section section--alt" aria-labelledby="einblicke" data-photo-strip data-folder="Vereinsleben">
+    <div class="container">
+      <header class="section-head reveal">
+        <div>
+          <p class="eyebrow">Einblicke</p>
+          <h2 id="einblicke">Bilder aus dem Vereinsleben</h2>
+        </div>
+        <a class="link-arrow" href="/galerie" data-photos-more>
+          <span data-photos-more-label>Zur Galerie</span>
+          <ArrowRight aria-hidden="true" />
+        </a>
+      </header>
+      <ul role="list" class="photos" data-photos>
+        {Array.from({ length: 9 }, () => <li class="photos__item skeleton" aria-hidden="true" />)}
+      </ul>
+      <p class="photos__hint">
+        Eigene Fotos von einer Veranstaltung? <a href="/galerie/hochladen">Hier hochladen</a> – nach der Freigabe durch den
+        Vorstand erscheinen sie in der Galerie.
+      </p>
+    </div>
+  </section>
+
+  <!-- Schützenjahr -->
+  <section class="section" aria-labelledby="jahr">
+    <div class="container">
+      <header class="section-head reveal">
+        <div>
+          <p class="eyebrow">Das Vereinsjahr</p>
+          <h2 id="jahr">Ein Jahr bei den Iglinger Schützen</h2>
+        </div>
+        <a class="link-arrow" href="/veranstaltungen">Aktuelle Termine <ArrowRight aria-hidden="true" /></a>
+      </header>
+      <ol role="list" class="year reveal-stagger">
+        {
+          schuetzenjahr.map((e) => (
+            <li class="year__item">
+              <span class="year__icon">
+                <e.icon aria-hidden="true" />
+              </span>
+              <span class="year__when">{e.zeit}</span>
+              <h3>{e.titel}</h3>
+              <p>{e.text}</p>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </section>
+
+  <!-- Vorstand -->
+  <section class="section section--alt" aria-labelledby="vorstand">
+    <div class="container board">
+      <figure class="board__figure reveal-scale">
+        <Image src={vorstandschaft} alt="Alte und neue Vorstandschaft zusammen" width={720} class="board__image" />
+        <figcaption>Alte und neue Vorstandschaft zusammen</figcaption>
+      </figure>
+      <div class="board__text reveal">
+        <p class="eyebrow">Ansprechpartner</p>
+        <h2 id="vorstand">Der Vorstand</h2>
+        <p>
+          Die Vorstandschaft wird von der Generalversammlung gewählt und kümmert sich um alles rund um Schießbetrieb,
+          Veranstaltungen und Vereinsleben. Bei Fragen, Ideen oder Interesse an einer Mitgliedschaft sind wir gerne für Sie
+          da.
+        </p>
+        <ul role="list" class="board__people">
+          {
+            verein.vorstand.map((v) => (
+              <li class="person">
+                <span class="person__avatar" aria-hidden="true">
+                  {v.name
+                    .split(' ')
+                    .map((n) => n[0])
+                    .join('')}
+                </span>
+                <span>
+                  <strong>{v.name}</strong>
+                  <span class="person__role">{v.funktion}</span>
+                </span>
+              </li>
+            ))
+          }
+        </ul>
+        <a class="btn btn--primary" href={`mailto:${verein.email}`}>
+          <Mail aria-hidden="true" /> E-Mail an den Vorstand
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Geschichte -->
+  <section class="section" aria-labelledby="geschichte">
+    <div class="container">
+      <header class="section-head reveal">
+        <div>
+          <p class="eyebrow">Unsere Geschichte</p>
+          <h2 id="geschichte">{jahre} Jahre Schützentradition</h2>
+        </div>
+        <a class="link-arrow" href="/chronik">Ganze Chronik lesen <ArrowRight aria-hidden="true" /></a>
+      </header>
+      <ol role="list" class="milestones reveal-stagger">
+        {
+          meilensteine.map((m) => (
+            <li class="milestone">
+              <span class="milestone__year">{m.jahr}</span>
+              <p>{m.text}</p>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </section>
+
+  <!-- Kennenlernen -->
+  <section class="section" aria-labelledby="kennenlernen">
+    <div class="container">
+      <div class="meet reveal-scale">
+        <div class="meet__rings" aria-hidden="true"></div>
+        <p class="eyebrow">Kennenlernen</p>
+        <h2 id="kennenlernen">Schauen Sie einfach vorbei!</h2>
+        <p class="meet__text">
+          Am besten lernt man uns an einem Schießabend kennen – samstags von {oeffnungszeiten.samstag.zeitraum} ab 19:30 Uhr im
+          Lamm. Schnuppertraining für Neueinsteiger bieten wir gerne an.
+        </p>
+        <div class="meet__actions">
+          <a class="btn btn--accent btn--lg" href="/mitgliedschaft">Mitglied werden <ArrowRight aria-hidden="true" class="btn__arrow" /></a>
+          <a class="btn btn--on-dark btn--lg" href="/veranstaltungen"><CalendarDays aria-hidden="true" /> Termine ansehen</a>
+          <a class="btn btn--on-dark btn--lg" href={verein.whatsappKanal} target="_blank" rel="noopener">
+            <MessageCircle aria-hidden="true" /> WhatsApp-Kanal
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  import { initPhotoStrips } from '../scripts/photo-strip';
+
+  initPhotoStrips();
+</script>
+
+<style>
+  h2 {
+    font-size: var(--step-4);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+  }
+
+  /* ---------- Wer wir sind ---------- */
+  .who {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+    gap: var(--space-2xl);
+    align-items: center;
+  }
+
+  .who__text {
+    display: grid;
+    gap: var(--space-s);
+  }
+
+  .who__text p:not(.eyebrow, .lead) {
+    color: var(--c-text-muted);
+  }
+
+  .values {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2xs);
+    margin-top: var(--space-2xs);
+  }
+
+  .values li {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.55rem 1rem;
+    border-radius: var(--radius-pill);
+    background: var(--c-primary-soft);
+    color: var(--c-primary);
+    font-weight: 650;
+  }
+
+  .values :global(svg) {
+    width: 1.1rem;
+    height: 1.1rem;
+  }
+
+  .facts {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-s);
+  }
+
+  .fact {
+    display: grid;
+    align-content: start;
+    gap: 0.4rem;
+    padding: var(--space-m);
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius-xl);
+    background:
+      radial-gradient(14rem 8rem at 100% 0%, color-mix(in oklab, var(--c-accent) 14%, transparent), transparent 70%),
+      var(--c-surface);
+  }
+
+  .fact dt {
+    font-family: var(--font-heading);
+    font-size: var(--step-5);
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    color: var(--c-primary);
+  }
+
+  .fact dd {
+    color: var(--c-text-muted);
+    font-size: var(--step--1);
+  }
+
+  /* ---------- Zuhause ---------- */
+  .home {
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+    gap: var(--space-2xl);
+    align-items: center;
+  }
+
+  .home__media {
+    position: relative;
+  }
+
+  .home__media :global(.home__image) {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    border-radius: var(--radius-2xl);
+    box-shadow: var(--shadow-l);
+  }
+
+  .home__badge {
+    position: absolute;
+    inset: auto auto var(--space-s) var(--space-s);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    max-width: calc(100% - 2 * var(--space-s));
+    padding: 0.5rem 0.9rem;
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-pill);
+    background: var(--glass-dark-strong);
+    backdrop-filter: blur(var(--glass-blur));
+    color: #fff;
+    font-size: var(--step--1);
+    font-weight: 600;
+  }
+
+  .home__badge :global(svg) {
+    flex: none;
+    width: 1rem;
+    height: 1rem;
+    color: var(--c-accent-strong);
+  }
+
+  .home__text {
+    display: grid;
+    gap: var(--space-s);
+    justify-items: start;
+  }
+
+  .home__text > p:not(.eyebrow) {
+    color: var(--c-text-muted);
+  }
+
+  .home__hours {
+    display: grid;
+    gap: var(--space-2xs);
+    width: 100%;
+    padding: var(--space-s) var(--space-m);
+    border-left: 3px solid var(--c-accent);
+    border-radius: var(--radius-m);
+    background: var(--c-surface);
+  }
+
+  .home__hours div {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.25rem 1rem;
+  }
+
+  .home__hours span {
+    color: var(--c-text-muted);
+  }
+
+  /* ---------- Angebote ---------- */
+  .offers {
+    display: grid;
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.6fr);
+    gap: var(--space-m);
+    align-items: stretch;
+  }
+
+  .offers__photo {
+    margin: 0;
+    overflow: hidden;
+    border-radius: var(--radius-2xl);
+  }
+
+  .offers__photo :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .offers__list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-m);
+  }
+
+  .offer {
+    display: grid;
+    align-content: start;
+    gap: var(--space-2xs);
+  }
+
+  .offer h3 {
+    font-size: var(--step-2);
+  }
+
+  .offer p {
+    color: var(--c-text-muted);
+  }
+
+  .offer__icon {
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    margin-bottom: var(--space-3xs);
+    border-radius: var(--radius-m);
+    background: linear-gradient(140deg, var(--c-primary), color-mix(in oklab, var(--c-primary) 55%, var(--c-accent-strong)));
+    color: #fff;
+  }
+
+  .offer__icon :global(svg) {
+    width: 1.35rem;
+    height: 1.35rem;
+  }
+
+  /* ---------- Einblicke ---------- */
+  .photos {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--space-xs);
+  }
+
+  .photos :global(.photos__item) {
+    aspect-ratio: 1;
+    overflow: hidden;
+    border-radius: var(--radius-l);
+    background: var(--c-surface-2);
+  }
+
+  .photos :global(.photos__item:first-child) {
+    grid-column: span 2;
+    grid-row: span 2;
+  }
+
+  .photos :global(.photos__link) {
+    display: block;
+    height: 100%;
+  }
+
+  .photos :global(.photos__link img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 600ms var(--ease-out);
+  }
+
+  .photos :global(.photos__link:hover img),
+  .photos :global(.photos__link:focus-visible img) {
+    transform: scale(1.05);
+  }
+
+  .photos__hint {
+    margin-top: var(--space-m);
+    color: var(--c-text-muted);
+    font-size: var(--step--1);
+  }
+
+  /* ---------- Vereinsjahr ---------- */
+  .year {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--space-m);
+  }
+
+  .year__item {
+    position: relative;
+    display: grid;
+    align-content: start;
+    gap: var(--space-3xs);
+    padding: var(--space-m);
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius-xl);
+    background: var(--c-surface);
+  }
+
+  .year__icon {
+    display: grid;
+    place-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    margin-bottom: var(--space-2xs);
+    border-radius: 50%;
+    background: var(--c-accent-soft);
+    color: var(--c-accent);
+  }
+
+  .year__icon :global(svg) {
+    width: 1.2rem;
+    height: 1.2rem;
+  }
+
+  .year__when {
+    font-size: var(--step--1);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--c-accent);
+  }
+
+  .year__item h3 {
+    font-size: var(--step-1);
+    line-height: 1.2;
+  }
+
+  .year__item p {
+    color: var(--c-text-muted);
+    font-size: var(--step--1);
+  }
+
+  /* ---------- Vorstand ---------- */
+  .board {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: var(--space-2xl);
+    align-items: center;
+  }
+
+  .board__figure {
+    display: grid;
+    gap: var(--space-xs);
+    margin: 0;
+  }
+
+  .board__figure :global(.board__image) {
+    width: 100%;
+    border-radius: var(--radius-2xl);
+    box-shadow: var(--shadow-l);
+  }
+
+  .board__figure figcaption {
+    color: var(--c-text-muted);
+    font-size: var(--step--1);
+    font-style: italic;
+    text-align: center;
+  }
+
+  .board__text {
+    display: grid;
+    gap: var(--space-s);
+    justify-items: start;
+  }
+
+  .board__text > p:not(.eyebrow) {
+    color: var(--c-text-muted);
+  }
+
+  .board__people {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+    gap: var(--space-xs);
+    width: 100%;
+  }
+
+  .person {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-xs) var(--space-s);
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius-l);
+    background: var(--c-surface);
+  }
+
+  .person > span:last-child {
+    display: grid;
+  }
+
+  .person__avatar {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 50%;
+    background: linear-gradient(140deg, var(--c-primary), var(--c-brand-dark));
+    color: var(--c-accent-strong);
+    font-family: var(--font-heading);
+    font-size: var(--step-1);
+  }
+
+  .person__role {
+    color: var(--c-text-muted);
+    font-size: var(--step--1);
+  }
+
+  /* ---------- Geschichte ---------- */
+  .milestones {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: var(--space-m);
+  }
+
+  .milestones::before {
+    content: '';
+    position: absolute;
+    inset: 1.6rem 0 auto;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--c-accent) 10%, var(--c-accent) 90%, transparent);
+    opacity: 0.5;
+  }
+
+  .milestone {
+    position: relative;
+    display: grid;
+    gap: var(--space-xs);
+    justify-items: start;
+  }
+
+  .milestone__year {
+    position: relative;
+    padding: 0.35rem 0.85rem;
+    border: 1px solid color-mix(in oklab, var(--c-accent) 50%, transparent);
+    border-radius: var(--radius-pill);
+    background: var(--c-surface);
+    color: var(--c-primary);
+    font-family: var(--font-heading);
+    font-size: var(--step-2);
+    line-height: 1.2;
+  }
+
+  .milestone p {
+    color: var(--c-text-muted);
+    font-size: var(--step--1);
+  }
+
+  /* ---------- Kennenlernen ---------- */
+  .meet {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    display: grid;
+    justify-items: center;
+    gap: var(--space-s);
+    padding: clamp(3rem, 2rem + 4vw, 5.5rem) var(--space-m);
+    border-radius: var(--radius-2xl);
+    text-align: center;
+    color: #fff;
+    background:
+      radial-gradient(40rem 22rem at 50% 120%, rgb(232 197 127 / 0.25), transparent 70%),
+      linear-gradient(160deg, #1a472a, #0b1f13);
+  }
+
+  .meet__rings {
+    position: absolute;
+    inset: 50% auto auto 50%;
+    z-index: -1;
+    width: 56rem;
+    aspect-ratio: 1;
+    translate: -50% -50%;
+    border-radius: 50%;
+    background: repeating-radial-gradient(circle, transparent 0 3rem, rgb(255 255 255 / 0.05) 3rem 3.1rem);
+    mask-image: radial-gradient(circle, #000 30%, transparent 70%);
+  }
+
+  .meet .eyebrow {
+    color: var(--c-accent-strong);
+  }
+
+  .meet h2 {
+    max-width: 18ch;
+    color: #fff;
+    font-size: var(--step-5);
+    line-height: 1;
+  }
+
+  .meet__text {
+    max-width: 40rem;
+    color: rgb(255 255 255 / 0.8);
+    font-size: var(--step-1);
+  }
+
+  .meet__actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-xs);
+    margin-top: var(--space-s);
+  }
+
+  /* ---------- Responsiv ---------- */
+  @media (max-width: 1100px) {
+    .year {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .milestones {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      row-gap: var(--space-l);
+    }
+
+    .milestones::before {
+      display: none;
+    }
+
+    .offers {
+      grid-template-columns: 1fr;
+    }
+
+    .offers__photo {
+      max-height: 22rem;
+    }
+  }
+
+  @media (max-width: 900px) {
+    .who,
+    .home,
+    .board {
+      grid-template-columns: 1fr;
+      gap: var(--space-xl);
+    }
+  }
+
+  @media (max-width: 640px) {
+    .offers__list,
+    .year {
+      grid-template-columns: 1fr;
+    }
+
+    .photos {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .milestones {
+      grid-template-columns: 1fr;
+      row-gap: var(--space-s);
+      padding-left: var(--space-s);
+      border-left: 2px solid color-mix(in oklab, var(--c-accent) 50%, transparent);
+    }
+
+    .facts {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .fact dt {
+      font-size: var(--step-4);
+    }
+  }
+</style>

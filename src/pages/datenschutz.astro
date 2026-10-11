@@ -1,0 +1,157 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHeader from '../components/PageHeader.astro';
+import { verein } from '../data/verein';
+---
+
+<BaseLayout title="Datenschutzerklärung" description={`Datenschutzerklärung des ${verein.name}.`}>
+  <PageHeader title="Datenschutzerklärung" />
+
+  <section class="section section--tight">
+    <div class="container container--narrow prose">
+      <h2>1. Datenschutz auf einen Blick</h2>
+      <h3>Allgemeine Hinweise</h3>
+      <p>
+        Die folgenden Hinweise geben einen einfachen Überblick darüber, was mit Ihren personenbezogenen Daten passiert,
+        wenn Sie diese Website besuchen.
+      </p>
+
+      <h2>2. Allgemeine Hinweise und Pflichtinformationen</h2>
+      <h3>Datenschutz</h3>
+      <p>
+        Die Betreiber dieser Seiten nehmen den Schutz Ihrer persönlichen Daten sehr ernst. Wir behandeln Ihre
+        personenbezogenen Daten vertraulich und entsprechend der gesetzlichen Datenschutzvorschriften sowie dieser
+        Datenschutzerklärung.
+      </p>
+
+      <h3>Verantwortliche Stelle</h3>
+      <address>
+        <strong>{verein.name}</strong><br />
+        {verein.adresse.strasse}<br />
+        {verein.adresse.plz}
+        {verein.adresse.ort}<br />
+        E-Mail: <a href={`mailto:${verein.email}`}>{verein.email}</a>
+      </address>
+
+      <h2>3. Datenerfassung auf dieser Website</h2>
+      <h3>Server-Log-Dateien</h3>
+      <p>
+        Der Provider der Seiten erhebt und speichert automatisch Informationen in so genannten Server-Log-Dateien, die Ihr
+        Browser automatisch an uns übermittelt. Dies sind:
+      </p>
+      <ul>
+        <li>Browsertyp und Browserversion</li>
+        <li>Verwendetes Betriebssystem</li>
+        <li>Referrer URL</li>
+        <li>Hostname des zugreifenden Rechners</li>
+        <li>Uhrzeit der Serveranfrage</li>
+        <li>IP-Adresse</li>
+      </ul>
+      <p>
+        Eine Zusammenführung dieser Daten mit anderen Datenquellen wird nicht vorgenommen. Die Erfassung dieser Daten
+        erfolgt auf Grundlage von Art. 6 Abs. 1 lit. f DSGVO.
+      </p>
+
+      <h3>Speicherung im Browser</h3>
+      <p>
+        Diese Website setzt keine Cookies. Im lokalen Speicher Ihres Browsers werden lediglich technisch notwendige
+        Einstellungen abgelegt: Ihre Wahl zwischen hellem und dunklem Design, ob Karten von Google Maps automatisch
+        geladen werden dürfen, sowie für die Dauer der Sitzung ein Merker, damit der Besucherzähler Sie nur einmal zählt.
+        Nach der Anmeldung im Vorstands- oder Helferbereich speichert der Browser außerdem die Anmeldung. Diese Angaben
+        verlassen Ihr Gerät nicht (Art. 6 Abs. 1 lit. f DSGVO, § 25 Abs. 2 Nr. 2 TDDDG).
+      </p>
+
+      <h3>Schriftarten</h3>
+      <p>
+        Die verwendeten Schriftarten werden direkt von unserem Server ausgeliefert. Es findet keine Verbindung zu Servern
+        von Google oder anderen Schriftanbietern statt.
+      </p>
+
+      <h2>4. Firebase / Google Cloud</h2>
+      <p>
+        Diese Website nutzt Firebase, einen Dienst der Google Ireland Limited. Firebase wird für die Verwaltung von
+        Veranstaltungen und Protokollen verwendet. Dabei können personenbezogene Daten an Server von Google übertragen
+        werden.
+      </p>
+      <p>
+        Darüber hinaus nutzen wir Firebase für die Anmeldung im Vorstands- und Helferbereich sowie für die interne
+        Einteilung von Wirten und Schießaufsicht. Diese Daten sind nur für angemeldete Vorstands- und Helferkonten
+        sichtbar.
+      </p>
+
+      <h2>5. Cloudinary (Bildverwaltung)</h2>
+      <p>
+        Für die Verwaltung und Bereitstellung von Bildern in unserer Galerie nutzen wir Cloudinary, einen Dienst der
+        Cloudinary Ltd. Wenn Sie Bilder über unsere Upload-Funktion hochladen, werden diese auf Servern von Cloudinary
+        gespeichert. Die Verarbeitung erfolgt auf Grundlage von Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an der
+        effizienten Bereitstellung von Bildinhalten).
+      </p>
+      <p>
+        <strong>Wichtig:</strong> Hochgeladene Bilder werden nach Freigabe durch den Vorstand öffentlich in der Galerie angezeigt.
+        Bitte laden Sie nur Bilder hoch, bei denen Sie über die erforderlichen Rechte verfügen und die keine
+        personenbezogenen Daten Dritter ohne deren Einwilligung enthalten.
+      </p>
+      <p>
+        Weitere Informationen finden Sie in der Datenschutzerklärung von Cloudinary:
+        <a href="https://cloudinary.com/privacy" target="_blank" rel="noopener">https://cloudinary.com/privacy</a>
+      </p>
+
+      <h2 id="google-maps">6. Google Maps</h2>
+      <p>
+        Auf der Seite „Kontakt / Anfahrt“ können Sie eine Karte von Google Maps (Google Ireland Limited, Gordon House,
+        Barrow Street, Dublin 4, Irland) anzeigen lassen. Die Karte wird erst geladen, wenn Sie auf „Karte laden“ klicken.
+        Erst dann werden Daten wie Ihre IP-Adresse an Google übertragen. Rechtsgrundlage ist Ihre Einwilligung (Art. 6
+        Abs. 1 lit. a DSGVO), die Sie jederzeit widerrufen können. Weitere Informationen:
+        <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">https://policies.google.com/privacy</a>
+      </p>
+      <p class="consent-reset">
+        <button type="button" class="btn btn--sm" data-map-revoke>Automatisches Laden von Karten widerrufen</button>
+        <span data-map-revoke-status role="status"></span>
+      </p>
+
+      <h2>7. Speicherdauer</h2>
+      <p>
+        Wir speichern personenbezogene Daten nur so lange, wie dies für die Erfüllung der jeweiligen Zwecke erforderlich
+        ist oder gesetzliche Aufbewahrungsfristen bestehen. Hochgeladene Bilder werden dauerhaft gespeichert, bis sie vom
+        Vorstand gelöscht werden.
+      </p>
+
+      <h2>8. Ihre Rechte</h2>
+      <p>Sie haben jederzeit das Recht auf:</p>
+      <ul>
+        <li><strong>Auskunft</strong> über Ihre gespeicherten personenbezogenen Daten (Art. 15 DSGVO)</li>
+        <li><strong>Berichtigung</strong> unrichtiger Daten (Art. 16 DSGVO)</li>
+        <li><strong>Löschung</strong> Ihrer Daten (Art. 17 DSGVO)</li>
+        <li><strong>Einschränkung der Verarbeitung</strong> (Art. 18 DSGVO)</li>
+        <li><strong>Datenübertragbarkeit</strong> (Art. 20 DSGVO)</li>
+        <li><strong>Widerspruch</strong> gegen die Verarbeitung (Art. 21 DSGVO)</li>
+        <li><strong>Beschwerde bei einer Aufsichtsbehörde</strong> (Art. 77 DSGVO)</li>
+      </ul>
+      <p>Zur Ausübung Ihrer Rechte wenden Sie sich bitte an: <a href={`mailto:${verein.email}`}>{verein.email}</a></p>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .consent-reset {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  [data-map-revoke-status] {
+    color: var(--c-success);
+    font-size: var(--step--1);
+  }
+</style>
+
+<script>
+  import { setMapConsent } from '../scripts/map-consent';
+
+  document.querySelector('[data-map-revoke]')?.addEventListener('click', () => {
+    setMapConsent(false);
+    const status = document.querySelector('[data-map-revoke-status]');
+    if (status) status.textContent = 'Erledigt – Karten werden wieder erst nach Klick geladen.';
+  });
+</script>

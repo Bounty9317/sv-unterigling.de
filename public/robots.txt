@@ -1,0 +1,5 @@
+User-agent: *
+Disallow: /vorstand
+Disallow: /helfer
+
+Sitemap: https://schuetzen-unterigling.de/sitemap-index.xml

@@ -1,0 +1,248 @@
+---
+import { ArrowLeft, CircleCheck, ImagePlus, Info, ShieldCheck, Upload } from '@lucide/astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHeader from '../../components/PageHeader.astro';
+---
+
+<BaseLayout
+  title="Bilder hochladen"
+  description="Teile deine Bilder von Veranstaltungen des Schützenverein Unterigling. Der Vorstand prüft sie und gibt sie für die Galerie frei."
+>
+  <PageHeader
+    eyebrow="Galerie"
+    title="Bilder hochladen"
+    intro="Teile deine Bilder von unseren Veranstaltungen! Der Vorstand wird die Bilder prüfen und für die Galerie freigeben."
+  >
+    <a class="btn btn--sm back" href="/galerie"><ArrowLeft aria-hidden="true" /> Zur Galerie</a>
+  </PageHeader>
+
+  <section class="section section--tight">
+    <div class="container upload-layout">
+      <form class="card upload" data-upload novalidate>
+        <div class="field">
+          <label class="label" for="event-select">Veranstaltung auswählen:</label>
+          <select id="event-select" class="select" data-upload-folder required>
+            <option value="">-- Lade Veranstaltungen... --</option>
+          </select>
+        </div>
+
+        <label class="dropzone" data-dropzone>
+          <input type="file" multiple accept=".jpg,.jpeg,.png,.gif,image/jpeg,image/png,image/gif" data-upload-input class="visually-hidden" />
+          <ImagePlus aria-hidden="true" class="dropzone__icon" />
+          <span class="dropzone__title">Bilder auswählen oder hierher ziehen</span>
+          <span class="dropzone__hint">JPG, PNG oder GIF · max. 10 MB pro Bild · bis zu 20 Bilder auf einmal</span>
+        </label>
+
+        <ul role="list" class="queue" data-upload-queue></ul>
+
+        <label class="check consent">
+          <input type="checkbox" data-upload-consent required />
+          <span>
+            Ich verfüge über die erforderlichen Rechte an den Bildern und bin mit der Speicherung und Veröffentlichung nach
+            Freigabe durch den Vorstand einverstanden.
+          </span>
+        </label>
+
+        <p class="upload__error" data-upload-error role="alert" hidden></p>
+
+        <button type="submit" class="btn btn--primary btn--lg" data-upload-submit disabled>
+          <Upload aria-hidden="true" /> Bilder hochladen
+        </button>
+
+        <p class="alert alert--success" data-upload-success hidden>
+          <CircleCheck aria-hidden="true" />
+          <span>✅ Bilder erfolgreich hochgeladen! Der Vorstand wird sie prüfen und freigeben.</span>
+        </p>
+      </form>
+
+      <aside class="upload-aside">
+        <div class="alert alert--brand">
+          <Info aria-hidden="true" />
+          <div>
+            <h2 class="aside-title">Hinweise:</h2>
+            <ul>
+              <li>Wähle zuerst die Veranstaltung aus</li>
+              <li>Du kannst mehrere Bilder gleichzeitig hochladen</li>
+              <li>Erlaubte Formate: JPG, PNG, GIF</li>
+              <li>Maximale Dateigröße: 10 MB pro Bild</li>
+              <li>Die Bilder werden nach Prüfung durch den Vorstand in der Galerie angezeigt</li>
+            </ul>
+          </div>
+        </div>
+        <div class="alert alert--warning">
+          <ShieldCheck aria-hidden="true" />
+          <div>
+            <h2 class="aside-title">Datenschutz-Hinweis</h2>
+            <p>
+              Mit dem Hochladen bestätigst du, dass du über die erforderlichen Rechte an den Bildern verfügst und mit der
+              Speicherung und Veröffentlichung nach Freigabe durch den Vorstand einverstanden bist. Die Bilder werden auf
+              Servern von Cloudinary gespeichert. Weitere Informationen findest du in unserer
+              <a href="/datenschutz">Datenschutzerklärung</a>.
+            </p>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .back {
+    justify-self: start;
+    margin-top: var(--space-2xs);
+  }
+
+  .upload-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    gap: var(--space-xl);
+    align-items: start;
+  }
+
+  .upload {
+    display: grid;
+    gap: var(--space-m);
+  }
+
+  .dropzone {
+    display: grid;
+    justify-items: center;
+    gap: 0.4rem;
+    padding: var(--space-xl) var(--space-m);
+    border: 2px dashed var(--c-border-strong);
+    border-radius: var(--radius-l);
+    background: var(--c-surface-2);
+    text-align: center;
+    cursor: pointer;
+    transition:
+      border-color var(--duration) ease,
+      background var(--duration) ease;
+  }
+
+  .dropzone:hover,
+  .dropzone:focus-within,
+  .dropzone.is-dragover {
+    border-color: var(--c-primary);
+    background: var(--c-primary-softer);
+  }
+
+  .dropzone :global(.dropzone__icon) {
+    width: 2.5rem;
+    height: 2.5rem;
+    color: var(--c-primary);
+  }
+
+  .dropzone__title {
+    font-weight: 650;
+    font-size: var(--step-1);
+  }
+
+  .dropzone__hint {
+    font-size: var(--step--1);
+    color: var(--c-text-muted);
+  }
+
+  .queue {
+    display: grid;
+    gap: 0.5rem;
+  }
+
+  .queue:empty {
+    display: none;
+  }
+
+  .queue :global(.queue__item) {
+    display: grid;
+    grid-template-columns: 3.25rem minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem;
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius-m);
+    background: var(--c-surface);
+  }
+
+  .queue :global(.queue__thumb) {
+    width: 3.25rem;
+    height: 3.25rem;
+    border-radius: var(--radius-s);
+    object-fit: cover;
+    background: var(--c-surface-3);
+  }
+
+  .queue :global(.queue__name) {
+    font-size: var(--step--1);
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .queue :global(.queue__meta) {
+    font-size: var(--step--2);
+    color: var(--c-text-muted);
+  }
+
+  .queue :global(.queue__meta.is-error) {
+    color: var(--c-danger);
+    font-weight: 600;
+  }
+
+  .queue :global(.queue__meta.is-done) {
+    color: var(--c-success);
+    font-weight: 600;
+  }
+
+  .queue :global(progress) {
+    width: 100%;
+    height: 0.4rem;
+    margin-top: 0.3rem;
+    accent-color: var(--c-primary);
+  }
+
+  .consent {
+    font-size: var(--step--1);
+  }
+
+  .upload__error {
+    color: var(--c-danger);
+    font-weight: 600;
+  }
+
+  .upload-aside {
+    display: grid;
+    gap: var(--space-m);
+  }
+
+  .aside-title {
+    margin-bottom: 0.4rem;
+    font-family: var(--font-body);
+    font-size: var(--step-0);
+    font-weight: 700;
+  }
+
+  .upload-aside ul {
+    padding-left: 1.1rem;
+    display: grid;
+    gap: 0.3rem;
+  }
+
+  .upload-aside p {
+    font-size: var(--step--1);
+  }
+
+  @media (max-width: 900px) {
+    .upload-layout {
+      grid-template-columns: 1fr;
+    }
+
+    .upload-aside {
+      order: -1;
+    }
+  }
+</style>
+
+<script>
+  import { initUpload } from '../../scripts/upload';
+  initUpload();
+</script>

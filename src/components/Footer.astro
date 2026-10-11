@@ -1,0 +1,281 @@
+---
+import { Image } from 'astro:assets';
+import { ArrowUpRight, Clock, Eye, Mail, MapPin, MessageCircle } from '@lucide/astro';
+import logo from '../assets/images/logo.png';
+import { hauptnavigation, oeffnungszeiten, verein } from '../data/verein';
+
+const year = new Date().getFullYear();
+---
+
+<footer class="site-footer">
+  <div class="site-footer__inner">
+    <div class="site-footer__top">
+      <div class="site-footer__brand">
+        <Image src={logo} alt={`Logo ${verein.name}`} width={160} height={96} class="site-footer__logo" />
+        <p class="site-footer__slogan">Tradition trifft Präzision – seit {verein.gegruendet}.</p>
+        <a class="site-footer__wa" href={verein.whatsappKanal} target="_blank" rel="noopener">
+          <MessageCircle aria-hidden="true" /> WhatsApp-Kanal folgen <ArrowUpRight aria-hidden="true" />
+        </a>
+      </div>
+
+      <div class="site-footer__col">
+        <h2 class="site-footer__heading">Kontakt</h2>
+        <ul role="list" class="site-footer__list">
+          <li>
+            <MapPin aria-hidden="true" />
+            <span>
+              {verein.kurzname}<br />
+              {verein.adresse.strasse}<br />
+              {verein.adresse.plz}
+              {verein.adresse.ort}
+            </span>
+          </li>
+          <li>
+            <Mail aria-hidden="true" />
+            <a href={`mailto:${verein.email}`}>{verein.email}</a>
+          </li>
+        </ul>
+      </div>
+
+      <div class="site-footer__col">
+        <h2 class="site-footer__heading">Öffnungszeiten</h2>
+        <ul role="list" class="site-footer__list">
+          <li>
+            <Clock aria-hidden="true" />
+            <span>
+              <strong>Samstag ({oeffnungszeiten.samstag.zeitraum}):</strong>
+              {oeffnungszeiten.samstag.zeiten}<br />
+              <span class="site-footer__subtle">({oeffnungszeiten.samstag.hinweis})</span>
+            </span>
+          </li>
+          <li>
+            <Clock aria-hidden="true" />
+            <span>
+              <strong>{oeffnungszeiten.sonntag.bezeichnung}:</strong>
+              {oeffnungszeiten.sonntag.zeiten} (Sonn- und Feiertage)
+            </span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="site-footer__col">
+        <h2 class="site-footer__heading">Seiten</h2>
+        <ul role="list" class="site-footer__links">
+          {hauptnavigation.slice(1).map((item) => <li><a href={item.href}>{item.label}</a></li>)}
+          <li><a href="/galerie/hochladen">Bilder hochladen</a></li>
+          <li><a href="/helfer/login">Helfer Login</a></li>
+          <li><a href="/vorstand/login">Vorstand Login</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <p class="site-footer__wordmark" aria-hidden="true">Schützenverein Unterigling</p>
+
+    <div class="site-footer__bottom">
+      <p>&copy; <span data-year>{year}</span> {verein.name} | Alle Rechte vorbehalten</p>
+      <p class="site-footer__legal">
+        <a href="/impressum">Impressum</a>
+        <a href="/datenschutz">Datenschutz</a>
+        <span class="site-footer__visitors">
+          <Eye aria-hidden="true" />
+          Besucher: <span data-visitor-count>…</span>
+        </span>
+      </p>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    margin-top: var(--space-section);
+    padding: var(--space-s);
+    padding-top: 0;
+  }
+
+  .site-footer__inner {
+    position: relative;
+    overflow: hidden;
+    padding: clamp(2.5rem, 2rem + 3vw, 4.5rem) clamp(1.25rem, 1rem + 3vw, 4rem) var(--space-m);
+    border-radius: var(--radius-2xl);
+    background:
+      radial-gradient(50rem 26rem at 100% 0%, rgb(232 197 127 / 0.12), transparent 70%),
+      linear-gradient(170deg, #12301f, #0a1a10);
+    color: var(--c-on-brand-muted);
+    font-size: var(--step--1);
+  }
+
+  .site-footer a {
+    color: var(--c-on-brand);
+    text-decoration: none;
+  }
+
+  .site-footer a:hover {
+    color: #fff;
+    text-decoration: underline;
+  }
+
+  .site-footer__top {
+    display: grid;
+    grid-template-columns: 1.3fr 1fr 1fr 0.9fr;
+    gap: var(--space-xl) var(--space-l);
+  }
+
+  .site-footer__logo {
+    width: 8.5rem;
+    height: auto;
+    margin-bottom: var(--space-s);
+  }
+
+  .site-footer__slogan {
+    font-family: var(--font-heading);
+    font-size: var(--step-1);
+    color: var(--c-on-brand);
+    max-width: 18ch;
+  }
+
+  .site-footer__wa {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    margin-top: var(--space-s);
+    padding: 0.5rem 0.9rem;
+    border-radius: var(--radius-pill);
+    background: rgb(126 226 160 / 0.12);
+    border: 1px solid rgb(126 226 160 / 0.25);
+    font-weight: 650;
+  }
+
+  .site-footer__wa:hover {
+    text-decoration: none !important;
+    background: rgb(126 226 160 / 0.2);
+  }
+
+  .site-footer__wa :global(svg) {
+    width: 1rem;
+    height: 1rem;
+    color: var(--c-live);
+  }
+
+  .site-footer__heading {
+    margin-bottom: var(--space-s);
+    font-family: var(--font-body);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--c-accent-strong);
+  }
+
+  .site-footer__list {
+    display: grid;
+    gap: 0.9rem;
+  }
+
+  .site-footer__list li {
+    display: flex;
+    gap: 0.65rem;
+    line-height: 1.55;
+  }
+
+  .site-footer__list :global(svg) {
+    flex: none;
+    width: 1.05rem;
+    height: 1.05rem;
+    margin-top: 0.2rem;
+    color: var(--c-accent-strong);
+  }
+
+  .site-footer__list strong {
+    color: var(--c-on-brand);
+  }
+
+  .site-footer__subtle {
+    opacity: 0.8;
+  }
+
+  .site-footer__links {
+    display: grid;
+    gap: 0.45rem;
+  }
+
+  .site-footer__wordmark {
+    margin: clamp(2.5rem, 2rem + 3vw, 4.5rem) 0 calc(var(--space-s) - 0.2em);
+    /* Platz für die Unterlänge im "g" – der Verlauf wird nur innerhalb der Box gemalt */
+    padding-block-end: 0.2em;
+    font-family: var(--font-heading);
+    font-size: clamp(2.4rem, 0.4rem + 7.4vw, 8.4rem);
+    font-weight: 500;
+    line-height: 0.9;
+    letter-spacing: -0.045em;
+    white-space: nowrap;
+    font-variation-settings: 'SOFT' 100, 'opsz' 144;
+    background: linear-gradient(180deg, rgb(246 239 214 / 0.9), rgb(246 239 214 / 0.08));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    user-select: none;
+  }
+
+  .site-footer__bottom {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem 1.5rem;
+    padding-top: var(--space-s);
+    border-top: 1px solid rgb(255 255 255 / 0.1);
+  }
+
+  .site-footer__legal {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 1.25rem;
+  }
+
+  .site-footer__visitors {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .site-footer__visitors :global(svg) {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  @media (max-width: 1000px) {
+    .site-footer__top {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .site-footer {
+      padding: var(--space-2xs);
+      padding-top: 0;
+    }
+
+    .site-footer__top {
+      grid-template-columns: 1fr;
+    }
+
+    .site-footer__wordmark {
+      white-space: normal;
+      font-size: 3rem;
+    }
+  }
+</style>
+
+<script>
+  import { countVisit } from '../lib/public-data';
+
+  const target = document.querySelector<HTMLElement>('[data-visitor-count]');
+  if (target) {
+    countVisit().then((count) => {
+      target.textContent = count === null ? '---' : count.toLocaleString('de-DE');
+    });
+  }
+  document.querySelectorAll('[data-year]').forEach((el) => (el.textContent = String(new Date().getFullYear())));
+</script>

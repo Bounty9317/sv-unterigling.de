@@ -1,0 +1,48 @@
+---
+import { ArrowLeft, Target } from '@lucide/astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Seite nicht gefunden" description="Diese Seite gibt es leider nicht." noindex>
+  <section class="section not-found-section">
+    <div class="container container--narrow not-found">
+      <Target aria-hidden="true" class="not-found__icon" />
+      <p class="eyebrow">Fehler 404</p>
+      <h1>Daneben geschossen!</h1>
+      <p class="lead">Diese Seite gibt es leider nicht (mehr). Vielleicht hilft einer dieser Links weiter:</p>
+      <div class="not-found__links">
+        <a class="btn btn--primary" href="/"><ArrowLeft aria-hidden="true" /> Zur Startseite</a>
+        <a class="btn" href="/veranstaltungen">Veranstaltungen</a>
+        <a class="btn" href="/galerie">Galerie</a>
+        <a class="btn" href="/kontakt">Kontakt</a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .not-found-section {
+    padding-top: clamp(8rem, 6rem + 6vw, 11rem);
+  }
+
+  .not-found {
+    display: grid;
+    justify-items: center;
+    gap: var(--space-s);
+    text-align: center;
+  }
+
+  .not-found :global(.not-found__icon) {
+    width: 4rem;
+    height: 4rem;
+    color: var(--c-accent);
+  }
+
+  .not-found__links {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-2xs);
+    margin-top: var(--space-s);
+  }
+</style>

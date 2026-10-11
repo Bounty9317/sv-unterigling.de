@@ -1,0 +1,145 @@
+---
+interface Props {
+  eyebrow?: string;
+  title: string;
+  intro?: string;
+}
+
+const { eyebrow, title, intro } = Astro.props;
+---
+
+<section class="page-header">
+  <div class="page-header__rings" aria-hidden="true">
+    <span></span><span></span><span></span>
+  </div>
+  <div class="page-header__inner">
+    {
+      eyebrow && (
+        <p class="page-header__eyebrow intro">
+          <span aria-hidden="true" class="page-header__line" />
+          {eyebrow}
+        </p>
+      )
+    }
+    <h1 class="intro d-1">{title}</h1>
+    {intro && <p class="lead intro d-2">{intro}</p>}
+    <slot />
+  </div>
+</section>
+
+<style>
+  .page-header {
+    position: relative;
+    isolation: isolate;
+    overflow: clip;
+    padding-block: clamp(8rem, 6rem + 6vw, 11rem) clamp(3rem, 2rem + 3vw, 5rem);
+    color: #fff;
+    background:
+      radial-gradient(50rem 26rem at 85% 0%, rgb(232 197 127 / 0.16), transparent 70%),
+      radial-gradient(46rem 28rem at 0% 100%, rgb(90 160 110 / 0.18), transparent 70%),
+      linear-gradient(170deg, #12301f, #0b1d12);
+  }
+
+  .page-header__inner {
+    position: relative;
+    display: grid;
+    gap: var(--space-s);
+    width: min(100% - 2 * var(--gutter), 84rem);
+    margin-inline: auto;
+    justify-items: start;
+  }
+
+  .page-header__eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    font-size: var(--step--1);
+    font-weight: 650;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--c-accent-strong);
+  }
+
+  .page-header__line {
+    width: 2.25rem;
+    height: 2px;
+    background: currentColor;
+  }
+
+  .page-header h1 {
+    max-width: 20ch;
+    color: #fff;
+    font-size: var(--step-6);
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: -0.035em;
+    font-variation-settings: 'SOFT' 100, 'opsz' 144;
+  }
+
+  .lead {
+    max-width: 44rem;
+    color: rgb(255 255 255 / 0.78);
+  }
+
+  /* Zielscheiben-Ringe, die langsam pulsieren */
+  .page-header__rings {
+    position: absolute;
+    z-index: -1;
+    right: -8rem;
+    top: 50%;
+    width: 38rem;
+    aspect-ratio: 1;
+    translate: 0 -45%;
+  }
+
+  .page-header__rings span {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 1px solid rgb(255 255 255 / 0.08);
+  }
+
+  .page-header__rings span:nth-child(2) {
+    inset: 18%;
+    border-color: rgb(255 255 255 / 0.1);
+  }
+
+  .page-header__rings span:nth-child(3) {
+    inset: 36%;
+    background: radial-gradient(circle, rgb(232 197 127 / 0.22) 0 22%, transparent 23%);
+    border-color: rgb(232 197 127 / 0.25);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .page-header__rings span {
+      animation: ring-breathe 6s ease-in-out infinite;
+    }
+
+    .page-header__rings span:nth-child(2) {
+      animation-delay: -2s;
+    }
+
+    .page-header__rings span:nth-child(3) {
+      animation-delay: -4s;
+    }
+  }
+
+  @keyframes ring-breathe {
+    50% {
+      transform: scale(1.04);
+      opacity: 0.6;
+    }
+  }
+
+  @media (max-width: 720px) {
+    .page-header {
+      padding-top: 6.5rem;
+    }
+
+    .page-header__rings {
+      width: 22rem;
+      right: -10rem;
+      opacity: 0.7;
+    }
+  }
+</style>

@@ -1,17 +1,6 @@
-# Compiled JavaScript files
-lib/**/*.js
-lib/**/*.js.map
-
-# TypeScript v1 declaration files
-typings/
-
-# Node.js dependency directory
+lib/
 node_modules/
 *.local
-
-# Service Account Key (NEVER commit this!)
 serviceAccountKey.json
-
-# Environment files
 .env
 .env.local

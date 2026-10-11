@@ -1,0 +1,200 @@
+/*
+ * Design-Tokens – Farben angelehnt an Vereinslogo und Gasthaus „Zum Weißen Lamm“:
+ * Waldgrün (Fensterläden, Logorand), Creme (Logo, Fassade) und Messing (Pokale).
+ */
+@layer reset, tokens, base, components, utilities;
+
+@layer tokens {
+  :root {
+    color-scheme: light;
+
+    /* Grundfarben */
+    --c-bg: #fbf8f0;
+    --c-bg-sunken: #f3eee1;
+    --c-surface: #ffffff;
+    --c-surface-2: #f8f4ea;
+    --c-surface-3: #efe9da;
+    --c-border: #e4dcc8;
+    --c-border-strong: #cdc2a6;
+    --c-text: #16211a;
+    --c-text-muted: #4f5d54;
+    --c-text-subtle: #6f7b72;
+
+    --c-primary: #1f5233;
+    --c-primary-hover: #173f27;
+    --c-primary-soft: #e2eee5;
+    --c-primary-softer: #f0f6f1;
+    --c-on-primary: #ffffff;
+
+    --c-accent: #8a6220;
+    --c-accent-strong: #b88a32;
+    --c-accent-soft: #f7edd7;
+    --c-cream: #f6efd6;
+
+    --c-danger: #b42318;
+    --c-danger-hover: #912018;
+    --c-danger-soft: #fdecea;
+    --c-warning: #a24a06;
+    --c-warning-soft: #fff3e3;
+    --c-success: #1c6e38;
+    --c-success-soft: #e5f3e9;
+    --c-info: #1c5c9c;
+    --c-info-soft: #e7f0fa;
+
+    /* Kopfbereich & Fuß bleiben in beiden Modi grün */
+    --c-brand-dark: #12301f;
+    --c-brand-darker: #0b2015;
+    --c-on-brand: #f4f1e6;
+    --c-on-brand-muted: #c5d3c8;
+
+    /* Typografie */
+    --font-body: var(--font-sans, system-ui), system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --font-heading: var(--font-display, Georgia), Georgia, 'Times New Roman', serif;
+
+    --step--2: clamp(0.72rem, 0.7rem + 0.1vw, 0.78rem);
+    --step--1: clamp(0.84rem, 0.81rem + 0.14vw, 0.92rem);
+    --step-0: clamp(1rem, 0.97rem + 0.17vw, 1.075rem);
+    --step-1: clamp(1.18rem, 1.1rem + 0.38vw, 1.36rem);
+    --step-2: clamp(1.4rem, 1.25rem + 0.72vw, 1.78rem);
+    --step-3: clamp(1.68rem, 1.42rem + 1.25vw, 2.4rem);
+    --step-4: clamp(2.02rem, 1.6rem + 2.05vw, 3.25rem);
+    --step-5: clamp(2.4rem, 1.75rem + 3.2vw, 4.4rem);
+    --step-6: clamp(2.9rem, 1.6rem + 6.2vw, 7.25rem);
+
+    /* Abstände */
+    --space-3xs: 0.25rem;
+    --space-2xs: 0.5rem;
+    --space-xs: 0.75rem;
+    --space-s: 1rem;
+    --space-m: 1.5rem;
+    --space-l: 2rem;
+    --space-xl: 3rem;
+    --space-2xl: 4.5rem;
+    --space-3xl: 6.5rem;
+    --space-section: clamp(3rem, 2rem + 4.5vw, 6rem);
+    --gutter: clamp(1rem, 0.6rem + 2vw, 2rem);
+
+    /* Formen */
+    --radius-xs: 4px;
+    --radius-s: 8px;
+    --radius-m: 12px;
+    --radius-l: 18px;
+    --radius-xl: 28px;
+    --radius-2xl: 40px;
+    --radius-pill: 999px;
+
+    /* Glas-Flächen (Navigation, Karten über Fotos) */
+    --glass-dark: rgb(10 26 17 / 0.58);
+    --glass-dark-strong: rgb(10 26 17 / 0.82);
+    --glass-border: rgb(255 255 255 / 0.14);
+    --glass-blur: blur(18px) saturate(1.5);
+
+    /* Signalfarbe für „live“ */
+    --c-live: #7ee2a0;
+
+    --shadow-xs: 0 1px 2px rgb(22 33 26 / 0.06);
+    --shadow-s: 0 1px 2px rgb(22 33 26 / 0.06), 0 2px 8px rgb(22 33 26 / 0.06);
+    --shadow-m: 0 2px 4px rgb(22 33 26 / 0.05), 0 8px 24px rgb(22 33 26 / 0.09);
+    --shadow-l: 0 4px 8px rgb(22 33 26 / 0.06), 0 18px 48px rgb(22 33 26 / 0.14);
+
+    --focus-ring: 0 0 0 3px var(--c-bg), 0 0 0 6px color-mix(in oklab, var(--c-primary) 70%, transparent);
+
+    --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+    --duration: 180ms;
+
+    --header-height: 4.5rem;
+    --z-header: 50;
+    --z-overlay: 80;
+    --z-toast: 90;
+  }
+
+  :root[data-theme='dark'] {
+    color-scheme: dark;
+
+    --c-bg: #0d1410;
+    --c-bg-sunken: #090e0b;
+    --c-surface: #141d17;
+    --c-surface-2: #19241d;
+    --c-surface-3: #213027;
+    --c-border: #27352c;
+    --c-border-strong: #364a3d;
+    --c-text: #e7ede8;
+    --c-text-muted: #aab8ae;
+    --c-text-subtle: #8a988e;
+
+    --c-primary: #79c493;
+    --c-primary-hover: #93d3a9;
+    --c-primary-soft: #1b3324;
+    --c-primary-softer: #15241b;
+    --c-on-primary: #08160d;
+
+    --c-accent: #ddb469;
+    --c-accent-strong: #e8c57f;
+    --c-accent-soft: #2c2414;
+    --c-cream: #2a2618;
+
+    --c-danger: #f4867c;
+    --c-danger-hover: #f7a39b;
+    --c-danger-soft: #3a1714;
+    --c-warning: #f3b468;
+    --c-warning-soft: #33230f;
+    --c-success: #7fcf98;
+    --c-success-soft: #14301f;
+    --c-info: #8bbcf0;
+    --c-info-soft: #13253a;
+
+    --c-brand-dark: #0f2318;
+    --c-brand-darker: #08150d;
+
+    --shadow-xs: 0 1px 2px rgb(0 0 0 / 0.4);
+    --shadow-s: 0 1px 2px rgb(0 0 0 / 0.35), 0 2px 8px rgb(0 0 0 / 0.3);
+    --shadow-m: 0 2px 4px rgb(0 0 0 / 0.3), 0 8px 24px rgb(0 0 0 / 0.4);
+    --shadow-l: 0 4px 8px rgb(0 0 0 / 0.35), 0 18px 48px rgb(0 0 0 / 0.5);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme='light']) {
+      color-scheme: dark;
+
+      --c-bg: #0d1410;
+      --c-bg-sunken: #090e0b;
+      --c-surface: #141d17;
+      --c-surface-2: #19241d;
+      --c-surface-3: #213027;
+      --c-border: #27352c;
+      --c-border-strong: #364a3d;
+      --c-text: #e7ede8;
+      --c-text-muted: #aab8ae;
+      --c-text-subtle: #8a988e;
+
+      --c-primary: #79c493;
+      --c-primary-hover: #93d3a9;
+      --c-primary-soft: #1b3324;
+      --c-primary-softer: #15241b;
+      --c-on-primary: #08160d;
+
+      --c-accent: #ddb469;
+      --c-accent-strong: #e8c57f;
+      --c-accent-soft: #2c2414;
+      --c-cream: #2a2618;
+
+      --c-danger: #f4867c;
+      --c-danger-hover: #f7a39b;
+      --c-danger-soft: #3a1714;
+      --c-warning: #f3b468;
+      --c-warning-soft: #33230f;
+      --c-success: #7fcf98;
+      --c-success-soft: #14301f;
+      --c-info: #8bbcf0;
+      --c-info-soft: #13253a;
+
+      --c-brand-dark: #0f2318;
+      --c-brand-darker: #08150d;
+
+      --shadow-xs: 0 1px 2px rgb(0 0 0 / 0.4);
+      --shadow-s: 0 1px 2px rgb(0 0 0 / 0.35), 0 2px 8px rgb(0 0 0 / 0.3);
+      --shadow-m: 0 2px 4px rgb(0 0 0 / 0.3), 0 8px 24px rgb(0 0 0 / 0.4);
+      --shadow-l: 0 4px 8px rgb(0 0 0 / 0.35), 0 18px 48px rgb(0 0 0 / 0.5);
+    }
+  }
+}

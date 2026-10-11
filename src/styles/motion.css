@@ -1,0 +1,124 @@
+/*
+ * Bewegung & Effekte – alles reines CSS, nur wenn der Browser es kann
+ * und niemand „weniger Bewegung“ eingestellt hat.
+ */
+
+/* Weiche Übergänge zwischen den Seiten (Cross-Document View Transitions) */
+@media (prefers-reduced-motion: no-preference) {
+  @view-transition {
+    navigation: auto;
+  }
+}
+
+::view-transition-old(root) {
+  animation: vt-fade-out 180ms ease both;
+}
+
+::view-transition-new(root) {
+  animation: vt-fade-in 320ms var(--ease-out) both;
+}
+
+/* Kopfzeile bleibt beim Seitenwechsel stehen */
+::view-transition-group(site-header) {
+  animation-duration: 0s;
+}
+
+@keyframes vt-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes vt-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+
+@layer utilities {
+  /* Elemente gleiten beim Scrollen ins Bild */
+  @media (prefers-reduced-motion: no-preference) {
+    @supports (animation-timeline: view()) {
+      .reveal {
+        animation: reveal-up linear both;
+        animation-timeline: view();
+        animation-range: entry 0% cover 22%;
+      }
+
+      .reveal-stagger > * {
+        animation: reveal-up linear both;
+        animation-timeline: view();
+        animation-range: entry 0% cover 20%;
+      }
+
+      .reveal-scale {
+        animation: reveal-scale linear both;
+        animation-timeline: view();
+        animation-range: entry 0% cover 30%;
+      }
+    }
+
+    /* Einblenden beim Laden (z. B. Hero) */
+    .intro {
+      animation: intro-up 900ms var(--ease-out) both;
+      animation-delay: calc(var(--i, 0) * 110ms + 80ms);
+    }
+  }
+
+  .d-1 {
+    --i: 1;
+  }
+  .d-2 {
+    --i: 2;
+  }
+  .d-3 {
+    --i: 3;
+  }
+  .d-4 {
+    --i: 4;
+  }
+  .d-5 {
+    --i: 5;
+  }
+
+  @keyframes reveal-up {
+    from {
+      opacity: 0;
+      transform: translateY(40px);
+    }
+  }
+
+  @keyframes reveal-scale {
+    from {
+      opacity: 0;
+      transform: scale(0.94);
+    }
+  }
+
+  @keyframes intro-up {
+    from {
+      opacity: 0;
+      transform: translateY(28px);
+      filter: blur(6px);
+    }
+  }
+}
+
+/* Feine Körnung über der ganzen Seite – wirkt hochwertiger als glatte Flächen */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  pointer-events: none;
+  opacity: 0.045;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+@media print {
+  body::after {
+    display: none;
+  }
+}

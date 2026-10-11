@@ -1,0 +1,18 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import HelferApp from '../../app/helfer/HelferApp';
+import '../../app/app.css';
+
+export function getStaticPaths() {
+  return [undefined, 'login', 'schiessaufsicht'].map((path) => ({ params: { path } }));
+}
+---
+
+<BaseLayout title="Helferbereich" description="Einteilung für Wirte und Schießaufsicht." noindex bare>
+  <HelferApp client:only="react">
+    <div slot="fallback" class="app-loading" role="status">
+      <div class="spinner" aria-hidden="true"></div>
+      <span>Helferbereich wird geladen…</span>
+    </div>
+  </HelferApp>
+</BaseLayout>

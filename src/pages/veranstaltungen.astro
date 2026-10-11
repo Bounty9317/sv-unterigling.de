@@ -1,0 +1,49 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHeader from '../components/PageHeader.astro';
+import OpeningHours from '../components/OpeningHours.astro';
+import EventList from '../components/EventList.astro';
+import RegistrationDialog from '../components/RegistrationDialog.astro';
+import { seasonLabel } from '../lib/dates';
+---
+
+<BaseLayout
+  title="Veranstaltungen"
+  description="Alle kommenden Veranstaltungen des Schützenverein Unterigling – Schießabende, Feste und Versammlungen – sowie die Öffnungszeiten des Vereinsheims."
+>
+  <PageHeader
+    eyebrow="Termine & Öffnungszeiten"
+    title="Veranstaltungen"
+    intro="Schießabende, Frühschoppen, Feste und Versammlungen – hier findet ihr alle Termine des Vereins."
+  />
+
+  <section class="section section--tight" aria-labelledby="zeiten">
+    <div class="container">
+      <h2 id="zeiten" class="visually-hidden">Öffnungszeiten</h2>
+      <OpeningHours />
+    </div>
+  </section>
+
+  <section class="section section--tight" aria-labelledby="kommende">
+    <div class="container container--narrow">
+      <header class="list-header">
+        <p class="eyebrow">Termine <span data-season-label>{seasonLabel()}</span></p>
+        <h2 id="kommende">Kommende Veranstaltungen</h2>
+      </header>
+      <EventList variant="full" showPast />
+    </div>
+  </section>
+
+  <RegistrationDialog />
+</BaseLayout>
+
+<style>
+  .list-header {
+    margin-bottom: var(--space-l);
+  }
+</style>
+
+<script>
+  import { seasonLabel } from '../lib/dates';
+  document.querySelectorAll('[data-season-label]').forEach((el) => (el.textContent = seasonLabel()));
+</script>

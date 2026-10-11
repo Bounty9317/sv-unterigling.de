@@ -1,0 +1,62 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHeader from '../components/PageHeader.astro';
+import { verein } from '../data/verein';
+---
+
+<BaseLayout title="Impressum" description={`Impressum des ${verein.name}.`}>
+  <PageHeader title="Impressum" />
+
+  <section class="section section--tight">
+    <div class="container container--narrow prose">
+      <h2>Angaben gemäß § 5 DDG</h2>
+      <address>
+        <strong>{verein.name}</strong><br />
+        {verein.adresse.strasse}<br />
+        {verein.adresse.plz}
+        {verein.adresse.ort}
+      </address>
+
+      <h2>Vertreten durch</h2>
+      <p>
+        {
+          verein.vorstand.map((person, index) => (
+            <>
+              {person.funktion}: {person.name}
+              {index < verein.vorstand.length - 1 && <br />}
+            </>
+          ))
+        }
+      </p>
+
+      <h2>Kontakt</h2>
+      <p>E-Mail: <a href={`mailto:${verein.email}`}>{verein.email}</a></p>
+
+      <h2>Vereinsregister</h2>
+      <p>
+        {verein.vereinsregister.gericht}<br />
+        Registernummer: {verein.vereinsregister.nummer}
+      </p>
+
+      <h2>Haftungsausschluss</h2>
+      <h3>Haftung für Inhalte</h3>
+      <p>
+        Die Inhalte unserer Seiten wurden mit größter Sorgfalt erstellt. Für die Richtigkeit, Vollständigkeit und
+        Aktualität der Inhalte können wir jedoch keine Gewähr übernehmen.
+      </p>
+
+      <h3>Haftung für Links</h3>
+      <p>
+        Unser Angebot enthält Links zu externen Webseiten Dritter, auf deren Inhalte wir keinen Einfluss haben. Deshalb
+        können wir für diese fremden Inhalte auch keine Gewähr übernehmen.
+      </p>
+
+      <h3>Urheberrecht</h3>
+      <p>
+        Die durch die Seitenbetreiber erstellten Inhalte und Werke auf diesen Seiten unterliegen dem deutschen
+        Urheberrecht. Die Vervielfältigung, Bearbeitung, Verbreitung und jede Art der Verwertung außerhalb der Grenzen des
+        Urheberrechtes bedürfen der schriftlichen Zustimmung des jeweiligen Autors bzw. Erstellers.
+      </p>
+    </div>
+  </section>
+</BaseLayout>

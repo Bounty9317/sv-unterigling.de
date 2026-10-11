@@ -1,0 +1,950 @@
+---
+import { Image } from 'astro:assets';
+import { ArrowDown, ArrowRight, ArrowUpRight, CalendarDays, Moon, Sun } from '@lucide/astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import EventList from '../components/EventList.astro';
+import WhatsAppCard from '../components/WhatsAppCard.astro';
+import RegistrationDialog from '../components/RegistrationDialog.astro';
+import hero from '../assets/images/gasthaus-lamm.jpg';
+import kapelle from '../assets/images/kapelle-winter.jpg';
+import vorstandschaft from '../assets/images/vorstandschaft.png';
+import schiessstand from '../assets/images/schiessstand.jpg';
+import koenigsschiessen from '../assets/images/koenigsschiessen.jpg';
+import { oeffnungszeiten, verein } from '../data/verein';
+import { seasonLabel } from '../lib/dates';
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'SportsClub',
+  name: verein.name,
+  url: 'https://schuetzen-unterigling.de/',
+  logo: 'https://schuetzen-unterigling.de/icons/icon-512.png',
+  image: 'https://schuetzen-unterigling.de/images/og-image.jpg',
+  email: verein.email,
+  foundingDate: String(verein.gegruendet),
+  sport: 'Sportschießen',
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: verein.adresse.strasse,
+    postalCode: verein.adresse.plz,
+    addressLocality: verein.adresse.ort,
+    addressCountry: 'DE',
+  },
+  sameAs: [verein.whatsappKanal],
+};
+---
+
+<BaseLayout description={`${verein.name}: ${verein.slogan}. Termine, Schießabende, Mitgliedschaft und Galerie.`}>
+  <script type="application/ld+json" slot="head" set:html={JSON.stringify(jsonLd)} />
+
+  <!-- Hero -->
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="hero__media" aria-hidden="true">
+      <Image src={hero} alt="" layout="full-width" quality={70} priority class="hero__image" />
+    </div>
+    <div class="hero__shade" aria-hidden="true"></div>
+    <div class="hero__rings" aria-hidden="true"></div>
+
+    <div class="hero__inner">
+      <div class="hero__copy">
+        <p class="hero__kicker intro">
+          <span class="hero__kicker-line" aria-hidden="true"></span>
+          Gegründet {verein.gegruendet} · {verein.adresse.ort}-Unterigling
+        </p>
+        <h1 id="hero-title" class="hero__title intro d-1">
+          Willkommen beim <span class="hero__title-accent">Schützenverein Unterigling e.V.</span>
+        </h1>
+        <p class="hero__lead intro d-2">{verein.slogan}</p>
+        <div class="hero__actions intro d-3">
+          <a class="btn btn--accent btn--lg" href="#termine">
+            <CalendarDays aria-hidden="true" /> Kommende Veranstaltungen
+          </a>
+          <a class="btn btn--on-dark btn--lg" href="/mitgliedschaft">
+            Mitglied werden <ArrowRight aria-hidden="true" class="btn__arrow" />
+          </a>
+        </div>
+      </div>
+
+      <aside class="hero-card intro d-4" data-countdown aria-label="Nächstes Schießen">
+        <p class="hero-card__head"><span class="live-dot" aria-hidden="true"></span> Nächstes Schießen</p>
+        <p class="hero-card__when" data-countdown-when>Lädt…</p>
+        <div class="hero-card__digits" role="timer" aria-live="off">
+          <div><span data-cd="d">–</span><small>Tage</small></div>
+          <div><span data-cd="h">–</span><small>Std</small></div>
+          <div><span data-cd="m">–</span><small>Min</small></div>
+          <div><span data-cd="s">–</span><small>Sek</small></div>
+        </div>
+        <p class="hero-card__status" data-countdown-timer></p>
+        <ul role="list" class="hero-card__hours">
+          <li>
+            <Moon aria-hidden="true" />
+            <span><strong>Samstag</strong> ab 19:30 Uhr · {oeffnungszeiten.samstag.zeitraum}</span>
+          </li>
+          <li>
+            <Sun aria-hidden="true" />
+            <span><strong>Frühschoppen</strong> 10:00 - 12:00 Uhr · Sonn- und Feiertage</span>
+          </li>
+        </ul>
+        <a class="hero-card__link link-arrow" href="/veranstaltungen">Alle Termine <ArrowRight aria-hidden="true" /></a>
+      </aside>
+    </div>
+
+    <a class="hero__scroll" href="#termine" aria-label="Zu den Terminen scrollen">
+      <ArrowDown aria-hidden="true" />
+    </a>
+  </section>
+
+  <!-- Termine -->
+  <section class="section events" id="termine" aria-labelledby="termine-titel">
+    <div class="container container--wide events__layout">
+      <div class="events__aside">
+        <div class="events__visual reveal-scale">
+          <Image
+            src={kapelle}
+            alt=""
+            width={736}
+            widths={[480, 736]}
+            sizes="(min-width: 1000px) 420px, 100vw"
+            quality={65}
+            class="events__image"
+          />
+          <div class="events__visual-text">
+            <p class="eyebrow">Termine <span data-season-label>{seasonLabel()}</span></p>
+            <h2 id="termine-titel">Kommende Veranstaltungen</h2>
+            <a class="link-arrow" href="/veranstaltungen">Alle Termine <ArrowRight aria-hidden="true" /></a>
+          </div>
+        </div>
+        <div class="reveal">
+          <WhatsAppCard />
+        </div>
+      </div>
+      <div class="events__list">
+        <EventList variant="compact" limit={10} />
+      </div>
+    </div>
+  </section>
+
+  <!-- Bento -->
+  <section class="section bento-section" aria-labelledby="verein-titel">
+    <div class="container container--wide">
+      <header class="section-head reveal">
+        <div>
+          <p class="eyebrow">Der Verein</p>
+          <h2 id="verein-titel">Tradition, Gemeinschaft und ein ruhiges Händchen</h2>
+        </div>
+        <p>
+          Wir sind ein Hobbyverein und schießen aus Spaß an der Sache – ohne Wettkämpfe oder Ligen. Bei uns steht die Freude
+          am Schießsport und das gesellige Miteinander im Vordergrund.
+        </p>
+      </header>
+
+      <div class="bento">
+        <a class="tile tile--photo tile--sport reveal" href="/sport">
+          <Image src={schiessstand} alt="Schießstand des Schützenvereins Unterigling" width={1200} widths={[600, 1200]} sizes="(min-width: 1000px) 50vw, 100vw" class="tile__image" />
+          <span class="tile__overlay">
+            <span class="tile__eyebrow">Sport</span>
+            <span class="tile__title">Sechs Schießstände</span>
+            <span class="tile__text">Luftgewehr und Pistole für Rechts- und Linkshänder</span>
+          </span>
+          <ArrowUpRight aria-hidden="true" class="tile__arrow" />
+        </a>
+
+        <div class="tile tile--dark tile--hours reveal">
+          <Moon aria-hidden="true" class="tile__icon" />
+          <span class="tile__eyebrow">{oeffnungszeiten.samstag.titel} · {oeffnungszeiten.samstag.zeitraum}</span>
+          <span class="tile__big">ab 19:30</span>
+          <span class="tile__text">
+            {oeffnungszeiten.samstag.zeiten}<br />({oeffnungszeiten.samstag.hinweis})
+          </span>
+        </div>
+
+        <a class="tile tile--number reveal" href="/chronik">
+          <span class="tile__eyebrow">Gegründet</span>
+          <span class="tile__huge">{verein.gegruendet}</span>
+          <span class="tile__text link-arrow">Zur Chronik <ArrowRight aria-hidden="true" /></span>
+        </a>
+
+        <div class="tile tile--cream tile--sunday reveal">
+          <Sun aria-hidden="true" class="tile__icon" />
+          <span class="tile__eyebrow">{oeffnungszeiten.sonntag.bezeichnung}</span>
+          <span class="tile__big">10–12 Uhr</span>
+          <span class="tile__text">{oeffnungszeiten.sonntag.hinweis}</span>
+        </div>
+
+        <a class="tile tile--price reveal" href="/mitgliedschaft">
+          <span class="tile__eyebrow">Vollmitgliedschaft</span>
+          <span class="tile__huge">{verein.mitgliedsbeitrag}</span>
+          <span class="tile__text">pro Jahr – inklusive Wertung beim Königsschießen und 10 € für den besten 10er an jedem Schießabend.</span>
+          <span class="btn btn--accent btn--sm tile__cta">Mitglied werden <ArrowRight aria-hidden="true" class="btn__arrow" /></span>
+        </a>
+
+        <a class="tile tile--photo tile--koenig reveal" href="/sport">
+          <Image src={koenigsschiessen} alt="Königsschießen mit Brezen-, Wurst- und Schützenkönig" width={900} widths={[500, 900]} sizes="(min-width: 1000px) 25vw, 100vw" class="tile__image" />
+          <span class="tile__overlay">
+            <span class="tile__eyebrow">Königsschießen</span>
+            <span class="tile__title">Jeder 10er zählt!</span>
+          </span>
+          <ArrowUpRight aria-hidden="true" class="tile__arrow" />
+        </a>
+
+        <a class="tile tile--photo tile--vorstand reveal" href="/ueber-uns">
+          <Image src={vorstandschaft} alt="Alte und neue Vorstandschaft zusammen" width={470} class="tile__image" />
+          <span class="tile__overlay">
+            <span class="tile__eyebrow">Über uns</span>
+            <span class="tile__title">Mehr als nur ein Sportverein</span>
+          </span>
+          <ArrowUpRight aria-hidden="true" class="tile__arrow" />
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Aufruf -->
+  <section class="cta" aria-labelledby="cta-titel">
+    <div class="container container--wide">
+      <div class="cta__inner reveal-scale">
+        <div class="cta__rings" aria-hidden="true"></div>
+        <p class="eyebrow">Mitglied werden</p>
+        <h2 id="cta-titel">Werden Sie Teil unserer Vereinsfamilie!</h2>
+        <p class="cta__text">
+          Interessiert? Kommen Sie einfach zu einem unserer Schießabende vorbei oder kontaktieren Sie uns. Wir bieten auch
+          Schnuppertraining für Neueinsteiger an!
+        </p>
+        <div class="cta__actions">
+          <a class="btn btn--accent btn--lg" href="/mitgliedschaft">Zur Mitgliedschaft <ArrowRight aria-hidden="true" class="btn__arrow" /></a>
+          <a class="btn btn--on-dark btn--lg" href="/kontakt">Kontakt &amp; Anfahrt</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <RegistrationDialog />
+</BaseLayout>
+
+<style>
+  /* ---------- Hero ---------- */
+  .hero {
+    position: relative;
+    isolation: isolate;
+    display: grid;
+    min-height: 100svh;
+    padding: 7.5rem 0 4.5rem;
+    color: #fff;
+    overflow: clip;
+    background: #0c1d13;
+  }
+
+  .hero__media {
+    position: absolute;
+    inset: 0;
+    z-index: -3;
+  }
+
+  .hero__media :global(.hero__image) {
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    object-fit: cover;
+    object-position: center 38%;
+    transform-origin: 60% 40%;
+    animation: hero-zoom 2.4s var(--ease-out) both;
+  }
+
+  @keyframes hero-zoom {
+    from {
+      transform: scale(1.08);
+    }
+  }
+
+  /* Bild läuft beim Scrollen langsamer mit (Parallaxe) */
+  @supports (animation-timeline: scroll()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .hero__media {
+        animation: hero-parallax linear both;
+        animation-timeline: scroll(root);
+        animation-range: 0 100svh;
+      }
+    }
+  }
+
+  @keyframes hero-parallax {
+    to {
+      transform: translateY(18%);
+    }
+  }
+
+  .hero__shade {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    background:
+      linear-gradient(100deg, rgb(7 20 12 / 0.92) 0%, rgb(7 20 12 / 0.7) 42%, rgb(7 20 12 / 0.2) 100%),
+      linear-gradient(0deg, rgb(7 20 12 / 0.85) 0%, transparent 40%);
+  }
+
+  .hero__rings {
+    position: absolute;
+    z-index: -1;
+    right: -12rem;
+    bottom: -18rem;
+    width: 46rem;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: repeating-radial-gradient(circle, transparent 0 3.2rem, rgb(255 255 255 / 0.06) 3.2rem 3.3rem);
+    mask-image: radial-gradient(circle, #000 40%, transparent 72%);
+  }
+
+  .hero__inner {
+    align-self: end;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 24rem;
+    gap: var(--space-xl);
+    align-items: end;
+    width: min(100% - 2 * var(--gutter), 84rem);
+    margin-inline: auto;
+  }
+
+  .hero__copy {
+    display: grid;
+    gap: var(--space-m);
+    justify-items: start;
+  }
+
+  .hero__kicker {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: var(--step--1);
+    font-weight: 650;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--c-accent-strong);
+  }
+
+  .hero__kicker-line {
+    width: 2.5rem;
+    height: 2px;
+    background: currentColor;
+  }
+
+  .hero__title {
+    max-width: 14ch;
+    color: #fff;
+    font-size: var(--step-6);
+    font-weight: 500;
+    line-height: 0.98;
+    letter-spacing: -0.035em;
+    font-variation-settings: 'SOFT' 100, 'opsz' 144;
+    text-wrap: balance;
+  }
+
+  .hero__title-accent {
+    display: block;
+    /* Verlauf nur innerhalb der Box sichtbar – Platz für Unterlängen (g) und kursiven Überhang schaffen */
+    padding-block-end: 0.2em;
+    margin-block-end: -0.2em;
+    padding-inline-end: 0.08em;
+    margin-inline-end: -0.08em;
+    font-style: italic;
+    font-weight: 400;
+    background: linear-gradient(100deg, #f6efd6 10%, #e8c57f 55%, #c9a24a 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .hero__lead {
+    max-width: 36rem;
+    font-size: var(--step-1);
+    color: rgb(255 255 255 / 0.82);
+  }
+
+  .hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+    margin-top: var(--space-2xs);
+  }
+
+  .hero-card {
+    display: grid;
+    gap: var(--space-s);
+    padding: var(--space-m);
+    border-radius: var(--radius-xl);
+    background: var(--glass-dark);
+    -webkit-backdrop-filter: var(--glass-blur);
+    backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.08),
+      0 30px 60px -30px rgb(0 0 0 / 0.7);
+  }
+
+  .hero-card__head {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: var(--step--1);
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--c-on-brand-muted);
+  }
+
+  .hero-card__when {
+    font-family: var(--font-heading);
+    font-size: var(--step-1);
+    line-height: 1.25;
+  }
+
+  .hero-card__digits {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.5rem;
+  }
+
+  .hero-card__digits div {
+    display: grid;
+    justify-items: center;
+    padding: 0.7rem 0.25rem 0.55rem;
+    border-radius: var(--radius-m);
+    background: rgb(255 255 255 / 0.07);
+    border: 1px solid rgb(255 255 255 / 0.08);
+  }
+
+  .hero-card__digits span {
+    font-family: var(--font-heading);
+    font-size: clamp(1.6rem, 1.3rem + 1vw, 2.2rem);
+    font-weight: 600;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    color: var(--c-accent-strong);
+  }
+
+  .hero-card__digits small {
+    margin-top: 0.3rem;
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--c-on-brand-muted);
+  }
+
+  .hero-card__status {
+    display: none;
+    font-family: var(--font-heading);
+    font-size: var(--step-2);
+    color: var(--c-accent-strong);
+  }
+
+  .hero-card[data-state='break'] .hero-card__digits,
+  .hero-card[data-state='now'] .hero-card__digits {
+    display: none;
+  }
+
+  .hero-card[data-state='break'] .hero-card__status,
+  .hero-card[data-state='now'] .hero-card__status {
+    display: block;
+  }
+
+  .hero-card__hours {
+    display: grid;
+    gap: 0.5rem;
+    padding-top: var(--space-s);
+    border-top: 1px solid rgb(255 255 255 / 0.1);
+    font-size: var(--step--1);
+    color: rgb(255 255 255 / 0.8);
+  }
+
+  .hero-card__hours li {
+    display: flex;
+    gap: 0.6rem;
+    align-items: flex-start;
+  }
+
+  .hero-card__hours :global(svg) {
+    flex: none;
+    width: 1rem;
+    height: 1rem;
+    margin-top: 0.15rem;
+    color: var(--c-accent-strong);
+  }
+
+  .hero-card__hours strong {
+    color: #fff;
+  }
+
+  .hero-card__link {
+    color: #fff;
+  }
+
+  .hero-card__link:hover {
+    color: var(--c-accent-strong);
+  }
+
+  .hero__scroll {
+    position: absolute;
+    left: 50%;
+    bottom: 1.25rem;
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    translate: -50% 0;
+    border-radius: 50%;
+    border: 1px solid rgb(255 255 255 / 0.25);
+    color: #fff;
+    animation: bob 2.2s ease-in-out infinite;
+  }
+
+  .hero__scroll :global(svg) {
+    width: 1.2rem;
+    height: 1.2rem;
+  }
+
+  @keyframes bob {
+    50% {
+      transform: translateY(6px);
+    }
+  }
+
+  /* ---------- Termine ---------- */
+  .events__layout {
+    display: grid;
+    grid-template-columns: 26rem minmax(0, 1fr);
+    gap: var(--space-2xl);
+    align-items: start;
+  }
+
+  .events__aside {
+    position: sticky;
+    top: 6.5rem;
+    display: grid;
+    gap: var(--space-m);
+  }
+
+  .events__visual {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--radius-2xl);
+    aspect-ratio: 4 / 5;
+    box-shadow: var(--shadow-l);
+  }
+
+  .events__visual :global(.events__image) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    object-fit: cover;
+  }
+
+  .events__visual-text {
+    position: absolute;
+    inset: auto 0 0;
+    display: grid;
+    gap: 0.5rem;
+    padding: var(--space-l) var(--space-m) var(--space-m);
+    background: linear-gradient(0deg, rgb(7 20 12 / 0.92) 10%, rgb(7 20 12 / 0.5) 65%, transparent);
+    color: #fff;
+  }
+
+  .events__visual-text h2 {
+    color: #fff;
+    font-size: var(--step-4);
+    line-height: 1;
+    letter-spacing: -0.03em;
+  }
+
+  .events__visual-text .eyebrow {
+    color: var(--c-accent-strong);
+  }
+
+  .events__visual-text .link-arrow {
+    color: #fff;
+  }
+
+  /* ---------- Bento ---------- */
+  .bento-section {
+    background:
+      radial-gradient(60rem 30rem at 0% 0%, color-mix(in oklab, var(--c-primary) 8%, transparent), transparent 70%),
+      var(--c-bg-sunken);
+  }
+
+  .bento {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-auto-rows: minmax(13.5rem, auto);
+    grid-template-areas:
+      'sport sport hours number'
+      'sport sport sunday price'
+      'koenig vorstand vorstand price';
+    gap: var(--space-s);
+  }
+
+  .tile--sport {
+    grid-area: sport;
+  }
+  .tile--hours {
+    grid-area: hours;
+  }
+  .tile--number {
+    grid-area: number;
+  }
+  .tile--sunday {
+    grid-area: sunday;
+  }
+  .tile--price {
+    grid-area: price;
+  }
+  .tile--koenig {
+    grid-area: koenig;
+  }
+  .tile--vorstand {
+    grid-area: vorstand;
+  }
+
+  .tile {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 0.35rem;
+    padding: var(--space-m);
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    background: var(--c-surface);
+    border: 1px solid var(--c-border);
+    color: var(--c-text);
+    text-decoration: none;
+    transition:
+      transform 300ms var(--ease-out),
+      box-shadow 300ms ease;
+  }
+
+  a.tile:hover {
+    color: var(--c-text);
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-l);
+  }
+
+  .tile__eyebrow {
+    font-size: var(--step--1);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--c-accent);
+  }
+
+  .tile__big {
+    font-family: var(--font-heading);
+    font-size: var(--step-3);
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+
+  .tile__huge {
+    font-family: var(--font-heading);
+    font-size: clamp(3.2rem, 2.2rem + 3vw, 5.2rem);
+    font-weight: 500;
+    line-height: 0.9;
+    letter-spacing: -0.04em;
+    font-variation-settings: 'SOFT' 100, 'opsz' 144;
+  }
+
+  .tile__title {
+    font-family: var(--font-heading);
+    font-size: var(--step-2);
+    font-weight: 600;
+    line-height: 1.1;
+  }
+
+  .tile__text {
+    color: var(--c-text-muted);
+    font-size: var(--step--1);
+  }
+
+  .tile :global(.tile__icon) {
+    position: absolute;
+    top: var(--space-m);
+    right: var(--space-m);
+    width: 1.6rem;
+    height: 1.6rem;
+    opacity: 0.8;
+  }
+
+  .tile--dark {
+    background: linear-gradient(160deg, #173f27, #0d2416);
+    border-color: transparent;
+    color: #fff;
+  }
+
+  .tile--dark .tile__eyebrow,
+  .tile--dark :global(.tile__icon) {
+    color: var(--c-accent-strong);
+  }
+
+  .tile--dark .tile__text {
+    color: rgb(255 255 255 / 0.75);
+  }
+
+  .tile--cream {
+    background: linear-gradient(160deg, #f8f0d2, #efe2b4);
+    border-color: transparent;
+    color: #1d2a20;
+  }
+
+  .tile--cream .tile__text {
+    color: #4a5a4e;
+  }
+
+  .tile--cream .tile__eyebrow,
+  .tile--cream :global(.tile__icon) {
+    color: #8a6220;
+  }
+
+  .tile--number {
+    background:
+      repeating-radial-gradient(circle at 110% 120%, transparent 0 1.4rem, color-mix(in oklab, var(--c-primary) 10%, transparent) 1.4rem 1.48rem),
+      var(--c-surface);
+  }
+
+  .tile--number .tile__huge {
+    color: var(--c-primary);
+  }
+
+  .tile--number .tile__text {
+    color: var(--c-primary);
+  }
+
+  .tile--price {
+    justify-content: space-between;
+    background:
+      radial-gradient(20rem 16rem at 100% 0%, rgb(232 197 127 / 0.28), transparent 70%),
+      linear-gradient(170deg, #1a472a, #0f2a19);
+    border-color: transparent;
+    color: #fff;
+  }
+
+  a.tile--price:hover {
+    color: #fff;
+  }
+
+  .tile--price .tile__eyebrow {
+    color: var(--c-accent-strong);
+  }
+
+  .tile--price .tile__huge {
+    color: var(--c-accent-strong);
+    font-size: clamp(3.6rem, 2.6rem + 3vw, 6rem);
+  }
+
+  .tile--price .tile__text {
+    color: rgb(255 255 255 / 0.8);
+  }
+
+  .tile__cta {
+    align-self: flex-start;
+    margin-top: var(--space-s);
+  }
+
+  .tile--photo {
+    padding: 0;
+    border: 0;
+    background: #0c1d13;
+    color: #fff;
+  }
+
+  a.tile--photo:hover {
+    color: #fff;
+  }
+
+  .tile--photo :global(.tile__image) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    object-fit: cover;
+    transition: transform 700ms var(--ease-out);
+  }
+
+  .tile--photo:hover :global(.tile__image) {
+    transform: scale(1.06);
+  }
+
+  .tile__overlay {
+    position: relative;
+    display: grid;
+    gap: 0.3rem;
+    padding: var(--space-xl) var(--space-m) var(--space-m);
+    background: linear-gradient(0deg, rgb(7 20 12 / 0.9), transparent);
+  }
+
+  .tile--photo .tile__eyebrow {
+    color: var(--c-accent-strong);
+  }
+
+  .tile__overlay .tile__text {
+    color: rgb(255 255 255 / 0.8);
+  }
+
+  .tile :global(.tile__arrow) {
+    position: absolute;
+    top: var(--space-s);
+    right: var(--space-s);
+    width: 2.5rem;
+    height: 2.5rem;
+    padding: 0.6rem;
+    border-radius: 50%;
+    background: var(--glass-dark);
+    backdrop-filter: blur(8px);
+    color: #fff;
+    transition: transform 300ms var(--ease-out);
+  }
+
+  .tile:hover :global(.tile__arrow) {
+    transform: rotate(45deg);
+  }
+
+  /* ---------- Aufruf ---------- */
+  .cta {
+    padding-block: var(--space-section) 0;
+  }
+
+  .cta__inner {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    display: grid;
+    justify-items: center;
+    gap: var(--space-s);
+    padding: clamp(3rem, 2rem + 4vw, 6rem) var(--space-m);
+    border-radius: var(--radius-2xl);
+    text-align: center;
+    color: #fff;
+    background:
+      radial-gradient(40rem 22rem at 50% 120%, rgb(232 197 127 / 0.25), transparent 70%),
+      linear-gradient(160deg, #1a472a, #0b1f13);
+  }
+
+  .cta__rings {
+    position: absolute;
+    inset: 50% auto auto 50%;
+    z-index: -1;
+    width: 60rem;
+    aspect-ratio: 1;
+    translate: -50% -50%;
+    border-radius: 50%;
+    background: repeating-radial-gradient(circle, transparent 0 3rem, rgb(255 255 255 / 0.05) 3rem 3.1rem);
+    mask-image: radial-gradient(circle, #000 30%, transparent 70%);
+  }
+
+  .cta__inner .eyebrow {
+    color: var(--c-accent-strong);
+  }
+
+  .cta__inner h2 {
+    max-width: 18ch;
+    color: #fff;
+    font-size: var(--step-5);
+    line-height: 1;
+    letter-spacing: -0.03em;
+  }
+
+  .cta__text {
+    max-width: 38rem;
+    color: rgb(255 255 255 / 0.8);
+    font-size: var(--step-1);
+  }
+
+  .cta__actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-xs);
+    margin-top: var(--space-s);
+  }
+
+  /* ---------- Responsiv ---------- */
+  @media (max-width: 1100px) {
+    .hero__inner {
+      grid-template-columns: 1fr;
+      align-self: end;
+    }
+
+    .hero-card {
+      max-width: 30rem;
+    }
+
+    .events__layout {
+      grid-template-columns: 1fr;
+      gap: var(--space-xl);
+    }
+
+    .events__aside {
+      position: static;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      align-items: end;
+    }
+
+    .events__visual {
+      aspect-ratio: 4 / 3;
+    }
+
+    .bento {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-areas:
+        'sport sport'
+        'hours number'
+        'sunday price'
+        'koenig price'
+        'vorstand vorstand';
+    }
+
+    .tile--sport {
+      min-height: 22rem;
+    }
+  }
+
+  @media (max-width: 680px) {
+    .hero {
+      padding: 6rem 0 4rem;
+    }
+
+    .hero__rings {
+      display: none;
+    }
+
+    .events__aside {
+      grid-template-columns: 1fr;
+    }
+
+    .bento {
+      grid-template-columns: 1fr;
+      grid-template-areas:
+        'sport'
+        'hours'
+        'sunday'
+        'number'
+        'price'
+        'koenig'
+        'vorstand';
+    }
+
+    .tile--koenig,
+    .tile--vorstand {
+      min-height: 18rem;
+    }
+
+    .hero__scroll {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  import { seasonLabel } from '../lib/dates';
+  document.querySelectorAll('[data-season-label]').forEach((el) => (el.textContent = seasonLabel()));
+</script>

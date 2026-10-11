@@ -1,0 +1,124 @@
+---
+import { Clock, Mail, MapPin, MessageCircle } from '@lucide/astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHeader from '../components/PageHeader.astro';
+import MapConsent from '../components/MapConsent.astro';
+import { oeffnungszeiten, verein } from '../data/verein';
+---
+
+<BaseLayout
+  title="Kontakt / Anfahrt"
+  description="Kontakt und Anfahrt zum Schützenverein Unterigling: Unteriglinger Str. 56, 86859 Igling. E-Mail und Öffnungszeiten des Vereinsheims."
+>
+  <PageHeader eyebrow="So erreicht ihr uns" title="Kontakt / Anfahrt" />
+
+  <section class="section">
+    <div class="container contact">
+      <div class="contact__info card reveal">
+        <h2>Kontaktdaten</h2>
+        <dl class="contact__list">
+          <div>
+            <dt><MapPin aria-hidden="true" /> Adresse:</dt>
+            <dd>
+              {verein.kurzname}<br />
+              {verein.adresse.strasse}<br />
+              {verein.adresse.plz}
+              {verein.adresse.ort}
+            </dd>
+          </div>
+          <div>
+            <dt><Mail aria-hidden="true" /> E-Mail:</dt>
+            <dd><a href={`mailto:${verein.email}`}>{verein.email}</a></dd>
+          </div>
+          <div>
+            <dt><MessageCircle aria-hidden="true" /> WhatsApp:</dt>
+            <dd>
+              <a href={verein.whatsappKanal} target="_blank" rel="noopener">Unserem WhatsApp-Kanal folgen</a>
+            </dd>
+          </div>
+          <div>
+            <dt><Clock aria-hidden="true" /> Öffnungszeiten Vereinsheim:</dt>
+            <dd>
+              <strong>Samstag ({oeffnungszeiten.samstag.zeitraum}):</strong>
+              {oeffnungszeiten.samstag.zeiten}<br />
+              <em>({oeffnungszeiten.samstag.hinweis})</em><br />
+              <strong>{oeffnungszeiten.sonntag.bezeichnung}:</strong>
+              {oeffnungszeiten.sonntag.zeiten} (Sonn- und Feiertage)<br />
+              <em>{oeffnungszeiten.weitere}</em>
+            </dd>
+          </div>
+        </dl>
+        <a class="btn btn--primary" href={`mailto:${verein.email}`}><Mail aria-hidden="true" /> E-Mail schreiben</a>
+      </div>
+
+      <div class="contact__map reveal">
+        <h2>Anfahrt</h2>
+        <p class="muted">
+          Unser Vereinsheim befindet sich in zentraler Lage in Unteriglingen. Parkplätze sind direkt vor Ort vorhanden.
+        </p>
+        <MapConsent />
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .contact {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    gap: var(--space-xl);
+    align-items: start;
+  }
+
+  .contact__info {
+    display: grid;
+    gap: var(--space-m);
+    justify-items: start;
+  }
+
+  .contact h2 {
+    font-size: var(--step-3);
+  }
+
+  .contact__list {
+    display: grid;
+    gap: var(--space-m);
+    width: 100%;
+  }
+
+  .contact__list dt {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    margin-bottom: 0.3rem;
+    font-weight: 700;
+    color: var(--c-primary);
+  }
+
+  .contact__list dt :global(svg) {
+    width: 1.1rem;
+    height: 1.1rem;
+  }
+
+  .contact__list dd {
+    margin: 0;
+    padding-left: 1.55rem;
+    overflow-wrap: anywhere;
+  }
+
+  .contact__list em {
+    color: var(--c-text-muted);
+    font-size: var(--step--1);
+  }
+
+  .contact__map {
+    display: grid;
+    gap: var(--space-s);
+  }
+
+  @media (max-width: 900px) {
+    .contact {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

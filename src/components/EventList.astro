@@ -1,0 +1,289 @@
+---
+interface Props {
+  /** compact = Startseite, full = Veranstaltungsseite */
+  variant?: 'compact' | 'full';
+  limit?: number;
+  showPast?: boolean;
+}
+
+const { variant = 'full', limit, showPast = false } = Astro.props;
+---
+
+<div
+  class:list={['event-list', `event-list--${variant}`]}
+  data-event-list
+  data-variant={variant}
+  data-limit={limit}
+  data-past={showPast ? 'true' : undefined}
+>
+  <div class="event-list__loading" data-event-loading aria-live="polite">
+    <span class="visually-hidden">Lade Veranstaltungen…</span>
+    {
+      [0, 1, 2].map(() => (
+        <div class="event-skeleton" aria-hidden="true">
+          <div class="skeleton event-skeleton__date" />
+          <div class="event-skeleton__lines">
+            <div class="skeleton event-skeleton__line" />
+            <div class="skeleton event-skeleton__line event-skeleton__line--short" />
+          </div>
+        </div>
+      ))
+    }
+  </div>
+  <div data-event-content></div>
+</div>
+
+<style>
+  .event-list {
+    --date-col: 6.25rem;
+  }
+
+  .event-list__loading {
+    display: grid;
+  }
+
+  .event-skeleton {
+    display: grid;
+    grid-template-columns: var(--date-col) 1fr;
+    gap: var(--space-m);
+    padding: var(--space-m) 0;
+    border-top: 1px solid var(--c-border);
+  }
+
+  .event-skeleton__date {
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: var(--radius-m);
+  }
+
+  .event-skeleton__lines {
+    display: grid;
+    gap: 0.6rem;
+    align-content: center;
+  }
+
+  .event-skeleton__line {
+    height: 1rem;
+  }
+
+  .event-skeleton__line--short {
+    width: 55%;
+  }
+
+  /* Monatsüberschrift */
+  .event-list :global(.event-month) {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-s);
+    margin: var(--space-xl) 0 var(--space-2xs);
+    font-family: var(--font-heading);
+    font-size: var(--step-2);
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    color: var(--c-text);
+  }
+
+  .event-list :global(.event-month:first-child) {
+    margin-top: 0;
+  }
+
+  .event-list :global(.event-month::after) {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--c-border-strong), transparent);
+  }
+
+  .event-list :global(.event-items) {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  /* Ein Termin als Zeile der Zeitleiste */
+  .event-list :global(.event-card) {
+    position: relative;
+    display: grid;
+    grid-template-columns: var(--date-col) minmax(0, 1fr);
+    gap: var(--space-m);
+    padding: var(--space-m) var(--space-s);
+    margin-inline: calc(var(--space-s) * -1);
+    border-top: 1px solid var(--c-border);
+    border-radius: var(--radius-m);
+    transition: background var(--duration) ease;
+  }
+
+  .event-list :global(.event-items li:first-child.event-card) {
+    border-top-color: transparent;
+  }
+
+  .event-list :global(.event-card:hover) {
+    background: color-mix(in oklab, var(--c-primary) 6%, transparent);
+  }
+
+  .event-list :global(.event-date) {
+    display: grid;
+    align-content: start;
+    justify-items: start;
+    line-height: 1;
+  }
+
+  .event-list :global(.event-date__day) {
+    font-family: var(--font-heading);
+    font-size: clamp(2.6rem, 2.2rem + 1.2vw, 3.4rem);
+    font-weight: 500;
+    letter-spacing: -0.04em;
+    color: var(--c-primary);
+    font-variation-settings: 'SOFT' 100, 'opsz' 144;
+  }
+
+  .event-list :global(.event-date__month) {
+    margin-top: 0.35rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--c-text);
+  }
+
+  .event-list :global(.event-date__weekday) {
+    margin-top: 0.2rem;
+    font-size: 0.72rem;
+    color: var(--c-text-subtle);
+  }
+
+  .event-list :global(.event-card__body) {
+    display: grid;
+    gap: 0.4rem;
+    min-width: 0;
+    align-content: start;
+  }
+
+  .event-list :global(.event-card__meta) {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem 0.75rem;
+    font-size: var(--step--1);
+    color: var(--c-text-muted);
+  }
+
+  .event-list :global(.event-card__meta svg) {
+    width: 0.95rem;
+    height: 0.95rem;
+  }
+
+  .event-list :global(.event-card__when) {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-weight: 600;
+    color: var(--c-text-muted);
+  }
+
+  .event-list :global(.event-card__title) {
+    font-family: var(--font-heading);
+    font-size: var(--step-2);
+    font-weight: 600;
+    line-height: 1.15;
+    letter-spacing: -0.015em;
+    overflow-wrap: anywhere;
+  }
+
+  .event-list :global(.event-card__desc) {
+    color: var(--c-text-muted);
+    white-space: pre-line;
+    overflow-wrap: anywhere;
+    max-width: 60ch;
+  }
+
+  .event-list :global(.event-card__actions) {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.4rem;
+  }
+
+  .event-list :global(.event-card__actions .badge svg) {
+    width: 0.95rem;
+    height: 0.95rem;
+  }
+
+  .event-list :global(.event-card.is-cancelled .event-date__day) {
+    color: var(--c-danger);
+  }
+
+  .event-list :global(.event-card.is-cancelled .event-card__title) {
+    text-decoration: line-through;
+    text-decoration-color: color-mix(in oklab, var(--c-danger) 70%, transparent);
+    color: var(--c-text-muted);
+  }
+
+  .event-list :global(.event-empty) {
+    padding: var(--space-xl) var(--space-m);
+    text-align: center;
+    color: var(--c-text-muted);
+    border: 1px dashed var(--c-border-strong);
+    border-radius: var(--radius-l);
+  }
+
+  .event-list :global(.event-error) {
+    padding: var(--space-m);
+    text-align: center;
+    color: var(--c-danger);
+  }
+
+  .event-list :global(.past-events) {
+    margin-top: var(--space-xl);
+    border-top: 1px solid var(--c-border);
+    padding-top: var(--space-m);
+  }
+
+  .event-list :global(.past-events summary) {
+    cursor: pointer;
+    font-family: var(--font-heading);
+    font-size: var(--step-2);
+    font-weight: 500;
+  }
+
+  .event-list :global(.past-events[open] summary) {
+    margin-bottom: var(--space-m);
+  }
+
+  .event-list :global(.past-events .event-card) {
+    opacity: 0.7;
+  }
+
+  /* Einträge gleiten beim Scrollen herein */
+  @media (prefers-reduced-motion: no-preference) {
+    @supports (animation-timeline: view()) {
+      .event-list :global(.event-card) {
+        animation: reveal-up linear both;
+        animation-timeline: view();
+        animation-range: entry 0% cover 18%;
+      }
+    }
+  }
+
+  @media (max-width: 520px) {
+    .event-list {
+      --date-col: 3.6rem;
+    }
+
+    .event-list :global(.event-card) {
+      gap: var(--space-s);
+      padding-inline: var(--space-2xs);
+      margin-inline: calc(var(--space-2xs) * -1);
+    }
+
+    .event-list :global(.event-date__day) {
+      font-size: 2.2rem;
+    }
+  }
+</style>
+
+<script>
+  import { initEventLists } from '../scripts/events';
+  initEventLists();
+</script>

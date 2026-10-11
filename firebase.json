@@ -1,41 +1,87 @@
 {
-  "firestore": {
-    "rules": "firestore.rules"
-  },
   "hosting": {
-    "public": ".",
-    "ignore": [
-      "firebase.json",
-      "**/.*",
-      "**/node_modules/**"
+    "public": "dist",
+    "cleanUrls": true,
+    "trailingSlash": false,
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+    "redirects": [
+      { "source": "/admin-login.html", "destination": "/vorstand/login", "type": 301 },
+      { "source": "/admin-login", "destination": "/vorstand/login", "type": 301 },
+      { "source": "/admin-dashboard.html", "destination": "/vorstand", "type": 301 },
+      { "source": "/admin-dashboard", "destination": "/vorstand", "type": 301 },
+      { "source": "/admin-calendar.html", "destination": "/vorstand/kalender", "type": 301 },
+      { "source": "/admin-calendar", "destination": "/vorstand/kalender", "type": 301 },
+      { "source": "/admin-calendar-backup.html", "destination": "/vorstand/kalender", "type": 301 },
+      { "source": "/admin-calendar-backup", "destination": "/vorstand/kalender", "type": 301 },
+      { "source": "/admin-events.html", "destination": "/vorstand/veranstaltungen", "type": 301 },
+      { "source": "/admin-events", "destination": "/vorstand/veranstaltungen", "type": 301 },
+      { "source": "/admin-protocols.html", "destination": "/vorstand/protokolle", "type": 301 },
+      { "source": "/admin-protocols", "destination": "/vorstand/protokolle", "type": 301 },
+      { "source": "/admin-wirte-tage.html", "destination": "/vorstand/wirte-tage", "type": 301 },
+      { "source": "/admin-wirte-tage", "destination": "/vorstand/wirte-tage", "type": 301 },
+      { "source": "/helfer-login.html", "destination": "/helfer/login", "type": 301 },
+      { "source": "/helfer-login", "destination": "/helfer/login", "type": 301 },
+      { "source": "/helfer-dashboard.html", "destination": "/helfer", "type": 301 },
+      { "source": "/helfer-dashboard", "destination": "/helfer", "type": 301 },
+      { "source": "/bilder-hochladen.html", "destination": "/galerie/hochladen", "type": 301 },
+      { "source": "/bilder-hochladen", "destination": "/galerie/hochladen", "type": 301 },
+      { "source": "/chronik-content.html", "destination": "/chronik", "type": 301 },
+      { "source": "/chronik-content", "destination": "/chronik", "type": 301 },
+      { "source": "/Beitrittserkl*SEPA*.pdf", "destination": "/downloads/beitrittserklaerung-sepa-mandat.pdf", "type": 301 },
+      { "source": "/logo.png", "destination": "/icons/icon-512.png", "type": 301 }
     ],
     "headers": [
       {
-        "source": "**/*.html",
+        "source": "**",
         "headers": [
-          {
-            "key": "Cache-Control",
-            "value": "no-cache, no-store, must-revalidate"
-          }
+          { "key": "Cache-Control", "value": "no-cache" },
+          { "key": "X-Content-Type-Options", "value": "nosniff" },
+          { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+          { "key": "X-Frame-Options", "value": "DENY" },
+          { "key": "Content-Security-Policy", "value": "frame-ancestors 'none'; object-src 'none'; base-uri 'self'" },
+          { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=(), payment=(), usb=()" },
+          { "key": "Cross-Origin-Opener-Policy", "value": "same-origin" }
         ]
+      },
+      {
+        "source": "/_astro/**",
+        "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
+      },
+      {
+        "source": "/@(icons|images|downloads)/**",
+        "headers": [{ "key": "Cache-Control", "value": "public, max-age=86400" }]
+      },
+      {
+        "source": "/@(favicon.svg|favicon-32.png|apple-touch-icon.png|manifest.webmanifest)",
+        "headers": [{ "key": "Cache-Control", "value": "public, max-age=86400" }]
       }
     ]
+  },
+  "firestore": [
+    {
+      "database": "vorstandschaftschuetzen",
+      "rules": "firestore.rules"
+    }
+  ],
+  "storage": {
+    "rules": "storage.rules"
   },
   "functions": [
     {
       "source": "functions",
       "codebase": "default",
       "disallowLegacyRuntimeConfig": true,
-      "ignore": [
-        "node_modules",
-        ".git",
-        "firebase-debug.log",
-        "firebase-debug.*.log",
-        "*.local"
-      ],
-      "predeploy": [
-        "npm --prefix \"$RESOURCE_DIR\" run build"
-      ]
+      "ignore": ["node_modules", ".git", "firebase-debug.log", "firebase-debug.*.log", "*.local"],
+      "predeploy": ["npm --prefix \"$RESOURCE_DIR\" run build"]
     }
-  ]
+  ],
+  "emulators": {
+    "auth": { "port": 9099 },
+    "firestore": { "port": 8080 },
+    "storage": { "port": 9199 },
+    "functions": { "port": 5002 },
+    "hosting": { "port": 5050 },
+    "ui": { "enabled": true, "port": 4000 },
+    "singleProjectMode": true
+  }
 }

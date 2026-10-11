@@ -1,0 +1,342 @@
+---
+import { ArrowLeft, ChevronLeft, ChevronRight, ImageUp, X } from '@lucide/astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHeader from '../../components/PageHeader.astro';
+---
+
+<BaseLayout
+  title="Galerie"
+  description="Bilder von Veranstaltungen und Aktivitäten des Schützenverein Unterigling."
+>
+  <PageHeader eyebrow="Bilder" title="Galerie" intro="Hier findest du Bilder von unseren Veranstaltungen und Aktivitäten." />
+
+  <section class="section section--tight">
+    <div class="container">
+      <p class="alert alert--brand upload-hint">
+        <ImageUp aria-hidden="true" />
+        <span>
+          <strong>Du hast Bilder von einer Veranstaltung?</strong>
+          <a href="/galerie/hochladen">Hier kannst du sie hochladen!</a>
+        </span>
+      </p>
+
+      <div class="gallery" data-gallery>
+        <div class="gallery__bar" data-gallery-bar hidden>
+          <button type="button" class="btn btn--sm" data-gallery-back>
+            <ArrowLeft aria-hidden="true" /> Zurück zur Übersicht
+          </button>
+          <h2 class="gallery__title" data-gallery-title tabindex="-1"></h2>
+          <span class="badge" data-gallery-count></span>
+        </div>
+
+        <div class="gallery__status" data-gallery-status role="status" aria-live="polite">
+          <div class="spinner" aria-hidden="true"></div>
+          <span>Lade…</span>
+        </div>
+
+        <ul role="list" class="folders" data-gallery-folders></ul>
+        <ul role="list" class="photos" data-gallery-photos hidden></ul>
+      </div>
+    </div>
+  </section>
+
+  <dialog class="lightbox" data-lightbox aria-label="Bildansicht">
+    <button type="button" class="lightbox__btn lightbox__close" data-lightbox-close aria-label="Schließen">
+      <X aria-hidden="true" />
+    </button>
+    <button type="button" class="lightbox__btn lightbox__prev" data-lightbox-prev aria-label="Vorheriges Bild">
+      <ChevronLeft aria-hidden="true" />
+    </button>
+    <figure class="lightbox__figure">
+      <img data-lightbox-img alt="" />
+      <figcaption data-lightbox-info></figcaption>
+    </figure>
+    <button type="button" class="lightbox__btn lightbox__next" data-lightbox-next aria-label="Nächstes Bild">
+      <ChevronRight aria-hidden="true" />
+    </button>
+  </dialog>
+</BaseLayout>
+
+<style>
+  .upload-hint {
+    margin-bottom: var(--space-xl);
+  }
+
+  .upload-hint a {
+    font-weight: 650;
+  }
+
+  .gallery__bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-s);
+    margin-bottom: var(--space-l);
+  }
+
+  .gallery__title {
+    font-size: var(--step-3);
+    outline: none;
+  }
+
+  .gallery__status {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: var(--space-2xl) 0;
+    color: var(--c-text-muted);
+  }
+
+  .gallery__status:empty {
+    display: none;
+  }
+
+  .folders {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr));
+    gap: var(--space-m);
+  }
+
+  /* Ordner als große Bildkarte */
+  .folders :global(.folder) {
+    position: relative;
+    display: block;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    background: linear-gradient(150deg, #173f27, #0b1d12);
+    color: #fff;
+    text-align: left;
+    box-shadow: var(--shadow-s);
+    transition:
+      transform 350ms var(--ease-out),
+      box-shadow 350ms ease;
+  }
+
+  .folders :global(.folder:hover) {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-l);
+  }
+
+  .folders :global(.folder__cover) {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    color: rgb(255 255 255 / 0.4);
+  }
+
+  .folders :global(.folder__cover img) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    object-fit: cover;
+    transition: transform 700ms var(--ease-out);
+  }
+
+  .folders :global(.folder:hover .folder__cover img) {
+    transform: scale(1.06);
+  }
+
+  .folders :global(.folder__cover svg) {
+    width: 3rem;
+    height: 3rem;
+  }
+
+  .folders :global(.folder__body) {
+    position: absolute;
+    inset: auto 0 0;
+    display: grid;
+    gap: 0.25rem;
+    padding: var(--space-xl) var(--space-m) var(--space-m);
+    background: linear-gradient(0deg, rgb(7 20 12 / 0.92), transparent);
+  }
+
+  .folders :global(.folder__name) {
+    font-family: var(--font-heading);
+    font-size: var(--step-2);
+    font-weight: 600;
+    line-height: 1.1;
+    letter-spacing: -0.015em;
+  }
+
+  .folders :global(.folder__count) {
+    justify-self: start;
+    padding: 0.15rem 0.6rem;
+    border-radius: var(--radius-pill);
+    background: rgb(255 255 255 / 0.14);
+    backdrop-filter: blur(6px);
+    font-size: var(--step--1);
+  }
+
+  /* Fotos im Mauerwerk-Layout in ihren echten Seitenverhältnissen */
+  .photos {
+    columns: 4 16rem;
+    column-gap: 0.75rem;
+  }
+
+  .photos > :global(li) {
+    break-inside: avoid;
+    margin-bottom: 0.75rem;
+  }
+
+  .photos :global(.photo) {
+    position: relative;
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius-l);
+    overflow: hidden;
+    background: var(--c-surface-3);
+  }
+
+  .photos :global(.photo img) {
+    width: 100%;
+    height: auto;
+    transition: transform 600ms var(--ease-out);
+  }
+
+  .photos :global(.photo:hover img) {
+    transform: scale(1.04);
+  }
+
+  .photos :global(.photo__date) {
+    position: absolute;
+    inset: auto 0 0 0;
+    padding: 1.5rem 0.75rem 0.6rem;
+    background: linear-gradient(to top, rgb(0 0 0 / 0.7), transparent);
+    color: #fff;
+    font-size: var(--step--1);
+    text-align: left;
+    opacity: 0;
+    transition: opacity var(--duration) ease;
+  }
+
+  .photos :global(.photo:hover .photo__date),
+  .photos :global(.photo:focus-visible .photo__date) {
+    opacity: 1;
+  }
+
+  .gallery :global(.gallery__message) {
+    padding: var(--space-xl) var(--space-m);
+    text-align: center;
+    color: var(--c-text-muted);
+    border: 1px dashed var(--c-border-strong);
+    border-radius: var(--radius-l);
+  }
+
+  .gallery :global(.gallery__message--error) {
+    color: var(--c-danger);
+  }
+
+  /* Lightbox */
+  .lightbox {
+    width: 100vw;
+    max-width: 100vw;
+    height: 100dvh;
+    max-height: 100dvh;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: rgb(5 9 7 / 0.96);
+    color: #fff;
+  }
+
+  .lightbox[open] {
+    display: grid;
+    place-items: center;
+  }
+
+  .lightbox::backdrop {
+    background: rgb(0 0 0 / 0.8);
+  }
+
+  .lightbox__figure {
+    display: grid;
+    justify-items: center;
+    gap: 0.75rem;
+    max-width: calc(100vw - 8rem);
+    max-height: 100dvh;
+    padding: 1rem;
+  }
+
+  .lightbox__figure img {
+    max-width: 100%;
+    max-height: calc(100dvh - 6rem);
+    object-fit: contain;
+    border-radius: var(--radius-s);
+    box-shadow: 0 20px 60px rgb(0 0 0 / 0.5);
+  }
+
+  .lightbox__figure figcaption {
+    padding: 0.35rem 0.9rem;
+    border-radius: var(--radius-pill);
+    background: rgb(0 0 0 / 0.55);
+    font-size: var(--step--1);
+  }
+
+  .lightbox__btn {
+    position: fixed;
+    display: grid;
+    place-items: center;
+    width: 3rem;
+    height: 3rem;
+    border: 0;
+    border-radius: 50%;
+    background: rgb(255 255 255 / 0.14);
+    color: #fff;
+    transition: background var(--duration) ease;
+  }
+
+  .lightbox__btn:hover {
+    background: rgb(255 255 255 / 0.26);
+  }
+
+  .lightbox__btn :global(svg) {
+    width: 1.6rem;
+    height: 1.6rem;
+  }
+
+  .lightbox__close {
+    top: 1rem;
+    right: 1rem;
+  }
+
+  .lightbox__prev {
+    left: 1rem;
+    top: 50%;
+    translate: 0 -50%;
+  }
+
+  .lightbox__next {
+    right: 1rem;
+    top: 50%;
+    translate: 0 -50%;
+  }
+
+  @media (max-width: 640px) {
+    .lightbox__figure {
+      max-width: 100vw;
+      padding: 0.5rem;
+    }
+
+    .lightbox__prev,
+    .lightbox__next {
+      top: auto;
+      bottom: 1rem;
+      translate: none;
+    }
+  }
+</style>
+
+<script>
+  import { initGallery } from '../../scripts/gallery';
+  initGallery();
+</script>

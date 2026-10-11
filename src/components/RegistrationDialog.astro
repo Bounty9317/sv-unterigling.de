@@ -1,0 +1,97 @@
+---
+import { House, Mail, X } from '@lucide/astro';
+import { oeffnungszeiten, verein } from '../data/verein';
+
+const mailto = `mailto:${verein.email}?subject=${encodeURIComponent('Anmeldung zur Veranstaltung')}`;
+---
+
+<dialog id="anmeldung" class="dialog" aria-labelledby="anmeldung-titel">
+  <div class="dialog__header">
+    <div>
+      <h2 id="anmeldung-titel">Anmeldung zur Veranstaltung</h2>
+      <p class="registration__event" data-registration-event></p>
+    </div>
+    <button type="button" class="btn btn--ghost btn--icon" data-dialog-close aria-label="Schließen">
+      <X aria-hidden="true" />
+    </button>
+  </div>
+  <div class="dialog__body registration">
+    <section class="registration__option">
+      <h3><House aria-hidden="true" /> Vor Ort anmelden</h3>
+      <p>
+        <strong>Adresse:</strong><br />
+        {verein.kurzname}<br />
+        {verein.adresse.strasse}<br />
+        {verein.adresse.plz}
+        {verein.adresse.ort}
+      </p>
+      <p>
+        <strong>Öffnungszeiten:</strong><br />
+        <strong>Samstag ({oeffnungszeiten.samstag.zeitraum}):</strong>
+        {oeffnungszeiten.samstag.zeiten}<br />
+        <em>({oeffnungszeiten.samstag.hinweis})</em><br />
+        <strong>{oeffnungszeiten.sonntag.bezeichnung}:</strong>
+        {oeffnungszeiten.sonntag.zeiten} (Sonn- und Feiertage)
+      </p>
+    </section>
+
+    <section class="registration__option">
+      <h3><Mail aria-hidden="true" /> Per E-Mail anmelden</h3>
+      <p>Senden Sie uns eine E-Mail mit Ihrem Namen und der Veranstaltung, für die Sie sich anmelden möchten.</p>
+      <p><strong>E-Mail:</strong> {verein.email}</p>
+      <a class="btn btn--primary" href={mailto} data-registration-mail data-address={verein.email}>
+        <Mail aria-hidden="true" /> E-Mail senden
+      </a>
+    </section>
+  </div>
+</dialog>
+
+<style>
+  .registration {
+    display: grid;
+    gap: var(--space-s);
+  }
+
+  .registration__event {
+    margin-top: 0.3rem;
+    color: var(--c-primary);
+    font-weight: 600;
+  }
+
+  .registration__event:empty {
+    display: none;
+  }
+
+  .registration__option {
+    display: grid;
+    gap: 0.65rem;
+    justify-items: start;
+    padding: var(--space-m);
+    border-radius: var(--radius-m);
+    background: var(--c-surface-2);
+    border-left: 4px solid var(--c-primary);
+  }
+
+  .registration__option h3 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: var(--step-1);
+    color: var(--c-primary);
+  }
+
+  .registration__option h3 :global(svg) {
+    width: 1.2rem;
+    height: 1.2rem;
+  }
+
+  .registration__option em {
+    color: var(--c-text-muted);
+    font-size: var(--step--1);
+  }
+</style>
+
+<script>
+  import { initRegistrationDialog } from '../scripts/registration';
+  initRegistrationDialog();
+</script>

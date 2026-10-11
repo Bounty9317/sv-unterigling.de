@@ -1,0 +1,269 @@
+---
+import { Image } from 'astro:assets';
+import { Clock } from '@lucide/astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHeader from '../components/PageHeader.astro';
+import schiessstand from '../assets/images/schiessstand.jpg';
+import koenigsschiessen from '../assets/images/koenigsschiessen.jpg';
+import logo from '../assets/images/logo.png';
+import { oeffnungszeiten } from '../data/verein';
+---
+
+<BaseLayout
+  title="Sport / Schießstände"
+  description="Sechs Schießstände mit zehn Gewehren und drei Pistolen, Königsschießen und Schießabende am Samstag von 19:30 bis 21:00 Uhr."
+>
+  <PageHeader
+    eyebrow="Sport"
+    title="Sport / Schießstände"
+    intro="Wir sind ein Hobbyverein und schießen aus Spaß an der Sache – ohne Wettkämpfe oder Ligen. Bei uns steht die Freude am Schießsport und das gesellige Miteinander im Vordergrund."
+  />
+
+  <section class="section">
+    <div class="container range">
+      <Image
+        src={schiessstand}
+        alt="Schießstand"
+        width={1400}
+        widths={[600, 1000, 1400]}
+        sizes="(min-width: 960px) 560px, 100vw"
+        class="range__image"
+      />
+      <div class="range__text reveal">
+        <h2>Unsere Schießstände</h2>
+        <p>
+          Wir verfügen über sechs Schießstände, die mit insgesamt zehn Gewehren und drei Pistolen ausgestattet sind.
+          Für jedes Mitglied, das das 65. Lebensjahr erreicht hat, stehen zudem zwei Auflage-Böcke zur Verfügung, um ein
+          bequemes und sicheres Schießen zu ermöglichen. Für unsere Nachwuchsschützen besitzen wir außerdem zwei
+          Jugendgewehre, die speziell auf die Bedürfnisse junger Schützen abgestimmt sind.
+        </p>
+        <dl class="range__facts reveal-stagger">
+          <div><dt>6</dt><dd>Schießstände</dd></div>
+          <div><dt>10</dt><dd>Gewehre</dd></div>
+          <div><dt>3</dt><dd>Pistolen</dd></div>
+          <div><dt>2</dt><dd>Jugendgewehre</dd></div>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--alt" aria-labelledby="disziplinen">
+    <div class="container">
+      <h2 id="disziplinen" class="section-title">Unsere Disziplinen</h2>
+      <div class="disciplines reveal-stagger">
+        <article class="discipline">
+          <div class="discipline__media discipline__media--logo">
+            <Image src={logo} alt="Logo" width={320} class="discipline__logo" />
+          </div>
+          <div class="discipline__body">
+            <h3>Luftgewehr/Pistole</h3>
+            <p>Gewehre und Pistolen für Rechts- und Linkshänder</p>
+          </div>
+        </article>
+        <article class="discipline">
+          <div class="discipline__media">
+            <Image
+              src={koenigsschiessen}
+              alt="Königsschießen"
+              width={720}
+              widths={[400, 720]}
+              sizes="(min-width: 960px) 360px, 100vw"
+            />
+          </div>
+          <div class="discipline__body">
+            <h3>Königsschießen</h3>
+            <p>
+              Jeder 10er zählt! Werdet zum Brezen-, Wurst- oder Schützenkönig bzw. -königin. Zusätzlich habt ihr die
+              Chance, einen Pistolen- oder Gewehrpokal zu gewinnen.
+            </p>
+          </div>
+        </article>
+        <article class="discipline">
+          <div class="discipline__media">
+            <Image
+              src={schiessstand}
+              alt="Schießstand"
+              width={720}
+              widths={[400, 720]}
+              sizes="(min-width: 960px) 360px, 100vw"
+            />
+          </div>
+          <div class="discipline__body">
+            <h3>Öffnungszeiten Schießstand</h3>
+            <p>{oeffnungszeiten.schiessstand.zeiten}</p>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="oeffnungszeiten">
+    <div class="container container--narrow">
+      <div class="hours-card reveal">
+        <Clock aria-hidden="true" />
+        <div>
+          <h2 id="oeffnungszeiten">Öffnungszeiten</h2>
+          <p><strong>{oeffnungszeiten.schiessstand.tag}:</strong> {oeffnungszeiten.schiessstand.tagZeiten}</p>
+          <p><strong>Zeitraum:</strong> {oeffnungszeiten.schiessstand.zeitraum}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .range {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: var(--space-2xl);
+    align-items: center;
+  }
+
+  .range :global(.range__image) {
+    width: 100%;
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-m);
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+  }
+
+  .range__text {
+    display: grid;
+    gap: var(--space-m);
+  }
+
+  .range__text p {
+    color: var(--c-text-muted);
+    font-size: var(--step-1);
+  }
+
+  .range__facts {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-xs);
+  }
+
+  .range__facts div {
+    padding: var(--space-s) 0.5rem;
+    border-radius: var(--radius-m);
+    background: var(--c-primary-softer);
+    border: 1px solid var(--c-primary-soft);
+    text-align: center;
+  }
+
+  .range__facts dt {
+    font-family: var(--font-heading);
+    font-size: var(--step-3);
+    font-weight: 600;
+    color: var(--c-primary);
+    line-height: 1.1;
+  }
+
+  .range__facts dd {
+    margin: 0;
+    font-size: var(--step--1);
+    color: var(--c-text-muted);
+  }
+
+  .section-title {
+    margin-bottom: var(--space-l);
+  }
+
+  .disciplines {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-m);
+  }
+
+  .discipline {
+    display: grid;
+    grid-template-rows: auto 1fr;
+    border-radius: var(--radius-l);
+    overflow: hidden;
+    background: var(--c-surface);
+    border: 1px solid var(--c-border);
+    box-shadow: var(--shadow-xs);
+  }
+
+  .discipline__media {
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    background: linear-gradient(135deg, var(--c-brand-dark), #2d5a3d);
+  }
+
+  .discipline__media :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .discipline__media--logo {
+    display: grid;
+    place-items: center;
+  }
+
+  .discipline__media--logo :global(.discipline__logo) {
+    width: 62%;
+    height: auto;
+    object-fit: contain;
+    filter: drop-shadow(0 6px 16px rgb(0 0 0 / 0.35));
+  }
+
+  .discipline__body {
+    display: grid;
+    align-content: start;
+    gap: 0.5rem;
+    padding: var(--space-m);
+  }
+
+  .discipline__body h3 {
+    font-size: var(--step-2);
+    color: var(--c-primary);
+  }
+
+  .discipline__body p {
+    color: var(--c-text-muted);
+  }
+
+  .hours-card {
+    display: flex;
+    gap: var(--space-m);
+    align-items: flex-start;
+    padding: var(--space-l);
+    border-radius: var(--radius-l);
+    background: var(--c-brand-dark);
+    color: var(--c-on-brand);
+  }
+
+  .hours-card h2 {
+    color: #fff;
+    font-size: var(--step-2);
+    margin-bottom: 0.5rem;
+  }
+
+  .hours-card :global(svg) {
+    flex: none;
+    width: 2rem;
+    height: 2rem;
+    color: var(--c-accent-strong);
+  }
+
+  @media (max-width: 960px) {
+    .range {
+      grid-template-columns: 1fr;
+      gap: var(--space-xl);
+    }
+
+    .disciplines {
+      grid-template-columns: 1fr;
+      max-width: 36rem;
+      margin-inline: auto;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .range__facts {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+</style>

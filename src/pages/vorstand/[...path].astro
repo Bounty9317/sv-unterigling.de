@@ -1,0 +1,29 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import VorstandApp from '../../app/vorstand/VorstandApp';
+import '../../app/app.css';
+
+// Jede Unterseite existiert als eigene HTML-Datei – die App übernimmt danach die Navigation.
+export function getStaticPaths() {
+  return [
+    undefined,
+    'login',
+    'veranstaltungen',
+    'kalender',
+    'helfer',
+    'wirte-tage',
+    'protokolle',
+    'galerie',
+    'einstellungen',
+  ].map((path) => ({ params: { path } }));
+}
+---
+
+<BaseLayout title="Vorstandsbereich" description="Interner Bereich des Vorstands." noindex bare>
+  <VorstandApp client:only="react">
+    <div slot="fallback" class="app-loading" role="status">
+      <div class="spinner" aria-hidden="true"></div>
+      <span>Vorstandsbereich wird geladen…</span>
+    </div>
+  </VorstandApp>
+</BaseLayout>
