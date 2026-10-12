@@ -32,6 +32,29 @@ export interface Person {
   id: string;
   name: string;
   color: string;
+  /** Wirte: Dienste, für die die Person eingeteilt werden kann (fehlt = alle) */
+  slots?: Slot[];
+  /** Platz in der festen Rotations-Reihenfolge (fehlt = nach Namen) */
+  rotationOrder?: number | null;
+}
+
+/** Kann die Person diesen Dienst übernehmen? (Schießaufsicht: immer) */
+export function canTake(type: ScheduleType, person: Pick<Person, 'slots'>, slot: Slot): boolean {
+  return type === 'aufsicht' || !person.slots || person.slots.includes(slot);
+}
+
+/** Kurzer Hinweis, wenn eine Person nur einen der beiden Wirte-Dienste übernimmt. */
+export function slotRestriction(type: ScheduleType, person: Pick<Person, 'slots'>): string | null {
+  if (type !== 'wirte' || !person.slots) return null;
+  const can = SLOTS.filter((s) => person.slots!.includes(s));
+  return can.length === 1 ? `nur ${SLOT_LABEL[can[0]!]}` : can.length === 0 ? 'keine Dienste' : null;
+}
+
+/** Reihenfolge für die Rotation: gespeicherte Reihenfolge, sonst nach Namen. */
+export function byRotationOrder(a: Person, b: Person): number {
+  const x = a.rotationOrder ?? Number.MAX_SAFE_INTEGER;
+  const y = b.rotationOrder ?? Number.MAX_SAFE_INTEGER;
+  return x - y || a.name.localeCompare(b.name, 'de');
 }
 
 export interface Assignment {

@@ -18,7 +18,7 @@ import { db, storage } from '../firebase';
 import { col, type Protocol } from './collections';
 import { storedSlot, swapTarget } from '../../lib/schedule/slots';
 import type { RotationPlan } from '../../lib/schedule/rotation';
-import type { Assignment, DayNote, Person, ScheduleType, Slot, SwapRequest } from '../../lib/schedule/types';
+import { SLOTS, type Assignment, type DayNote, type Person, type ScheduleType, type Slot, type SwapRequest } from '../../lib/schedule/types';
 
 const now = () => new Date().toISOString();
 
@@ -106,27 +106,33 @@ export async function deleteProtocol(protocol: Protocol) {
 
 /* ---------- Helfer (Personen) ---------- */
 
-export function addPerson(type: ScheduleType, name: string, color: string) {
-  return addDoc(collection(db, col.persons(type)), { name, color });
+/** Wirte: Dienste, für die die Person eingeteilt werden kann (Schießaufsicht: ohne Feld) */
+function slotsData(type: ScheduleType, slots: Slot[] | undefined) {
+  return type === 'wirte' && slots ? { slots: SLOTS.filter((s) => slots.includes(s)) } : {};
+}
+
+export function addPerson(type: ScheduleType, name: string, color: string, slots?: Slot[]) {
+  return addDoc(collection(db, col.persons(type)), { name, color, ...slotsData(type, slots) });
 }
 
 /**
- * Ändert Name/Farbe. Bestehende Einteilungen und offene Tauschanfragen werden mit angepasst,
+ * Ändert Name/Farbe/Dienste. Bestehende Einteilungen und offene Tauschanfragen werden mit angepasst,
  * damit die Person ihre Termine behält.
  */
 export async function updatePerson(
   type: ScheduleType,
   person: Person,
-  next: { name: string; color: string },
+  next: { name: string; color: string; slots?: Slot[] },
   related: { assignments: Assignment[]; swaps: SwapRequest[] },
 ) {
   const ops: ((b: WriteBatch) => void)[] = [
-    (b) => b.update(doc(db, col.persons(type), person.id), { name: next.name, color: next.color }),
+    (b) => b.update(doc(db, col.persons(type), person.id), { name: next.name, color: next.color, ...slotsData(type, next.slots) }),
   ];
   const renamed = next.name !== person.name;
+  const recolored = next.color !== person.color;
   for (const a of related.assignments) {
     const update: Record<string, string> = {};
-    if (a.person === person.name) {
+    if (a.person === person.name && (renamed || recolored || a.color !== next.color)) {
       update.person = next.name;
       update.color = next.color;
     }
@@ -241,10 +247,24 @@ export async function removeAssignments(
   await commitAll(ops);
 }
 
-export async function applyRotation(type: ScheduleType, plan: RotationPlan) {
+/**
+ * Schreibt die Rotation. Mit `persons` werden zugleich die Reihenfolge (rotationOrder) und die Dienstauswahl
+ * gespeichert, damit die nächste Rotation in derselben Reihenfolge weiterläuft.
+ */
+export async function applyRotation(
+  type: ScheduleType,
+  plan: RotationPlan,
+  persons: { person: Person; rotationOrder: number; slots?: Slot[] }[] = [],
+) {
   const ops: ((b: WriteBatch) => void)[] = plan.deleteIds.map(
     (id) => (b: WriteBatch) => b.delete(doc(db, col.assignments(type), id)),
   );
+  for (const { person, rotationOrder, slots } of persons) {
+    const normalized = (list: Slot[]) => SLOTS.filter((s) => list.includes(s)).join();
+    const sameSlots = type !== 'wirte' || !slots || normalized(person.slots ?? SLOTS) === normalized(slots);
+    if (person.rotationOrder === rotationOrder && sameSlots) continue;
+    ops.push((b) => b.update(doc(db, col.persons(type), person.id), { rotationOrder, ...slotsData(type, slots) }));
+  }
   for (const entry of plan.creates) {
     const ref = newRef(col.assignments(type));
     ops.push((b) => b.set(ref, assignmentData(type, entry.date, entry.slot, { name: entry.person, color: entry.color })));

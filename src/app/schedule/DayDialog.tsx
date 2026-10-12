@@ -7,7 +7,7 @@ import { slotText, useScheduleActions } from './useScheduleActions';
 import { formatDateLong } from '../../lib/dates';
 import { buildDay, indexAssignments, type SlotCell } from '../../lib/schedule/model';
 import { swapTarget } from '../../lib/schedule/slots';
-import { slotTime, type Person, type ScheduleType } from '../../lib/schedule/types';
+import { canTake, slotRestriction, slotTime, type Person, type ScheduleType, type Slot } from '../../lib/schedule/types';
 
 interface Props {
   type: ScheduleType;
@@ -61,17 +61,24 @@ export function DayDialog({ type, date, mode, onClose }: Props) {
 }
 
 function PersonPicker({
+  type,
+  slot,
   persons,
   exclude,
   onPick,
   disabled,
 }: {
+  type: ScheduleType;
+  slot: Slot;
   persons: Person[];
   exclude?: string;
   onPick(person: Person): void;
   disabled?: boolean;
 }) {
-  const list = persons.filter((p) => p.name !== exclude);
+  // Wer den Dienst sonst nicht übernimmt (z. B. „nur Frühschoppen“), bleibt wählbar, steht aber hinten und ist markiert
+  const list = persons
+    .filter((p) => p.name !== exclude)
+    .sort((a, b) => Number(canTake(type, b, slot)) - Number(canTake(type, a, slot)));
   if (!list.length) return <p className="muted">Keine weiteren Personen vorhanden – bitte unter „Helfer“ anlegen.</p>;
   return (
     <div className="person-picker">
@@ -85,6 +92,7 @@ function PersonPicker({
           disabled={disabled}
         >
           {person.name}
+          {!canTake(type, person, slot) && <small className="person-picker__note"> ({slotRestriction(type, person)})</small>}
         </button>
       ))}
     </div>
@@ -212,6 +220,8 @@ function SlotSection({ type, date, cell, mode }: { type: ScheduleType; date: str
             {mode === 'admin' ? 'Person auswählen:' : `Du bist eingeteilt: ${assignment?.person}. Wähle einen Ersatz-Helfer:`}
           </p>
           <PersonPicker
+            type={type}
+            slot={cell.slot}
             persons={schedule.persons[type]}
             exclude={mode === 'helper' ? assignment?.person : undefined}
             disabled={busy}

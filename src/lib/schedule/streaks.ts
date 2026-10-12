@@ -1,7 +1,7 @@
 import { addDays } from '../dates';
 import { compareForKeep } from './model';
 import { effectiveSlot, type DayRules } from './slots';
-import { isPlaceholder, type Assignment, type Person, type ScheduleType, type Slot } from './types';
+import { canTake, isPlaceholder, type Assignment, type Person, type ScheduleType, type Slot } from './types';
 
 /**
  * Mindestabstand zwischen zwei Diensten derselben Person: mehr als eine Woche.
@@ -122,6 +122,7 @@ export function planStreakFix(params: {
 
     const eligible = persons
       .filter((p) => p.name !== assignment.person)
+      .filter((p) => canTake(type, p, slot))
       .filter((p) => slot !== 'schiessabend' || !otherEvening.has(`${date}|${p.name}`))
       .filter((p) => !busyWithin(p.name, 1))
       .map((p) => {

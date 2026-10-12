@@ -986,6 +986,10 @@
   }
 
   .person-row__meta {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem;
     color: var(--c-text-muted);
     font-size: var(--step--1);
   }
@@ -1828,6 +1832,11 @@
     transition: transform var(--duration) var(--ease-out);
   }
 
+  .person-picker__note {
+    font-weight: 500;
+    opacity: 0.75;
+  }
+
   .person-picker__item:hover:not(:disabled) {
     transform: translateY(-1px);
     box-shadow: var(--shadow-s);
@@ -2058,6 +2067,72 @@
     width: 1.1rem;
     height: 1.1rem;
     opacity: 0.6;
+  }
+
+  .rotation-item {
+    flex-wrap: wrap;
+  }
+
+  .rotation-item__check {
+    flex: 1 1 10rem;
+    min-width: 0;
+  }
+
+  /* Dienstauswahl je Wirt (Schießabend / Frühschoppen) */
+  .rotation-item__slots {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+  }
+
+  .slot-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.15rem 0.55rem 0.15rem 0.4rem;
+    border: 1px solid rgb(17 26 20 / 0.35);
+    border-radius: var(--radius-pill);
+    background: rgb(255 255 255 / 0.35);
+    font-size: var(--step--1);
+    font-weight: 600;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .slot-toggle.is-on {
+    background: rgb(255 255 255 / 0.8);
+    border-color: rgb(17 26 20 / 0.6);
+  }
+
+  .slot-toggle:not(.is-on) span {
+    text-decoration: line-through;
+    opacity: 0.7;
+  }
+
+  .slot-toggle input {
+    width: 0.95rem;
+    height: 0.95rem;
+    margin: 0;
+    accent-color: var(--c-primary);
+  }
+
+  .slot-toggle:has(input:disabled) {
+    cursor: not-allowed;
+  }
+
+  .slot-toggle:focus-within {
+    outline: 2px solid var(--c-primary);
+    outline-offset: 1px;
+  }
+
+  .link-btn {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--c-primary);
+    font: inherit;
+    text-decoration: underline;
+    cursor: pointer;
   }
 
   .icon-btn {

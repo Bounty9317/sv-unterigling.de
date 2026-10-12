@@ -2,15 +2,17 @@ import { describe, expect, it } from 'vitest';
 import { buildMonth, countOpenSlots } from './model';
 import { dayRules, effectiveSlot, expectedSlots, isOpenSwap, isShootingDay, swapTarget } from './slots';
 import { eveningConflict, findConflicts } from './conflicts';
-import { planRotation, rotationEntries } from './rotation';
+import { lastBeforeStart, planRotation, rotationEntries } from './rotation';
 import { findDuplicates } from './duplicates';
 import { daysApart, findStreaks, planStreakFix } from './streaks';
 import { currentOrNextSeason, seasonsFromNotes } from './season';
 import { bavarianHolidays, easterSunday } from './holidays';
 import { dateRangeData, personData } from './pdf-data';
-import { isPlaceholder, type Assignment, type Person, type WirteDay } from './types';
+import { byRotationOrder, canTake, isPlaceholder, slotRestriction, type Assignment, type Person, type Slot, type WirteDay } from './types';
+import { WEEKDAYS_SHORT, weekday } from '../dates';
 
 const none = dayRules();
+const weekdayShort = (date: string) => WEEKDAYS_SHORT[weekday(date)];
 const custom = (...dates: string[]) => dayRules(dates);
 const season2627 = [{ start: '2026-10-17', end: '2027-03-13' }];
 let nextId = 1;
@@ -206,7 +208,7 @@ describe('Auto-Rotation', () => {
     ).toEqual([{ date: '2026-12-26', slot: 'schiessabend' }]);
   });
 
-  it('verteilt fair nach letzter Einteilung', () => {
+  it('verteilt reihum in der Reihenfolge der Liste und ersetzt bestehende Einträge im Zeitraum', () => {
     const entries = [
       { date: '2026-10-10', slot: 'schiessabend' as const },
       { date: '2026-10-17', slot: 'schiessabend' as const },
@@ -221,11 +223,85 @@ describe('Auto-Rotation', () => {
       otherType: [],
       rules: none,
     });
-    // Berts Eintrag am 17.10. wird ersetzt und zählt nicht: Bert und Carl waren damit „nie dran“
-    // (Reihenfolge der Liste entscheidet), danach Anna (26.09.), dann wieder Bert.
-    expect(plan.creates.map((c) => c.person)).toEqual(['Bert', 'Carl', 'Anna', 'Bert']);
+    expect(plan.creates.map((c) => c.person)).toEqual(['Anna', 'Bert', 'Carl', 'Anna']);
     expect(plan.deleteIds).toHaveLength(1);
     expect(plan.uniqueDays).toBe(4);
+  });
+
+  it('läuft immer wieder in der festgelegten Reihenfolge durch – Samstage und Sonntage gemeinsam', () => {
+    const order: Person[] = [
+      { id: '4', name: 'Dora', color: '#ffb74d' },
+      { id: '1', name: 'Anna', color: '#e57373' },
+      { id: '3', name: 'Carl', color: '#81c784' },
+      { id: '2', name: 'Bert', color: '#64b5f6' },
+    ];
+    const entries = rotationEntries('wirte', '2026-10-17', '2026-11-08', { includeSaturdays: true, includeSundays: true, includeHolidays: true }, none);
+    const plan = planRotation({ type: 'wirte', entries, persons: order, existing: [], otherType: [], rules: none });
+    expect(plan.creates.map((c) => c.person)).toEqual(['Dora', 'Anna', 'Carl', 'Bert', 'Dora', 'Anna', 'Carl', 'Bert']);
+  });
+
+  it('teilt jeden nur für seine Dienste ein – wer übersprungen wird, kommt beim nächsten passenden Dienst dran', () => {
+    const team: Person[] = [
+      { id: '1', name: 'Alex', color: '#81c784', slots: ['fruehschoppen'] },
+      { id: '2', name: 'Benno', color: '#e57373' },
+      { id: '3', name: 'Carl', color: '#64b5f6' },
+      { id: '4', name: 'Dora', color: '#ffb74d' },
+      { id: '5', name: 'Emil', color: '#f06292' },
+    ];
+    const entries = rotationEntries('wirte', '2026-10-17', '2026-11-15', { includeSaturdays: true, includeSundays: true, includeHolidays: true }, none);
+    const plan = planRotation({ type: 'wirte', entries, persons: team, existing: [], otherType: [], rules: none });
+    expect(plan.creates.map((c) => `${weekdayShort(c.date)} ${c.person}`)).toEqual([
+      'Sa Benno', // Alex macht keine Schießabende → Benno, Alex behält seinen Platz
+      'So Alex',
+      'Sa Carl',
+      'So Dora',
+      'Sa Emil',
+      'So Alex', // zweite Runde
+      'Sa Benno',
+      'So Carl',
+      'Sa Dora',
+      'So Emil',
+    ]);
+    expect(plan.creates.filter((c) => c.person === 'Alex').every((c) => c.slot === 'fruehschoppen')).toBe(true);
+    expect(findStreaks(plan.creates.map((c, i) => ({ id: `r${i}`, ...c })), '2026-10-01')).toEqual([]);
+  });
+
+  it('lässt Dienste stehen, die keine der ausgewählten Personen übernehmen kann', () => {
+    const morningOnly: Person[] = persons.map((p) => ({ ...p, slots: ['fruehschoppen'] }));
+    const evening = a('2026-10-17', 'Dora', 'schiessabend');
+    const plan = planRotation({
+      type: 'wirte',
+      entries: [
+        { date: '2026-10-17', slot: 'schiessabend' },
+        { date: '2026-10-18', slot: 'fruehschoppen' },
+      ],
+      persons: morningOnly,
+      existing: [evening],
+      otherType: [],
+      rules: none,
+    });
+    expect(plan.creates.map((c) => `${c.slot}:${c.person}`)).toEqual(['fruehschoppen:Anna']);
+    expect(plan.unfillable).toEqual([{ date: '2026-10-17', slot: 'schiessabend' }]);
+    expect(plan.deleteIds).not.toContain(evening.id);
+  });
+
+  it('nennt die letzte Einteilung vor dem Start und beachtet die Dienstauswahl nur bei den Wirten', () => {
+    const list = [a('2026-10-04', 'Anna'), a('2026-10-11', 'Bert'), a('2026-10-17', 'Carl'), a('2026-10-10', 'Fremd')];
+    expect(lastBeforeStart(list, persons, '2026-10-13')?.person).toBe('Bert');
+    expect(lastBeforeStart([], persons, '2026-10-13')).toBeNull();
+    const alex = { slots: ['fruehschoppen'] as Slot[] };
+    expect(canTake('wirte', alex, 'schiessabend')).toBe(false);
+    expect(canTake('wirte', alex, 'fruehschoppen')).toBe(true);
+    expect(canTake('aufsicht', alex, 'schiessabend')).toBe(true);
+    expect(canTake('wirte', {}, 'schiessabend')).toBe(true);
+    expect(slotRestriction('wirte', alex)).toBe('nur Frühschoppen');
+    expect(slotRestriction('wirte', {})).toBeNull();
+    const sorted = [
+      { id: '1', name: 'Zora', color: '', rotationOrder: 1 },
+      { id: '2', name: 'Anna', color: '' },
+      { id: '3', name: 'Max', color: '', rotationOrder: 0 },
+    ].sort(byRotationOrder);
+    expect(sorted.map((p) => p.name)).toEqual(['Max', 'Zora', 'Anna']);
   });
 
   it('vermeidet Konflikte mit der Schießaufsicht und Doppeldienste am selben Tag', () => {
@@ -337,6 +413,15 @@ describe('Mehrere Dienste innerhalb einer Woche', () => {
     expect(changes[0]!.candidates.at(-1)?.name).toBe('Hans');
     // verschiedene Vorschläge
     expect(changes[0]!.candidates[0]!.name).not.toBe(changes[1]!.candidates[0]!.name);
+  });
+
+  it('schlägt zum Entzerren nur Personen vor, die den Dienst übernehmen können', () => {
+    const team = persons.map((p) => (p.name === 'Alex' ? { ...p, slots: ['fruehschoppen'] as Slot[] } : p));
+    const list = [a('2026-10-24', 'Benno', 'fruehschoppen'), a('2026-10-31', 'Benno', 'schiessabend')];
+    const [change] = planStreakFix({ type: 'wirte', assignments: list, otherType: [], persons: team, rules: none, from: '2026-10-11' });
+    expect(change!.slot).toBe('schiessabend');
+    expect(change!.candidates.map((p) => p.name)).not.toContain('Alex');
+    expect(change!.candidates.length).toBeGreaterThan(0);
   });
 
   it('macht keinen Vorschlag, wenn dadurch eine neue Häufung entstünde', () => {

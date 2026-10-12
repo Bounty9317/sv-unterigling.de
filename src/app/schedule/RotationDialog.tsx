@@ -5,13 +5,25 @@ import { colorVar } from '../ui/misc';
 import { errorMessage, useConfirm, useToast } from '../ui/feedback';
 import { useSchedule } from '../data/schedule-data';
 import { applyRotation } from '../data/repo';
-import { formatDate, todayISO } from '../../lib/dates';
-import { planRotation, rotationEntries, type RotationDayOptions } from '../../lib/schedule/rotation';
-import { TYPE_LABEL, isPlaceholder, type Person, type ScheduleType } from '../../lib/schedule/types';
+import { formatDate, formatDateWithWeekday, todayISO } from '../../lib/dates';
+import { lastBeforeStart, planRotation, rotationEntries, type RotationDayOptions } from '../../lib/schedule/rotation';
+import { effectiveSlot } from '../../lib/schedule/slots';
+import {
+  SLOTS,
+  SLOT_LABEL,
+  TYPE_LABEL,
+  byRotationOrder,
+  isPlaceholder,
+  type Person,
+  type ScheduleType,
+  type Slot,
+} from '../../lib/schedule/types';
 
 interface Row {
   person: Person;
   included: boolean;
+  /** Wirte: Dienste, für die die Person eingeteilt werden kann */
+  slots: Slot[];
 }
 
 export function RotationDialog({ type, open, onClose }: { type: ScheduleType; open: boolean; onClose(): void }) {
@@ -22,6 +34,7 @@ export function RotationDialog({ type, open, onClose }: { type: ScheduleType; op
   const [end, setEnd] = useState('');
   const [options, setOptions] = useState<RotationDayOptions>({ includeSaturdays: true, includeSundays: true, includeHolidays: true });
   const [rows, setRows] = useState<Row[]>([]);
+  const [startWith, setStartWith] = useState<string | null>(null);
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -35,7 +48,14 @@ export function RotationDialog({ type, open, onClose }: { type: ScheduleType; op
         ? { includeSaturdays: true, includeSundays: false, includeHolidays: true }
         : { includeSaturdays: true, includeSundays: true, includeHolidays: true },
     );
-    setRows(schedule.persons[type].map((person) => ({ person, included: !isPlaceholder(person.name) })));
+    setRows(
+      [...schedule.persons[type]].sort(byRotationOrder).map((person) => ({
+        person,
+        included: !isPlaceholder(person.name),
+        slots: person.slots ?? [...SLOTS],
+      })),
+    );
+    setStartWith(null);
     // nur beim Öffnen initialisieren
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, type]);
@@ -44,7 +64,17 @@ export function RotationDialog({ type, open, onClose }: { type: ScheduleType; op
     () => (start && end && start <= end ? rotationEntries(type, start, end, options, schedule.dayRules) : []),
     [type, start, end, options, schedule.dayRules],
   );
-  const active = rows.filter((r) => r.included).map((r) => r.person);
+  const activeRows = rows.filter((r) => r.included && !isPlaceholder(r.person.name));
+  // Die Rotation beginnt mit der gewählten Person und läuft dann in der Reihenfolge der Liste weiter
+  const firstIndex = Math.max(0, activeRows.findIndex((r) => r.person.id === startWith));
+  const ordered = [...activeRows.slice(firstIndex), ...activeRows.slice(0, firstIndex)];
+  const active = ordered.map((r) => (type === 'wirte' ? { ...r.person, slots: r.slots } : r.person));
+  const previous = start ? lastBeforeStart(schedule.assignments[type], activeRows.map((r) => r.person), start) : null;
+  const nextAfterPrevious = (() => {
+    if (!previous) return null;
+    const i = activeRows.findIndex((r) => r.person.name === previous.person);
+    return i < 0 ? null : activeRows[(i + 1) % activeRows.length]!.person;
+  })();
 
   function move(from: number, to: number) {
     if (to < 0 || to >= rows.length || from === to) return;
@@ -54,6 +84,12 @@ export function RotationDialog({ type, open, onClose }: { type: ScheduleType; op
       next.splice(to, 0, item!);
       return next;
     });
+  }
+
+  function toggleSlot(index: number, slot: Slot, on: boolean) {
+    setRows((list) =>
+      list.map((r, i) => (i === index ? { ...r, slots: SLOTS.filter((s) => (s === slot ? on : r.slots.includes(s))) } : r)),
+    );
   }
 
   async function start_() {
@@ -95,12 +131,20 @@ export function RotationDialog({ type, open, onClose }: { type: ScheduleType; op
             <li>Tage: {dayTypes}</li>
             <li>Anzahl Tage: {plan.uniqueDays}</li>
             <li>Anzahl Einteilungen: {plan.creates.length}</li>
-            <li>Aktive Personen: {active.length}</li>
+            <li>
+              Reihenfolge: {active.map((p, i) => `${i + 1}. ${p.name}`).join(', ')} – danach wieder von vorne
+            </li>
           </ul>
           {plan.skipped.length > 0 && (
             <p>
               Unverändert bleiben (Platzhalter wie „Kein Schießen“):{' '}
               {plan.skipped.map((e) => formatDate(e.date)).join(', ')}
+            </p>
+          )}
+          {plan.unfillable.length > 0 && (
+            <p>
+              Niemand der Ausgewählten kann diese Dienste übernehmen, sie bleiben unverändert:{' '}
+              {plan.unfillable.map((e) => `${formatDate(e.date)} (${SLOT_LABEL[e.slot]})`).join(', ')}
             </p>
           )}
           <p>
@@ -113,8 +157,13 @@ export function RotationDialog({ type, open, onClose }: { type: ScheduleType; op
     if (!ok) return;
     setBusy(true);
     try {
-      await applyRotation(type, plan);
-      toast.success(`✓ Rotation abgeschlossen! ${plan.uniqueDays === 1 ? '1 Tag' : `${plan.uniqueDays} Tage`} mit ${plan.creates.length === 1 ? '1 Einteilung' : `${plan.creates.length} Einteilungen`} – alle Personen wurden fair verteilt.`);
+      // Reihenfolge und Dienstauswahl merken, damit die nächste Rotation genauso weiterläuft
+      await applyRotation(
+        type,
+        plan,
+        rows.map((r, index) => ({ person: r.person, rotationOrder: index, slots: type === 'wirte' ? r.slots : undefined })),
+      );
+      toast.success(`✓ Rotation abgeschlossen! ${plan.uniqueDays === 1 ? '1 Tag' : `${plan.uniqueDays} Tage`} mit ${plan.creates.length === 1 ? '1 Einteilung' : `${plan.creates.length} Einteilungen`} – reihum in der festgelegten Reihenfolge.`);
       onClose();
     } catch (error) {
       toast.error(`Fehler bei der Rotation: ${errorMessage(error)}`);
@@ -134,7 +183,7 @@ export function RotationDialog({ type, open, onClose }: { type: ScheduleType; op
       open={open}
       onClose={onClose}
       title={`Automatische Rotation – ${TYPE_LABEL[type]}`}
-      description="Verteilt die Dienste fair: Wer am längsten nicht dran war, kommt zuerst."
+      description="Verteilt die Dienste reihum in der festgelegten Reihenfolge: Nr. 1, Nr. 2, … und dann wieder von vorne."
       size="m"
       footer={
         <>
@@ -200,6 +249,9 @@ export function RotationDialog({ type, open, onClose }: { type: ScheduleType; op
           <p className="hint">
             Ziehe die Personen in die gewünschte Reihenfolge (oder nutze die Pfeile). Deaktiviere Personen, die nicht
             eingeteilt werden sollen.
+            {type === 'wirte' &&
+              ' Bei jedem Wirt legst du fest, ob er Schießabende und/oder Frühschoppen übernimmt. Wer einen Dienst nicht macht, wird dort übersprungen und kommt beim nächsten passenden Dienst als Erster dran.'}{' '}
+            Reihenfolge und Auswahl werden beim Start gespeichert.
           </p>
           <ol className="rotation-list">
             {rows.map((row, index) => (
@@ -230,6 +282,25 @@ export function RotationDialog({ type, open, onClose }: { type: ScheduleType; op
                     {index + 1}. {row.person.name}
                   </span>
                 </label>
+                {type === 'wirte' && !isPlaceholder(row.person.name) && (
+                  <span className="rotation-item__slots" role="group" aria-label={`Dienste von ${row.person.name}`}>
+                    {(['schiessabend', 'fruehschoppen'] as const).map((slot) => {
+                      const on = row.slots.includes(slot);
+                      return (
+                        <label key={slot} className={`slot-toggle${on ? ' is-on' : ''}`}>
+                          <input
+                            type="checkbox"
+                            checked={on}
+                            // mindestens einen Dienst behalten
+                            disabled={on && row.slots.length === 1}
+                            onChange={(e) => toggleSlot(index, slot, e.target.checked)}
+                          />
+                          <span>{SLOT_LABEL[slot]}</span>
+                        </label>
+                      );
+                    })}
+                  </span>
+                )}
                 <span className="rotation-item__tools">
                   <button type="button" className="icon-btn" onClick={() => move(index, index - 1)} aria-label="Nach oben" disabled={index === 0}>
                     <ArrowUp aria-hidden="true" />
@@ -249,6 +320,40 @@ export function RotationDialog({ type, open, onClose }: { type: ScheduleType; op
             ))}
           </ol>
         </fieldset>
+
+        {activeRows.length > 1 && (
+          <div className="field">
+            <label className="label" htmlFor="rot-first">
+              Beginnen mit:
+            </label>
+            <select
+              id="rot-first"
+              className="input"
+              value={ordered[0]?.person.id ?? ''}
+              onChange={(e) => setStartWith(e.target.value)}
+            >
+              {activeRows.map((r) => (
+                <option key={r.person.id} value={r.person.id}>
+                  {r.person.name}
+                </option>
+              ))}
+            </select>
+            {previous && (
+              <span className="hint">
+                Zuletzt vor dem Start: {previous.person} am {formatDateWithWeekday(previous.date)}
+                {type === 'wirte' && ` (${SLOT_LABEL[effectiveSlot(type, previous, schedule.dayRules)]})`}
+                {nextAfterPrevious && nextAfterPrevious.id !== ordered[0]?.person.id && (
+                  <>
+                    {' – '}
+                    <button type="button" className="link-btn" onClick={() => setStartWith(nextAfterPrevious.id)}>
+                      mit {nextAfterPrevious.name} weitermachen
+                    </button>
+                  </>
+                )}
+              </span>
+            )}
+          </div>
+        )}
       </div>
     </Modal>
   );

@@ -1,7 +1,7 @@
 import { addDays, datesBetween, weekday } from '../dates';
 import { effectiveSlot, expectedSlots, type DayRules } from './slots';
 import { MAX_GAP_DAYS } from './streaks';
-import { isPlaceholder, type Assignment, type Person, type ScheduleType, type Slot } from './types';
+import { canTake, isPlaceholder, type Assignment, type Person, type ScheduleType, type Slot } from './types';
 
 export interface RotationDayOptions {
   includeSaturdays: boolean;
@@ -50,17 +50,22 @@ export interface RotationPlan {
   uniqueDays: number;
   /** Dienste, die mit einem Platzhalter („Kein Schießen“) belegt sind und unverändert bleiben */
   skipped: RotationEntry[];
+  /** Dienste, die keine der ausgewählten Personen übernehmen kann (z. B. Schießabende, wenn alle nur Frühschoppen machen) – bleiben unverändert */
+  unfillable: RotationEntry[];
 }
 
 /**
- * Faire Rotation: Für jeden Dienst wird die Person gewählt, die am längsten nicht dran war
- * (wer noch nie eingeteilt war, kommt zuerst; bei Gleichstand gilt die Reihenfolge der Liste).
- * Wenn möglich wird vermieden, dass jemand am selben Abend Wirt und Schießaufsicht ist, zweimal am selben Tag
- * oder mehrmals innerhalb einer Woche eingeteilt wird (z. B. zwei Samstage hintereinander). Dienste mit einem Platzhalter („Kein Schießen“) bleiben unverändert.
+ * Rotation reihum in der festgelegten Reihenfolge: Nr. 1, Nr. 2, … bis zum Ende der Liste, dann wieder von vorne.
+ * Wer einen Dienst nicht übernehmen kann (z. B. „nur Frühschoppen“ an einem Schießabend), am selben Abend
+ * Schießaufsicht hat oder in derselben Woche schon dran ist, wird übersprungen und behält seinen Platz:
+ * Er kommt beim nächsten passenden Dienst als Erster dran. Jeder ist also einmal pro Runde dran.
+ * Mehrere Dienste innerhalb einer Woche werden vermieden, solange genug Leute da sind.
+ * Dienste mit einem Platzhalter („Kein Schießen“) bleiben unverändert.
  */
 export function planRotation(params: {
   type: ScheduleType;
   entries: RotationEntry[];
+  /** in Rotations-Reihenfolge, die erste Person beginnt */
   persons: Person[];
   existing: Assignment[];
   otherType: Assignment[];
@@ -71,7 +76,8 @@ export function planRotation(params: {
   const blocked = new Set(
     existing.filter((a) => isPlaceholder(a.person)).map((a) => `${a.date}|${effectiveSlot(type, a, rules)}`),
   );
-  const entries = params.entries.filter((e) => !blocked.has(`${e.date}|${e.slot}`));
+  const unfillable = params.entries.filter((e) => !blocked.has(`${e.date}|${e.slot}`) && !persons.some((p) => canTake(type, p, e.slot)));
+  const entries = params.entries.filter((e) => !blocked.has(`${e.date}|${e.slot}`) && !unfillable.includes(e));
   const skipped = params.entries.filter((e) => blocked.has(`${e.date}|${e.slot}`));
   const targets = new Set(entries.map((e) => `${e.date}|${e.slot}`));
 
@@ -80,20 +86,8 @@ export function planRotation(params: {
     .map((a) => a.id);
   const deleted = new Set(deleteIds);
 
-  // Alle Diensttage je Person (bestehend + neu verteilt)
-  const datesOf = new Map<string, string[]>();
-  const remember = (person: string, date: string) => datesOf.set(person, [...(datesOf.get(person) ?? []), date]);
-  existing.filter((a) => !deleted.has(a.id)).forEach((a) => remember(a.person, a.date));
-  /**
-   * Letzter Dienst VOR diesem Tag. Später schon geplante Dienste (z. B. ein Sonntagsplan bis ins übernächste Jahr)
-   * zählen hier bewusst nicht – sonst gälte die Person als „gerade dran gewesen“ und käme nie an die Reihe.
-   * Für den Wochenabstand werden sie weiter berücksichtigt (siehe isFree).
-   */
-  const lastBefore = (person: string, date: string) => {
-    let last: string | undefined;
-    for (const d of datesOf.get(person) ?? []) if (d < date && (!last || d > last)) last = d;
-    return last;
-  };
+  // Platz in der Reihe: Wer dran war, rückt eine Runde nach hinten; wer übersprungen wurde, behält seinen Platz.
+  const turn = new Map(persons.map((p, index) => [p.id, index]));
 
   // Abendtermine des jeweils anderen Dienstes (für die Konfliktvermeidung)
   const otherEvening = new Set(
@@ -113,14 +107,8 @@ export function planRotation(params: {
 
   for (const entry of sortedEntries) {
     const ranked = persons
-      .map((person, order) => ({ person, order, last: lastBefore(person.name, entry.date) }))
-      .sort((a, b) => {
-        if (!a.last && !b.last) return a.order - b.order;
-        if (!a.last) return -1;
-        if (!b.last) return 1;
-        return a.last.localeCompare(b.last) || a.order - b.order;
-      })
-      .map((r) => r.person);
+      .filter((p) => canTake(type, p, entry.slot))
+      .sort((a, b) => turn.get(a.id)! - turn.get(b.id)!);
 
     /** frei am Tag selbst und `range` Tage davor und danach */
     const isFree = (p: Person, range: number) => {
@@ -141,8 +129,18 @@ export function planRotation(params: {
 
     creates.push({ date: entry.date, slot: entry.slot, person: chosen.name, color: chosen.color });
     onDay.add(`${entry.date}|${chosen.name}`);
-    remember(chosen.name, entry.date);
+    turn.set(chosen.id, turn.get(chosen.id)! + persons.length);
   }
 
-  return { deleteIds, creates, uniqueDays: new Set(entries.map((e) => e.date)).size, skipped };
+  return { deleteIds, creates, uniqueDays: new Set(entries.map((e) => e.date)).size, skipped, unfillable };
+}
+
+/** Wer hatte zuletzt (vor dem Start) einen Dienst? – Hilfe für die Wahl, mit wem die Rotation weitermacht. */
+export function lastBeforeStart(existing: Assignment[], persons: Person[], start: string): Assignment | null {
+  const names = new Set(persons.map((p) => p.name));
+  let last: Assignment | null = null;
+  for (const a of existing) {
+    if (a.date < start && names.has(a.person) && (!last || a.date > last.date)) last = a;
+  }
+  return last;
 }

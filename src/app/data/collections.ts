@@ -6,7 +6,7 @@ import { collection, onSnapshot, type DocumentData } from 'firebase/firestore';
 import { db } from '../firebase';
 import { isISODate } from '../../lib/dates';
 import { normalizeEvent, type VereinsEvent } from '../../lib/events';
-import type { Assignment, DayNote, Person, ScheduleType, SwapRequest, WirteDay } from '../../lib/schedule/types';
+import { SLOTS, type Assignment, type DayNote, type Person, type ScheduleType, type SwapRequest, type WirteDay } from '../../lib/schedule/types';
 
 export const col = {
   events: 'events',
@@ -25,7 +25,11 @@ const optStr = (value: unknown) => (typeof value === 'string' && value ? value :
 export function toPerson(id: string, d: DocumentData): Person | null {
   const name = str(d.name).trim();
   if (!name) return null;
-  return { id, name, color: str(d.color) || '#90a4ae' };
+  const person: Person = { id, name, color: str(d.color) || '#90a4ae' };
+  // "slots" fehlt bei bestehenden Personen → alle Dienste
+  if (Array.isArray(d.slots)) person.slots = SLOTS.filter((s) => d.slots.includes(s));
+  if (typeof d.rotationOrder === 'number' && Number.isFinite(d.rotationOrder)) person.rotationOrder = d.rotationOrder;
+  return person;
 }
 
 export function toAssignment(id: string, d: DocumentData): Assignment | null {

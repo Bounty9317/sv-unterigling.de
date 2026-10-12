@@ -113,6 +113,13 @@ Die Testkonten stehen in `scripts/seed-emulator.mjs`, das Passwort in `scripts/e
   in diesen Wochen wenig Dienste hat. Gibt es so jemanden nicht (z. B. an Weihnachten), steht der Eintrag auf
   „nicht ändern“; knappere Kandidaten sind markiert. Die Auto-Rotation hält diesen Abstand von selbst ein –
   auch zwischen Aufsicht und Wirt.
+- **Auto-Rotation:** verteilt die Dienste reihum in der festgelegten Reihenfolge (Nr. 1, Nr. 2, … und dann
+  wieder von vorne) – Schießabende und Frühschoppen in einer gemeinsamen Reihe. Bei jedem Wirt lässt sich
+  festlegen, ob er Schießabende und/oder Frühschoppen übernimmt (im Rotationsdialog oder unter „Helfer“,
+  Feld `slots` der Person). Wer einen Dienst nicht übernehmen kann, am selben Abend Aufsicht hat oder in
+  derselben Woche schon dran ist, wird übersprungen und kommt beim nächsten passenden Dienst als Erster dran.
+  Reihenfolge (`rotationOrder`) und Auswahl werden beim Start gespeichert. „Beginnen mit“ wählt die erste
+  Person, der Dialog schlägt vor, mit wem es nach dem letzten Dienst vor dem Start weitergeht.
 - **Wirte-Tage:** Unter „Wirte-Tage“ lassen sich die bayerischen Feiertage eines Jahres mit einem Klick eintragen.
 - **Saison der Schießaufsicht:** Die Infos „Anfangsschießen“ und „Endschießen“ legen auch fest, welche
   Samstage in den PDF-Listen erscheinen.

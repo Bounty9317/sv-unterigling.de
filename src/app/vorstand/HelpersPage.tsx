@@ -7,7 +7,18 @@ import { EmptyState, PageTitle, PersonChip, Spinner, colorVar } from '../ui/misc
 import { errorMessage, useConfirm, useToast } from '../ui/feedback';
 import { Link } from '../router';
 import { todayISO } from '../../lib/dates';
-import { PERSON_COLORS, TYPE_LABEL, TYPE_LABEL_SINGULAR, type Person, type ScheduleType } from '../../lib/schedule/types';
+import {
+  PERSON_COLORS,
+  SLOTS,
+  SLOT_LABEL,
+  TYPE_LABEL,
+  TYPE_LABEL_SINGULAR,
+  isPlaceholder,
+  slotRestriction,
+  type Person,
+  type ScheduleType,
+  type Slot,
+} from '../../lib/schedule/types';
 
 export function HelpersPage() {
   const schedule = useSchedule();
@@ -86,10 +97,14 @@ function PersonList({ type, onEdit }: { type: ScheduleType; onEdit(person: Perso
         <ul role="list" className="person-list">
           {persons.map((person) => {
             const upcoming = schedule.assignments[type].filter((a) => a.person === person.name && a.date >= today).length;
+            const restriction = slotRestriction(type, person);
             return (
               <li key={person.id} className="person-row" style={colorVar(person.color)}>
                 <PersonChip name={person.name} color={person.color} />
-                <span className="person-row__meta">{upcoming === 1 ? '1 kommender Termin' : `${upcoming} kommende Termine`}</span>
+                <span className="person-row__meta">
+                  {upcoming === 1 ? '1 kommender Termin' : `${upcoming} kommende Termine`}
+                  {restriction && <span className="badge badge--info">{restriction}</span>}
+                </span>
                 <div className="person-row__actions">
                   <button type="button" className="btn btn--ghost btn--sm" onClick={() => onEdit(person)}>
                     <Pencil aria-hidden="true" /> Bearbeiten
@@ -124,6 +139,7 @@ function PersonDialog({
   const [first, setFirst] = useState('');
   const [last, setLast] = useState('');
   const [color, setColor] = useState<string | null>(null);
+  const [slots, setSlots] = useState<Slot[]>([...SLOTS]);
   const [busy, setBusy] = useState(false);
   const [openFor, setOpenFor] = useState<typeof editing>(null);
 
@@ -133,6 +149,7 @@ function PersonDialog({
     setFirst(parts.first);
     setLast(parts.last);
     setColor(editing?.person?.color ?? null);
+    setSlots(editing?.person?.slots ?? [...SLOTS]);
   }
 
   const type = editing?.type ?? 'wirte';
@@ -154,10 +171,10 @@ function PersonDialog({
     setBusy(true);
     try {
       if (person) {
-        await updatePerson(type, person, { name, color }, { assignments: schedule.assignments[type], swaps: schedule.swaps[type] });
+        await updatePerson(type, person, { name, color, slots }, { assignments: schedule.assignments[type], swaps: schedule.swaps[type] });
         toast.success(`${name} gespeichert.`);
       } else {
-        await addPerson(type, name, color);
+        await addPerson(type, name, color, slots);
         toast.success(`${name} hinzugefügt.`);
       }
       onClose();
@@ -209,6 +226,28 @@ function PersonDialog({
           </div>
           <span className="hint">Bereits vergebene Farben sind ausgegraut.</span>
         </fieldset>
+        {type === 'wirte' && !isPlaceholder(`${first} ${last}`.trim() || 'x') && (
+          <fieldset className="field">
+            <legend className="label">Einteilen für</legend>
+            <div className="check-group">
+              {(['schiessabend', 'fruehschoppen'] as const).map((slot) => {
+                const on = slots.includes(slot);
+                return (
+                  <label key={slot} className="check">
+                    <input
+                      type="checkbox"
+                      checked={on}
+                      disabled={on && slots.length === 1}
+                      onChange={(e) => setSlots((list) => SLOTS.filter((s) => (s === slot ? e.target.checked : list.includes(s))))}
+                    />
+                    <span>{SLOT_LABEL[slot]}</span>
+                  </label>
+                );
+              })}
+            </div>
+            <span className="hint">Die Auto-Rotation teilt die Person nur für die angehakten Dienste ein (mindestens einer).</span>
+          </fieldset>
+        )}
         {person && (
           <p className="hint">Bestehende Einteilungen und offene Tauschanfragen werden auf den neuen Namen bzw. die neue Farbe umgestellt.</p>
         )}
