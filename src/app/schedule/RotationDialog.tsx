@@ -78,7 +78,7 @@ export function RotationDialog({ type, open, onClose }: { type: ScheduleType; op
       rules: schedule.dayRules,
     });
     const dayTypes = [
-      options.includeSaturdays && 'Samstage',
+      options.includeSaturdays && (type === 'wirte' ? 'Schießabende' : 'Samstage'),
       options.includeSundays && type === 'wirte' && 'Sonntage',
       options.includeHolidays && (type === 'wirte' ? 'Feiertage/Sondertage' : '26.12.'),
     ]
@@ -172,7 +172,7 @@ export function RotationDialog({ type, open, onClose }: { type: ScheduleType; op
                 checked={options.includeSaturdays}
                 onChange={(e) => setOptions((o) => ({ ...o, includeSaturdays: e.target.checked }))}
               />
-              <span>Samstage{type === 'wirte' ? ' (Schießabend)' : ''}</span>
+              <span>{type === 'wirte' ? 'Schießabende (Samstage und 26.12.)' : 'Samstage'}</span>
             </label>
             {type === 'wirte' && (
               <label className="check">

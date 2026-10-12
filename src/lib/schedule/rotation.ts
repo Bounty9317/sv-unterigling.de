@@ -29,10 +29,14 @@ export function rotationEntries(
     const isCustom = rules.customDays.has(date);
     const is26Dec = date.slice(5) === '12-26';
     for (const slot of expectedSlots(type, date, rules)) {
+      // Wirte: jeder Schießabend (auch der 26.12.) hängt am Haken „Schießabende“, Feiertage betreffen nur den Frühschoppen.
+      // Aufsicht: der 26.12. lässt sich getrennt von den Samstagen wählen (Weihnachtsschießen).
+      const evening =
+        type === 'wirte'
+          ? options.includeSaturdays
+          : (dow === 6 && options.includeSaturdays) || (is26Dec && options.includeHolidays);
       const include =
-        slot === 'schiessabend'
-          ? (dow === 6 && options.includeSaturdays) || (is26Dec && options.includeHolidays)
-          : (dow === 0 && options.includeSundays) || (isCustom && options.includeHolidays);
+        slot === 'schiessabend' ? evening : (dow === 0 && options.includeSundays) || (isCustom && options.includeHolidays);
       if (include) entries.push({ date, slot });
     }
   }
@@ -76,12 +80,20 @@ export function planRotation(params: {
     .map((a) => a.id);
   const deleted = new Set(deleteIds);
 
-  const lastAssignment = new Map<string, string>();
-  const remember = (person: string, date: string) => {
-    const last = lastAssignment.get(person);
-    if (!last || date > last) lastAssignment.set(person, date);
-  };
+  // Alle Diensttage je Person (bestehend + neu verteilt)
+  const datesOf = new Map<string, string[]>();
+  const remember = (person: string, date: string) => datesOf.set(person, [...(datesOf.get(person) ?? []), date]);
   existing.filter((a) => !deleted.has(a.id)).forEach((a) => remember(a.person, a.date));
+  /**
+   * Letzter Dienst VOR diesem Tag. Später schon geplante Dienste (z. B. ein Sonntagsplan bis ins übernächste Jahr)
+   * zählen hier bewusst nicht – sonst gälte die Person als „gerade dran gewesen“ und käme nie an die Reihe.
+   * Für den Wochenabstand werden sie weiter berücksichtigt (siehe isFree).
+   */
+  const lastBefore = (person: string, date: string) => {
+    let last: string | undefined;
+    for (const d of datesOf.get(person) ?? []) if (d < date && (!last || d > last)) last = d;
+    return last;
+  };
 
   // Abendtermine des jeweils anderen Dienstes (für die Konfliktvermeidung)
   const otherEvening = new Set(
@@ -101,7 +113,7 @@ export function planRotation(params: {
 
   for (const entry of sortedEntries) {
     const ranked = persons
-      .map((person, order) => ({ person, order, last: lastAssignment.get(person.name) }))
+      .map((person, order) => ({ person, order, last: lastBefore(person.name, entry.date) }))
       .sort((a, b) => {
         if (!a.last && !b.last) return a.order - b.order;
         if (!a.last) return -1;

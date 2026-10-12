@@ -178,6 +178,34 @@ describe('Auto-Rotation', () => {
     expect(onlySaturdays.map((e) => e.date)).toEqual(['2026-10-03', '2026-10-10', '2026-10-17']);
   });
 
+  it('nimmt den Weihnachts-Schießabend der Wirte nur mit den Schießabenden auf, nicht mit den Feiertagen', () => {
+    const xmas = custom('2026-12-25', '2026-12-26');
+    const holidaysOnly = rotationEntries(
+      'wirte',
+      '2026-12-24',
+      '2026-12-27',
+      { includeSaturdays: false, includeSundays: true, includeHolidays: true },
+      xmas,
+    );
+    expect(holidaysOnly).toEqual([
+      { date: '2026-12-25', slot: 'fruehschoppen' },
+      { date: '2026-12-26', slot: 'fruehschoppen' },
+      { date: '2026-12-27', slot: 'fruehschoppen' },
+    ]);
+    const eveningsOnly = rotationEntries(
+      'wirte',
+      '2026-12-24',
+      '2026-12-27',
+      { includeSaturdays: true, includeSundays: false, includeHolidays: false },
+      xmas,
+    );
+    expect(eveningsOnly).toEqual([{ date: '2026-12-26', slot: 'schiessabend' }]);
+    // Aufsicht: 26.12. weiterhin über den eigenen Haken wählbar
+    expect(
+      rotationEntries('aufsicht', '2026-12-24', '2026-12-27', { includeSaturdays: false, includeSundays: false, includeHolidays: true }, none),
+    ).toEqual([{ date: '2026-12-26', slot: 'schiessabend' }]);
+  });
+
   it('verteilt fair nach letzter Einteilung', () => {
     const entries = [
       { date: '2026-10-10', slot: 'schiessabend' as const },
@@ -213,6 +241,29 @@ describe('Auto-Rotation', () => {
       rules: custom('2026-10-03'),
     });
     expect(plan.creates.map((c) => `${c.slot}:${c.person}`)).toEqual(['fruehschoppen:Anna', 'schiessabend:Carl']);
+  });
+
+  it('übergeht niemanden, der schon weit in der Zukunft eingeplant ist', () => {
+    // Fehlerfall aus dem Live-Betrieb: ein alter Sonntagsplan bis 2028 ließ Bert und Carl nie an die Reihe kommen
+    const four: Person[] = [...persons, { id: '4', name: 'Dora', color: '#ffb74d' }];
+    const entries = rotationEntries(
+      'wirte',
+      '2026-10-17',
+      '2026-12-05',
+      { includeSaturdays: true, includeSundays: false, includeHolidays: false },
+      none,
+    );
+    const plan = planRotation({
+      type: 'wirte',
+      entries,
+      persons: four,
+      existing: [a('2028-03-05', 'Bert', 'fruehschoppen'), a('2028-03-12', 'Carl', 'fruehschoppen'), a('2026-10-10', 'Anna', 'schiessabend')],
+      otherType: [],
+      rules: none,
+    });
+    const count = (name: string) => plan.creates.filter((c) => c.person === name).length;
+    expect(entries).toHaveLength(8);
+    expect(['Anna', 'Bert', 'Carl', 'Dora'].map(count)).toEqual([2, 2, 2, 2]);
   });
 
   it('lässt Platzhalter wie „Kein Schießen“ stehen und teilt sie nicht ein', () => {
