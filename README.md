@@ -112,20 +112,17 @@ Die Testkonten stehen in `scripts/seed-emulator.mjs`, das Passwort in `scripts/e
   behält den ersten Dienst und schlägt für die weiteren jemanden vor, der an dem Wochenende frei ist, denselben
   Dienst nicht eine Woche davor/danach hat und in diesen Wochen wenig Dienste hat. Gibt es so jemanden nicht (z. B. an Weihnachten), steht der Eintrag auf
   „nicht ändern“; knappere Kandidaten sind markiert. Die Auto-Rotation hält diesen Abstand von selbst ein.
-- **Auto-Rotation:** verteilt reihum in der festgelegten Reihenfolge – je Dienst eine eigene Reihe: Die
-  Schießabende laufen der Reihe nach durch alle, die Schießabend machen, die Frühschoppen durch alle, die
-  Frühschoppen machen (Nr. 1, Nr. 2, … und dann wieder von vorne). Bei jedem Wirt lässt sich festlegen, ob er
-  Schießabende und/oder Frühschoppen übernimmt (im Rotationsdialog oder unter „Helfer“, Feld `slots` der Person);
-  wer beides macht, steht in beiden Reihen und ist entsprechend öfter dran. Übersprungen wird nur, wer am selben
-  Wochenende schon Wirt oder Schießaufsicht ist oder denselben Dienst eine Woche davor/danach hätte; er behält seinen
-  Platz und kommt beim nächsten Dienst dieser Reihe dran, danach geht es in der Reihenfolge weiter (höchstens eine
-  Runde Rückstand). Schießabend und Frühschoppen an zwei Wochenenden hintereinander sind bewusst erlaubt, damit die
-  Reihenfolge auch für Wirte gilt, die beides machen.
-  Im Sommer ohne Schießabende pausiert deren Reihe und läuft im Herbst weiter. Reihenfolge (`rotationOrder`) und
-  Auswahl werden beim Start gespeichert. „Beginnen mit“ wählt die erste Person, der Dialog schlägt vor, mit wem es
-  nach dem letzten Dienst vor dem Start weitergeht. Ob Schießabende und Frühschoppen zusammen oder in getrennten
-  Läufen verteilt werden, ergibt dieselben Reihen. Stehen nach dem End-Datum noch Einteilungen (z. B. ein älterer
-  Plan), zeigt der Dialog das an und bietet an, bis dorthin mit zu verteilen.
+- **Auto-Rotation:** zwei feste Reihen – Schießabende (Samstage und 26.12.) und Frühschoppen (Sonntage,
+  Feiertage, Sondertage). In jeder Reihe stehen nur die Wirte, die diesen Dienst machen (Häkchen unter „Helfer“,
+  Feld `slots`), jede mit eigener Reihenfolge (Feld `rotationOrders.<Dienst>` der Person). Jede Reihe läuft von
+  Nr. 1 bis x und beginnt dann wieder bei Nr. 1; „Beginnen mit“ wählt die Startperson, „… weitermachen“ setzt sie auf
+  den Nächsten nach dem letzten Dienst vor dem Start. Erst werden die Schießabende verteilt, dann die Frühschoppen
+  passend dazu; was der Lauf ersetzt, zählt dabei nicht mehr mit. „Beste Reihenfolge berechnen“ prüft alle
+  Reihenfolgen der Frühschoppen-Reihe (bis 8 Personen) und wählt die mit den wenigsten Wirten an zwei Wochenenden
+  hintereinander, dann den wenigsten Platztauschen. Getauscht wird nur, wenn es nicht anders geht: Schießaufsicht am
+  selben Abend, schon eingeteilt am selben Wochenende oder derselbe Dienst eine Woche davor/danach. Die Vorschau zeigt
+  beide Reihen, die Dienste je Wirt, alle Platztausche und alle Wochenenden hintereinander, bevor etwas gespeichert
+  wird. Stehen nach dem End-Datum noch Einteilungen, bietet der Dialog an, bis dorthin mit zu verteilen.
 - **Neue Version veröffentlicht:** Jeder Build schreibt seine Kennung nach `/version.json`. Ein länger offenes
   Fenster des Vorstandsbereichs prüft alle 5 Minuten und beim Zurückwechseln, ob online eine neuere Version liegt,
   und zeigt dann „Jetzt neu laden“. Die Auto-Rotation lässt sich in einem veralteten Fenster nicht starten.

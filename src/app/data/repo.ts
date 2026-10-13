@@ -248,22 +248,18 @@ export async function removeAssignments(
 }
 
 /**
- * Schreibt die Rotation. Mit `persons` werden zugleich die Reihenfolge (rotationOrder) und die Dienstauswahl
- * gespeichert, damit die nächste Rotation in derselben Reihenfolge weiterläuft.
+ * Schreibt die Rotation. Mit `orders` wird zugleich die Reihenfolge jeder verteilten Reihe gespeichert
+ * (Feld rotationOrders.<Dienst> der Person), damit die nächste Rotation in derselben Reihenfolge weiterläuft.
  */
-export async function applyRotation(
-  type: ScheduleType,
-  plan: RotationPlan,
-  persons: { person: Person; rotationOrder: number; slots?: Slot[] }[] = [],
-) {
+export async function applyRotation(type: ScheduleType, plan: RotationPlan, orders: { slot: Slot; order: Person[] }[] = []) {
   const ops: ((b: WriteBatch) => void)[] = plan.deleteIds.map(
     (id) => (b: WriteBatch) => b.delete(doc(db, col.assignments(type), id)),
   );
-  for (const { person, rotationOrder, slots } of persons) {
-    const normalized = (list: Slot[]) => SLOTS.filter((s) => list.includes(s)).join();
-    const sameSlots = type !== 'wirte' || !slots || normalized(person.slots ?? SLOTS) === normalized(slots);
-    if (person.rotationOrder === rotationOrder && sameSlots) continue;
-    ops.push((b) => b.update(doc(db, col.persons(type), person.id), { rotationOrder, ...slotsData(type, slots) }));
+  for (const { slot, order } of orders) {
+    order.forEach((person, index) => {
+      if (person.rotationOrders?.[slot] === index) return;
+      ops.push((b) => b.update(doc(db, col.persons(type), person.id), { [`rotationOrders.${slot}`]: index }));
+    });
   }
   for (const entry of plan.creates) {
     const ref = newRef(col.assignments(type));

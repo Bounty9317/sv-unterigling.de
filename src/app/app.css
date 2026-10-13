@@ -2078,51 +2078,92 @@
     min-width: 0;
   }
 
-  /* Dienstauswahl je Wirt (Schießabend / Frühschoppen) */
-  .rotation-item__slots {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.3rem;
+  /* Rotation: je Dienst eine Reihe */
+  .rotation-queues {
+    display: grid;
+    gap: 0.9rem;
   }
 
-  .slot-toggle {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.3rem;
-    padding: 0.15rem 0.55rem 0.15rem 0.4rem;
-    border: 1px solid rgb(17 26 20 / 0.35);
-    border-radius: var(--radius-pill);
-    background: rgb(255 255 255 / 0.35);
-    font-size: var(--step--1);
-    font-weight: 600;
-    cursor: pointer;
-    user-select: none;
+  @media (min-width: 52rem) {
+    .rotation-queues--two {
+      grid-template-columns: 1fr 1fr;
+      align-items: start;
+    }
   }
 
-  .slot-toggle.is-on {
-    background: rgb(255 255 255 / 0.8);
-    border-color: rgb(17 26 20 / 0.6);
-  }
-
-  .slot-toggle:not(.is-on) span {
-    text-decoration: line-through;
-    opacity: 0.7;
-  }
-
-  .slot-toggle input {
-    width: 0.95rem;
-    height: 0.95rem;
+  .rotation-queue {
+    display: grid;
+    gap: 0.6rem;
+    min-width: 0;
     margin: 0;
-    accent-color: var(--c-primary);
+    padding: 0.75rem;
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius-m);
   }
 
-  .slot-toggle:has(input:disabled) {
-    cursor: not-allowed;
+  .rotation-queue.is-off .rotation-list,
+  .rotation-queue.is-off .field,
+  .rotation-queue.is-off .rotation-queue__best {
+    opacity: 0.45;
   }
 
-  .slot-toggle:focus-within {
+  .rotation-queue__title {
+    padding: 0 0.3rem;
+    font-weight: 700;
+  }
+
+  .rotation-queue__best {
+    display: grid;
+    gap: 0.35rem;
+    justify-items: start;
+  }
+
+  .rotation-item.is-first {
     outline: 2px solid var(--c-primary);
     outline-offset: 1px;
+  }
+
+  .rotation-preview {
+    display: grid;
+    gap: 0.4rem;
+  }
+
+  .rotation-preview h3 {
+    margin: 0;
+    font-size: var(--step-0);
+  }
+
+  .rotation-preview__cols {
+    display: grid;
+    gap: 0.6rem;
+  }
+
+  @media (min-width: 40rem) {
+    .rotation-preview__cols--two {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .rotation-preview__list {
+    max-height: 16rem;
+    overflow-y: auto;
+    margin: 0;
+    padding: 0.4rem 0.6rem;
+    list-style: none;
+    border-radius: var(--radius-s);
+    background: var(--c-surface-2);
+    font-size: var(--step--1);
+  }
+
+  .rotation-preview__list li.is-warn {
+    color: var(--c-warning);
+    font-weight: 650;
+  }
+
+  .rotation-preview__date {
+    display: inline-block;
+    min-width: 5.5rem;
+    color: var(--c-text-muted);
   }
 
   .hint--warning {

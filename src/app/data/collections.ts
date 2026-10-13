@@ -6,7 +6,7 @@ import { collection, onSnapshot, type DocumentData } from 'firebase/firestore';
 import { db } from '../firebase';
 import { isISODate } from '../../lib/dates';
 import { normalizeEvent, type VereinsEvent } from '../../lib/events';
-import { SLOTS, type Assignment, type DayNote, type Person, type ScheduleType, type SwapRequest, type WirteDay } from '../../lib/schedule/types';
+import { SLOTS, type Assignment, type DayNote, type Person, type ScheduleType, type Slot, type SwapRequest, type WirteDay } from '../../lib/schedule/types';
 
 export const col = {
   events: 'events',
@@ -29,6 +29,11 @@ export function toPerson(id: string, d: DocumentData): Person | null {
   // "slots" fehlt bei bestehenden Personen → alle Dienste
   if (Array.isArray(d.slots)) person.slots = SLOTS.filter((s) => d.slots.includes(s));
   if (typeof d.rotationOrder === 'number' && Number.isFinite(d.rotationOrder)) person.rotationOrder = d.rotationOrder;
+  if (d.rotationOrders && typeof d.rotationOrders === 'object') {
+    const orders: Partial<Record<Slot, number>> = {};
+    for (const s of SLOTS) if (typeof d.rotationOrders[s] === 'number') orders[s] = d.rotationOrders[s];
+    person.rotationOrders = orders;
+  }
   return person;
 }
 

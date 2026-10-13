@@ -34,8 +34,10 @@ export interface Person {
   color: string;
   /** Wirte: Dienste, für die die Person eingeteilt werden kann (fehlt = alle) */
   slots?: Slot[];
-  /** Platz in der festen Rotations-Reihenfolge (fehlt = nach Namen) */
+  /** Platz in der festen Rotations-Reihenfolge (ältere, gemeinsame Reihenfolge – fehlt = nach Namen) */
   rotationOrder?: number | null;
+  /** Platz je Reihe (Schießabende / Frühschoppen) – geht vor rotationOrder */
+  rotationOrders?: Partial<Record<Slot, number>>;
 }
 
 /** Kann die Person diesen Dienst übernehmen? (Schießaufsicht: immer) */
@@ -55,6 +57,20 @@ export function byRotationOrder(a: Person, b: Person): number {
   const x = a.rotationOrder ?? Number.MAX_SAFE_INTEGER;
   const y = b.rotationOrder ?? Number.MAX_SAFE_INTEGER;
   return x - y || a.name.localeCompare(b.name, 'de');
+}
+
+/** Reihenfolge einer Reihe: gespeicherter Platz in dieser Reihe, sonst die gemeinsame Reihenfolge, sonst nach Namen. */
+export function byQueueOrder(slot: Slot) {
+  return (a: Person, b: Person): number => {
+    const x = a.rotationOrders?.[slot] ?? Number.MAX_SAFE_INTEGER;
+    const y = b.rotationOrders?.[slot] ?? Number.MAX_SAFE_INTEGER;
+    return x - y || byRotationOrder(a, b);
+  };
+}
+
+/** Wer gehört in die Reihe dieses Dienstes – in gespeicherter Reihenfolge? (ohne Platzhalter wie „Kein Schießen“) */
+export function queueMembers(type: ScheduleType, persons: Person[], slot: Slot): Person[] {
+  return persons.filter((p) => !isPlaceholder(p.name) && canTake(type, p, slot)).sort(byQueueOrder(slot));
 }
 
 export interface Assignment {
