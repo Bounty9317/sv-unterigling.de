@@ -1,6 +1,6 @@
 import { addDays, datesBetween, weekday } from '../dates';
 import { effectiveSlot, expectedSlots, type DayRules } from './slots';
-import { MAX_GAP_DAYS } from './streaks';
+import { SAME_DUTY_GAP_DAYS, SAME_WEEKEND_DAYS } from './streaks';
 import { canTake, isPlaceholder, type Assignment, type Person, type ScheduleType, type Slot } from './types';
 
 export interface RotationDayOptions {
@@ -58,9 +58,10 @@ export interface RotationPlan {
  * Rotation reihum in der festgelegten Reihenfolge – je Dienst eine eigene Reihe: Die Schießabende laufen der Reihe nach
  * durch alle, die Schießabend machen, die Frühschoppen durch alle, die Frühschoppen machen (Nr. 1, Nr. 2, … und dann
  * wieder von vorne). Wer beides macht, steht in beiden Reihen.
- * Wer am selben Abend Schießaufsicht hat oder am Wochenende davor/danach schon dran ist, wird übersprungen und behält
- * seinen Platz: Er kommt beim nächsten Dienst dieser Reihe als Erster dran, danach geht es in der Reihenfolge weiter.
- * Dienste an zwei Wochenenden hintereinander werden so vermieden, solange genug Leute da sind.
+ * Übersprungen wird nur, wer am selben Wochenende schon Wirt oder Schießaufsicht ist oder denselben Dienst eine Woche
+ * davor/danach hat; er behält seinen Platz und kommt beim nächsten Dienst dieser Reihe als Erster dran, danach geht es
+ * in der Reihenfolge weiter. Schießabend und Frühschoppen an zwei Wochenenden hintereinander sind erlaubt, damit die
+ * Reihenfolge auch für Wirte, die beides machen, eingehalten wird.
  * Ob Schießabende und Frühschoppen gemeinsam oder in getrennten Läufen verteilt werden, ergibt dieselben Reihen.
  * Dienste mit einem Platzhalter („Kein Schießen“) bleiben unverändert.
  */
@@ -109,12 +110,12 @@ export function planRotation(params: {
   );
 
   const creates: RotationPlan['creates'] = [];
-  // Wer ist an welchem Tag schon dran (bestehend + neu verteilt)? – gegen Dienste an zwei Wochenenden hintereinander
-  const onDay = new Set(existing.filter((a) => !deleted.has(a.id)).map((a) => `${a.date}|${a.person}`));
+  // Wer ist an welchem Tag schon dran (bestehend + neu verteilt) – und mit welchem Dienst?
+  const kept = existing.filter((a) => !deleted.has(a.id));
+  const onDay = new Set(kept.map((a) => `${a.date}|${a.person}`));
+  const dutyOnDay = new Set(kept.map((a) => `${a.date}|${a.person}|${effectiveSlot(type, a, rules)}`));
   const otherOnDay = new Set(otherType.map((a) => `${a.date}|${a.person}`));
-  // Eigene Dienste zählen eine Woche davor und danach, Schießaufsicht nur am selben Wochenende (Vor- und Folgetag)
-  const busy = (date: string, name: string, daysAway: number) =>
-    onDay.has(`${date}|${name}`) || (daysAway <= 1 && otherOnDay.has(`${date}|${name}`));
+  const busy = (date: string, name: string) => onDay.has(`${date}|${name}`) || otherOnDay.has(`${date}|${name}`);
   const sortedEntries = [...entries].sort(
     (a, b) => a.date.localeCompare(b.date) || (a.slot === 'fruehschoppen' ? -1 : 1) - (b.slot === 'fruehschoppen' ? -1 : 1),
   );
@@ -123,25 +124,30 @@ export function planRotation(params: {
     const { members, turn } = queueFor(entry.slot);
     const ranked = [...members].sort((a, b) => turn.get(a.id)! - turn.get(b.id)!);
 
-    /** frei am Tag selbst und `range` Tage davor und danach */
-    const isFree = (p: Person, range: number) => {
+    /** frei am Tag selbst; mit `weekend` auch am Vor- und Folgetag (Wirt und Aufsicht), mit `sameDuty` ohne denselben Dienst eine Woche davor/danach */
+    const isFree = (p: Person, weekend: boolean, sameDuty: boolean) => {
       if (onDay.has(`${entry.date}|${p.name}`)) return false;
       if (entry.slot === 'schiessabend' && otherEvening.has(`${entry.date}|${p.name}`)) return false;
-      for (let i = 1; i <= range; i++) {
-        if (busy(addDays(entry.date, -i), p.name, i) || busy(addDays(entry.date, i), p.name, i)) return false;
+      for (let i = 1; weekend && i <= SAME_WEEKEND_DAYS; i++) {
+        if (busy(addDays(entry.date, -i), p.name) || busy(addDays(entry.date, i), p.name)) return false;
+      }
+      for (let i = 1; sameDuty && i <= SAME_DUTY_GAP_DAYS; i++) {
+        for (const d of [addDays(entry.date, -i), addDays(entry.date, i)]) if (dutyOnDay.has(`${d}|${p.name}|${entry.slot}`)) return false;
       }
       return true;
     };
-    // Erst jemanden suchen, der am Wochenende davor und danach frei ist, dann wenigstens Vor- und Folgetag frei – nur notfalls lockern
+    // Wer dran ist, bekommt den Dienst – außer er ist am selben Wochenende schon eingeteilt oder hätte denselben Dienst
+    // eine Woche davor/danach; nur notfalls lockern
     const chosen =
-      ranked.find((p) => isFree(p, MAX_GAP_DAYS)) ??
-      ranked.find((p) => isFree(p, 1)) ??
-      ranked.find((p) => isFree(p, 0)) ??
+      ranked.find((p) => isFree(p, true, true)) ??
+      ranked.find((p) => isFree(p, true, false)) ??
+      ranked.find((p) => isFree(p, false, false)) ??
       ranked[0];
     if (!chosen) continue;
 
     creates.push({ date: entry.date, slot: entry.slot, person: chosen.name, color: chosen.color });
     onDay.add(`${entry.date}|${chosen.name}`);
+    dutyOnDay.add(`${entry.date}|${chosen.name}|${entry.slot}`);
     const position = turn.get(chosen.id)!;
     turn.set(chosen.id, position + members.length);
     // Kein Nachholen: Wer immer wieder übersprungen wurde, ist höchstens eine Runde im Rückstand –

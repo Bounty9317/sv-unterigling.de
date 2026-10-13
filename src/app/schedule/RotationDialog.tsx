@@ -78,7 +78,6 @@ export function RotationDialog({ type, open, onClose }: { type: ScheduleType; op
     const p = rows.find((r) => r.person.name === a.person);
     return p && !canTake(type, { slots: p.slots }, effectiveSlot(type, a, schedule.dayRules));
   }).length;
-  const partial = type === 'wirte' && !(options.includeSaturdays && options.includeSundays && options.includeHolidays);
   const doesBoth = activeRows.filter((r) => SLOTS.every((s) => r.slots.includes(s)));
   const nextAfterPrevious = (() => {
     if (!previous) return null;
@@ -266,11 +265,11 @@ export function RotationDialog({ type, open, onClose }: { type: ScheduleType; op
           </div>
           {type === 'wirte' && (
             <p className="hint" role="note">
-              Schießabende und Frühschoppen haben je eine eigene Reihe in dieser Reihenfolge.
+              Schießabende und Frühschoppen haben je eine eigene Reihe in dieser Reihenfolge – ob zusammen oder einzeln
+              verteilt. Getauscht wird nur, wenn jemand sonst am selben Wochenende zweimal dran wäre oder am selben Abend
+              Schießaufsicht hat.
               {doesBoth.length > 0 &&
                 ` ${doesBoth.map((r) => r.person.name.split(' ')[0]).join(', ')} ${doesBoth.length === 1 ? 'macht' : 'machen'} beides, ${doesBoth.length === 1 ? 'steht' : 'stehen'} in beiden Reihen und ${doesBoth.length === 1 ? 'ist' : 'sind'} dadurch öfter dran.`}
-              {partial &&
-                ' Tipp: beide in einem Lauf verteilen – dann werden die Reihen zusammen geplant und es muss seltener jemand den Platz tauschen.'}
             </p>
           )}
         </fieldset>

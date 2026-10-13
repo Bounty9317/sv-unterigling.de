@@ -7,16 +7,20 @@ import { useSchedule } from '../data/schedule-data';
 import { reassignMany } from '../data/repo';
 import { formatDateWithWeekday, todayISO } from '../../lib/dates';
 import { findStreaks, planStreakFix } from '../../lib/schedule/streaks';
+import { effectiveSlot } from '../../lib/schedule/slots';
 import { slotText } from './useScheduleActions';
 import { TYPE_LABEL, type ScheduleType } from '../../lib/schedule/types';
 
 const shortDate = (date: string) => formatDateWithWeekday(date).replace(/\.\d{4}$/, '.');
 
-/** Hinweis über dem Kalender, wenn jemand mehrere Dienste kurz hintereinander hat (zwei Wochenenden in Folge). */
+/** Hinweis über dem Kalender, wenn jemand zu dicht eingeteilt ist (selbes Wochenende oder derselbe Dienst eine Woche später). */
 export function StreaksPanel({ type, onJump, onFix }: { type: ScheduleType; onJump(date: string): void; onFix(): void }) {
   const schedule = useSchedule();
   const today = todayISO();
-  const streaks = useMemo(() => findStreaks(schedule.assignments[type], today), [schedule.assignments, type, today]);
+  const streaks = useMemo(
+    () => findStreaks(schedule.assignments[type], today, (a) => effectiveSlot(type, a, schedule.dayRules)),
+    [schedule.assignments, schedule.dayRules, type, today],
+  );
   if (!streaks.length) return null;
 
   return (
@@ -26,7 +30,7 @@ export function StreaksPanel({ type, onJump, onFix }: { type: ScheduleType; onJu
         <h2 id={`streaks-${type}`} className="conflicts__title conflicts__title--warning">
           Mehrere Dienste kurz hintereinander
         </h2>
-        <p className="muted">Diese Personen sind zu dicht hintereinander eingeteilt – an zwei Wochenenden in Folge (z. B. Samstag und Sonntag, zwei Samstage in Folge oder Schießabend und Frühschoppen am Wochenende danach):</p>
+        <p className="muted">Diese Personen sind zu dicht eingeteilt – am selben Wochenende (z. B. Samstag und Sonntag) oder zweimal hintereinander mit demselben Dienst (z. B. zwei Samstage in Folge):</p>
         <ul role="list" className="conflicts__list">
           {streaks.map((s) => (
             <li key={`${s.person}-${s.assignments[0]!.date}`}>
@@ -101,7 +105,7 @@ export function StreaksDialog({ type, open, onClose }: { type: ScheduleType; ope
       open={open}
       onClose={onClose}
       title={`Dienste entzerren – ${TYPE_LABEL[type]}`}
-      description="Der erste Dienst bleibt, weitere Dienste am Wochenende danach gehen an jemand anderen. Vorgeschlagen wird, wer am Wochenende davor und danach frei ist und in diesen Wochen am wenigsten Dienste hat."
+      description="Der erste Dienst bleibt, weitere zu dichte Dienste gehen an jemand anderen. Vorgeschlagen wird, wer an dem Wochenende frei ist, denselben Dienst nicht eine Woche davor oder danach hat und in diesen Wochen am wenigsten Dienste hat."
       size="m"
       footer={
         changes.length ? (

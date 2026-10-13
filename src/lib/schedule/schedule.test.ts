@@ -253,16 +253,16 @@ describe('Auto-Rotation', () => {
     ];
     const entries = rotationEntries('wirte', '2026-10-17', '2026-11-15', { includeSaturdays: true, includeSundays: true, includeHolidays: true }, none);
     const plan = planRotation({ type: 'wirte', entries, persons: team, existing: [], otherType: [], rules: none });
-    // Schießabend-Reihe: Benno, Carl, Dora, Emil – Frühschoppen-Reihe: Alex, Benno, Carl, Dora, Emil
+    // Schießabend-Reihe: Benno, Carl, Dora, Emil – Frühschoppen-Reihe: Alex, Benno, Carl, Dora, Emil – beide strikt
     expect(plan.creates.map((c) => `${weekdayShort(c.date)} ${c.person}`)).toEqual([
       'Sa Benno',
       'So Alex',
       'Sa Carl',
-      'So Dora', // Benno (Samstag davor) und Carl (gestern) übersprungen – sie behalten ihren Platz
-      'Sa Emil', // Dora hatte vorigen Sonntag Frühschoppen → Emil, Dora kommt beim nächsten Schießabend
-      'So Benno',
+      'So Benno', // Schießabend und Frühschoppen an zwei Wochenenden hintereinander sind erlaubt
       'Sa Dora',
       'So Carl',
+      'Sa Emil',
+      'So Dora',
       'Sa Benno', // zweite Runde der Schießabende
       'So Emil',
     ]);
@@ -470,7 +470,7 @@ describe('Mehrere Dienste innerhalb einer Woche', () => {
     { id: '4', name: 'Alex', color: '#81c784' },
   ];
 
-  it('findet Samstag + Sonntag, zwei Samstage in Folge und Dienste an zwei Wochenenden hintereinander (ab heute)', () => {
+  it('findet Dienste am selben Wochenende und denselben Dienst zwei Wochen in Folge (ab heute)', () => {
     const list = [
       a('2026-10-17', 'Hans', null),
       a('2026-10-18', 'Hans', null),
@@ -480,7 +480,7 @@ describe('Mehrere Dienste innerhalb einer Woche', () => {
       a('2026-11-07', 'Franz', null),
       a('2026-11-14', 'Franz', null), // zwei Samstage hintereinander
       a('2026-11-28', 'Alex', null),
-      a('2026-12-06', 'Alex', null), // Samstag + Sonntag am Wochenende danach (8 Tage) – zu dicht
+      a('2026-12-06', 'Alex', null), // Schießabend + Frühschoppen am Wochenende danach – erlaubt
       a('2026-12-19', 'Hans', null),
       a('2027-01-02', 'Hans', null), // ein Wochenende frei dazwischen – in Ordnung
       a('2026-10-03', 'Alex', null),
@@ -493,7 +493,6 @@ describe('Mehrere Dienste innerhalb einer Woche', () => {
       'Hans:10-17+10-18',
       'Benno:10-24+10-25+10-31',
       'Franz:11-07+11-14',
-      'Alex:11-28+12-06',
     ]);
   });
 
@@ -519,7 +518,7 @@ describe('Mehrere Dienste innerhalb einer Woche', () => {
 
   it('schlägt zum Entzerren nur Personen vor, die den Dienst übernehmen können', () => {
     const team = persons.map((p) => (p.name === 'Alex' ? { ...p, slots: ['fruehschoppen'] as Slot[] } : p));
-    const list = [a('2026-10-24', 'Benno', 'fruehschoppen'), a('2026-10-31', 'Benno', 'schiessabend')];
+    const list = [a('2026-10-24', 'Benno', 'schiessabend'), a('2026-10-31', 'Benno', 'schiessabend')];
     const [change] = planStreakFix({ type: 'wirte', assignments: list, otherType: [], persons: team, rules: none, from: '2026-10-11' });
     expect(change!.slot).toBe('schiessabend');
     expect(change!.candidates.map((p) => p.name)).not.toContain('Alex');
@@ -532,7 +531,7 @@ describe('Mehrere Dienste innerhalb einer Woche', () => {
       a('2026-10-18', 'Hans', null),
       a('2026-10-21', 'Benno', null),
       a('2026-10-22', 'Franz', null),
-      a('2026-10-24', 'Alex', null),
+      a('2026-10-25', 'Alex', null), // alle hätten den Frühschoppen eine Woche davor/danach
     ];
     const [change] = planStreakFix({ type: 'wirte', assignments: list, otherType: [], persons, rules: none, from: '2026-10-11' });
     expect(change!.suggestion).toBeNull();
