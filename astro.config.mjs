@@ -1,7 +1,11 @@
 // @ts-check
+import { writeFileSync } from 'node:fs';
 import { defineConfig, fontProviders } from 'astro/config';
 import react from '@astrojs/react';
 import sitemap from '@astrojs/sitemap';
+
+// Kennung dieses Builds: steht im Programm und in /version.json – so merkt ein offenes Fenster, dass es veraltet ist.
+const BUILD_ID = new Date().toISOString();
 
 // `astro dev|build --mode emulator` verbindet die Seite mit den lokalen Firebase-Emulatoren.
 const useEmulators = process.argv.includes('emulator');
@@ -25,7 +29,16 @@ export default defineConfig({
   },
   // Astro 7 entfernt sonst Leerzeichen zwischen Inline-Elementen nach JSX-Regeln
   compressHTML: true,
+  vite: {
+    define: { __BUILD_ID__: JSON.stringify(BUILD_ID) },
+  },
   integrations: [
+    {
+      name: 'build-id',
+      hooks: {
+        'astro:build:done': ({ dir }) => writeFileSync(new URL('version.json', dir), JSON.stringify({ id: BUILD_ID })),
+      },
+    },
     react(),
     sitemap({
       filter: (page) => !/\/(vorstand|helfer)(\/|$)/.test(new URL(page).pathname),

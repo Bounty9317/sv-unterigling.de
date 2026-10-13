@@ -126,6 +126,9 @@ Die Testkonten stehen in `scripts/seed-emulator.mjs`, das Passwort in `scripts/e
   nach dem letzten Dienst vor dem Start weitergeht. Ob Schießabende und Frühschoppen zusammen oder in getrennten
   Läufen verteilt werden, ergibt dieselben Reihen. Stehen nach dem End-Datum noch Einteilungen (z. B. ein älterer
   Plan), zeigt der Dialog das an und bietet an, bis dorthin mit zu verteilen.
+- **Neue Version veröffentlicht:** Jeder Build schreibt seine Kennung nach `/version.json`. Ein länger offenes
+  Fenster des Vorstandsbereichs prüft alle 5 Minuten und beim Zurückwechseln, ob online eine neuere Version liegt,
+  und zeigt dann „Jetzt neu laden“. Die Auto-Rotation lässt sich in einem veralteten Fenster nicht starten.
 - **Wirte-Tage:** Unter „Wirte-Tage“ lassen sich die bayerischen Feiertage eines Jahres mit einem Klick eintragen.
 - **Saison der Schießaufsicht:** Die Infos „Anfangsschießen“ und „Endschießen“ legen auch fest, welche
   Samstage in den PDF-Listen erscheinen.

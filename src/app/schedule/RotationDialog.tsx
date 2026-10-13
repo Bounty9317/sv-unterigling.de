@@ -5,6 +5,7 @@ import { colorVar } from '../ui/misc';
 import { errorMessage, useConfirm, useToast } from '../ui/feedback';
 import { useSchedule } from '../data/schedule-data';
 import { applyRotation } from '../data/repo';
+import { newerVersionOnline } from '../version';
 import { formatDate, formatDateWithWeekday, todayISO } from '../../lib/dates';
 import { lastBeforeStart, planRotation, rotationEntries, type RotationDayOptions } from '../../lib/schedule/rotation';
 import { effectiveSlot } from '../../lib/schedule/slots';
@@ -38,6 +39,8 @@ export function RotationDialog({ type, open, onClose }: { type: ScheduleType; op
   const [startWith, setStartWith] = useState<string | null>(null);
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [busy, setBusy] = useState(false);
+  // Veraltetes Programm in einem länger offenen Fenster? Dann keine Rotation (sie würde nach alten Regeln verteilen)
+  const [outdated, setOutdated] = useState(false);
 
   useEffect(() => {
     if (!open) return;
@@ -57,6 +60,8 @@ export function RotationDialog({ type, open, onClose }: { type: ScheduleType; op
       })),
     );
     setStartWith(null);
+    setOutdated(false);
+    void newerVersionOnline().then(setOutdated);
     // nur beim Öffnen initialisieren
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, type]);
@@ -102,6 +107,11 @@ export function RotationDialog({ type, open, onClose }: { type: ScheduleType; op
   }
 
   async function start_() {
+    if (outdated || (await newerVersionOnline())) {
+      setOutdated(true);
+      toast.error('Die Seite wurde inzwischen aktualisiert – bitte neu laden und die Rotation dann starten.');
+      return;
+    }
     if (!start || !end || start > end) {
       toast.error('Bitte gültige Start- und End-Daten eingeben!');
       return;
@@ -199,13 +209,24 @@ export function RotationDialog({ type, open, onClose }: { type: ScheduleType; op
           <button type="button" className="btn" onClick={onClose} disabled={busy}>
             ✗ Abbrechen
           </button>
-          <button type="button" className="btn btn--primary" onClick={start_} disabled={busy}>
+          <button type="button" className="btn btn--primary" onClick={start_} disabled={busy || outdated}>
             <RefreshCw aria-hidden="true" /> {busy ? 'Wird verteilt…' : `Rotation starten (${entries.length === 1 ? '1 Dienst' : `${entries.length} Dienste`})`}
           </button>
         </>
       }
     >
       <div className="form">
+        {outdated && (
+          <div className="alert alert--warning" role="alert">
+            <span>
+              Die Seite wurde inzwischen aktualisiert. Bitte zuerst neu laden – sonst würde die Rotation nach den alten
+              Regeln verteilen.
+            </span>
+            <button type="button" className="btn btn--sm btn--primary" onClick={() => window.location.reload()}>
+              Jetzt neu laden
+            </button>
+          </div>
+        )}
         <div className="form__row">
           <div className="field">
             <label className="label" htmlFor="rot-start">

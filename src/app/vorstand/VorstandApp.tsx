@@ -23,6 +23,7 @@ import { findConflicts } from '../../lib/schedule/conflicts';
 import { isOpenSwap, isShootingDay } from '../../lib/schedule/slots';
 import { isPlaceholder } from '../../lib/schedule/types';
 import { todayISO } from '../../lib/dates';
+import { useNewerVersion } from '../version';
 import { Overview } from './Overview';
 import { EventsPage } from './EventsPage';
 import { CalendarPage } from './CalendarPage';
@@ -92,6 +93,7 @@ function Layout() {
   const { path } = useRouter();
   const auth = useAuth();
   const schedule = useSchedule();
+  const newerVersion = useNewerVersion();
 
   const today = todayISO();
   const pendingSwaps = schedule.swaps.wirte.concat(schedule.swaps.aufsicht).filter((s) => isOpenSwap(s, today)).length;
@@ -148,6 +150,17 @@ function Layout() {
 
   return (
     <AppShell areaLabel="Vorstandsbereich" nav={nav}>
+      {newerVersion && (
+        <div className="alert alert--warning app-notice" role="alert">
+          <span>
+            Die Seite wurde inzwischen aktualisiert. Bitte neu laden, damit Auto-Rotation und alle Funktionen in der
+            neuen Version laufen.
+          </span>
+          <button type="button" className="btn btn--sm btn--primary" onClick={() => window.location.reload()}>
+            Jetzt neu laden
+          </button>
+        </div>
+      )}
       {!auth.isAdmin && (
         <div className="alert alert--warning app-notice">
           <span>
