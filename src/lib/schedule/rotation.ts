@@ -55,11 +55,13 @@ export interface RotationPlan {
 }
 
 /**
- * Rotation reihum in der festgelegten Reihenfolge: Nr. 1, Nr. 2, … bis zum Ende der Liste, dann wieder von vorne.
- * Wer einen Dienst nicht übernehmen kann (z. B. „nur Frühschoppen“ an einem Schießabend), am selben Abend
- * Schießaufsicht hat oder am Wochenende davor/danach schon dran ist, wird übersprungen und behält seinen Platz:
- * Er kommt beim nächsten passenden Dienst als Erster dran. Jeder ist also einmal pro Runde dran.
- * Dienste an zwei Wochenenden hintereinander werden vermieden, solange genug Leute da sind.
+ * Rotation reihum in der festgelegten Reihenfolge – je Dienst eine eigene Reihe: Die Schießabende laufen der Reihe nach
+ * durch alle, die Schießabend machen, die Frühschoppen durch alle, die Frühschoppen machen (Nr. 1, Nr. 2, … und dann
+ * wieder von vorne). Wer beides macht, steht in beiden Reihen.
+ * Wer am selben Abend Schießaufsicht hat oder am Wochenende davor/danach schon dran ist, wird übersprungen und behält
+ * seinen Platz: Er kommt beim nächsten Dienst dieser Reihe als Erster dran, danach geht es in der Reihenfolge weiter.
+ * Dienste an zwei Wochenenden hintereinander werden so vermieden, solange genug Leute da sind.
+ * Ob Schießabende und Frühschoppen gemeinsam oder in getrennten Läufen verteilt werden, ergibt dieselben Reihen.
  * Dienste mit einem Platzhalter („Kein Schießen“) bleiben unverändert.
  */
 export function planRotation(params: {
@@ -86,8 +88,18 @@ export function planRotation(params: {
     .map((a) => a.id);
   const deleted = new Set(deleteIds);
 
-  // Platz in der Reihe: Wer dran war, rückt eine Runde nach hinten; wer übersprungen wurde, behält seinen Platz.
-  const turn = new Map(persons.map((p, index) => [p.id, index]));
+  // Je Dienst eine Reihe (alle, die ihn übernehmen, in der festgelegten Reihenfolge) mit dem Platz jeder Person:
+  // Wer dran war, rückt eine Runde nach hinten; wer übersprungen wurde, behält seinen Platz.
+  const queues = new Map<Slot, { members: Person[]; turn: Map<string, number> }>();
+  const queueFor = (slot: Slot) => {
+    let queue = queues.get(slot);
+    if (!queue) {
+      const members = persons.filter((p) => canTake(type, p, slot));
+      queue = { members, turn: new Map(members.map((p, index) => [p.id, index])) };
+      queues.set(slot, queue);
+    }
+    return queue;
+  };
 
   // Abendtermine des jeweils anderen Dienstes (für die Konfliktvermeidung)
   const otherEvening = new Set(
@@ -100,37 +112,23 @@ export function planRotation(params: {
   // Wer ist an welchem Tag schon dran (bestehend + neu verteilt)? – gegen Dienste an zwei Wochenenden hintereinander
   const onDay = new Set(existing.filter((a) => !deleted.has(a.id)).map((a) => `${a.date}|${a.person}`));
   const otherOnDay = new Set(otherType.map((a) => `${a.date}|${a.person}`));
-  const busy = (date: string, name: string) => onDay.has(`${date}|${name}`) || otherOnDay.has(`${date}|${name}`);
-  const chronological = (a: { date: string; slot: Slot }, b: { date: string; slot: Slot }) =>
-    a.date.localeCompare(b.date) || (a.slot === 'fruehschoppen' ? -1 : 1) - (b.slot === 'fruehschoppen' ? -1 : 1);
-  const sortedEntries = [...entries].sort(chronological);
+  // Eigene Dienste zählen eine Woche davor und danach, Schießaufsicht nur am selben Wochenende (Vor- und Folgetag)
+  const busy = (date: string, name: string, daysAway: number) =>
+    onDay.has(`${date}|${name}`) || (daysAway <= 1 && otherOnDay.has(`${date}|${name}`));
+  const sortedEntries = [...entries].sort(
+    (a, b) => a.date.localeCompare(b.date) || (a.slot === 'fruehschoppen' ? -1 : 1) - (b.slot === 'fruehschoppen' ? -1 : 1),
+  );
 
-  // Dienste der Ausgewählten, die im Zeitraum stehen bleiben (z. B. ihre Frühschoppen bei einem Lauf nur für
-  // Schießabende), zählen als „in dieser Runde dran gewesen“ – sonst kämen Wirte, die beides machen, in beiden
-  // Listen dran und damit doppelt so oft, oft Samstag und Sonntag kurz hintereinander.
-  const active = new Map(persons.map((p) => [p.name, p]));
-  const first = sortedEntries[0]?.date ?? '';
-  const last = sortedEntries.at(-1)?.date ?? '';
-  const kept = existing
-    .filter((a) => !deleted.has(a.id) && active.has(a.person) && a.date >= first && a.date <= last)
-    .map((a) => ({ date: a.date, slot: effectiveSlot(type, a, rules), keptBy: active.get(a.person)! }));
-  const timeline: ({ date: string; slot: Slot; keptBy?: Person })[] = [...sortedEntries, ...kept].sort(chronological);
-
-  for (const entry of timeline) {
-    if (entry.keptBy) {
-      turn.set(entry.keptBy.id, turn.get(entry.keptBy.id)! + persons.length);
-      continue;
-    }
-    const ranked = persons
-      .filter((p) => canTake(type, p, entry.slot))
-      .sort((a, b) => turn.get(a.id)! - turn.get(b.id)!);
+  for (const entry of sortedEntries) {
+    const { members, turn } = queueFor(entry.slot);
+    const ranked = [...members].sort((a, b) => turn.get(a.id)! - turn.get(b.id)!);
 
     /** frei am Tag selbst und `range` Tage davor und danach */
     const isFree = (p: Person, range: number) => {
       if (onDay.has(`${entry.date}|${p.name}`)) return false;
       if (entry.slot === 'schiessabend' && otherEvening.has(`${entry.date}|${p.name}`)) return false;
       for (let i = 1; i <= range; i++) {
-        if (busy(addDays(entry.date, -i), p.name) || busy(addDays(entry.date, i), p.name)) return false;
+        if (busy(addDays(entry.date, -i), p.name, i) || busy(addDays(entry.date, i), p.name, i)) return false;
       }
       return true;
     };
@@ -145,12 +143,12 @@ export function planRotation(params: {
     creates.push({ date: entry.date, slot: entry.slot, person: chosen.name, color: chosen.color });
     onDay.add(`${entry.date}|${chosen.name}`);
     const position = turn.get(chosen.id)!;
-    turn.set(chosen.id, position + persons.length);
-    // Kein Nachholen: Wer eine ganze Runde lang keinen passenden Dienst bekommen konnte (z. B. im Sommer ohne
-    // Schießabende), ist höchstens eine Runde im Rückstand – sonst bekäme er danach mehrere Dienste kurz hintereinander.
-    for (const p of persons) {
+    turn.set(chosen.id, position + members.length);
+    // Kein Nachholen: Wer immer wieder übersprungen wurde, ist höchstens eine Runde im Rückstand –
+    // sonst bekäme er danach mehrere Dienste kurz hintereinander.
+    for (const p of members) {
       let t = turn.get(p.id)!;
-      while (t <= position - persons.length) t += persons.length;
+      while (t <= position - members.length) t += members.length;
       turn.set(p.id, t);
     }
   }

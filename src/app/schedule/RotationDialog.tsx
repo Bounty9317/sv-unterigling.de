@@ -264,12 +264,13 @@ export function RotationDialog({ type, open, onClose }: { type: ScheduleType; op
               <span>{type === 'wirte' ? 'Feiertage/Sondertage (Frühschoppen)' : '26.12. (Weihnachtsschießen)'}</span>
             </label>
           </div>
-          {partial && doesBoth.length > 0 && (
+          {type === 'wirte' && (
             <p className="hint" role="note">
-              Tipp: Schießabende und Frühschoppen am besten in einem Lauf verteilen – die Häkchen bei jedem Wirt sorgen
-              dafür, dass jeder nur seine Dienste bekommt. Bei getrennten Läufen zählen die Dienste aus der anderen Liste
-              mit, damit {doesBoth.map((r) => r.person.name.split(' ')[0]).join(', ')} nicht doppelt so oft dran{' '}
-              {doesBoth.length === 1 ? 'ist' : 'sind'}.
+              Schießabende und Frühschoppen haben je eine eigene Reihe in dieser Reihenfolge.
+              {doesBoth.length > 0 &&
+                ` ${doesBoth.map((r) => r.person.name.split(' ')[0]).join(', ')} ${doesBoth.length === 1 ? 'macht' : 'machen'} beides, ${doesBoth.length === 1 ? 'steht' : 'stehen'} in beiden Reihen und ${doesBoth.length === 1 ? 'ist' : 'sind'} dadurch öfter dran.`}
+              {partial &&
+                ' Tipp: beide in einem Lauf verteilen – dann werden die Reihen zusammen geplant und es muss seltener jemand den Platz tauschen.'}
             </p>
           )}
         </fieldset>

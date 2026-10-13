@@ -228,16 +228,19 @@ describe('Auto-Rotation', () => {
     expect(plan.uniqueDays).toBe(4);
   });
 
-  it('läuft immer wieder in der festgelegten Reihenfolge durch – Samstage und Sonntage gemeinsam', () => {
+  it('läuft je Dienst immer wieder in der festgelegten Reihenfolge durch', () => {
     const order: Person[] = [
-      { id: '4', name: 'Dora', color: '#ffb74d' },
-      { id: '1', name: 'Anna', color: '#e57373' },
-      { id: '3', name: 'Carl', color: '#81c784' },
-      { id: '2', name: 'Bert', color: '#64b5f6' },
+      { id: '4', name: 'Dora', color: '#ffb74d', slots: ['schiessabend'] },
+      { id: '1', name: 'Anna', color: '#e57373', slots: ['fruehschoppen'] },
+      { id: '3', name: 'Carl', color: '#81c784', slots: ['schiessabend'] },
+      { id: '2', name: 'Bert', color: '#64b5f6', slots: ['fruehschoppen'] },
+      { id: '5', name: 'Emil', color: '#f06292', slots: ['schiessabend'] },
     ];
-    const entries = rotationEntries('wirte', '2026-10-17', '2026-11-08', { includeSaturdays: true, includeSundays: true, includeHolidays: true }, none);
+    const entries = rotationEntries('wirte', '2026-10-17', '2026-12-06', { includeSaturdays: true, includeSundays: true, includeHolidays: true }, none);
     const plan = planRotation({ type: 'wirte', entries, persons: order, existing: [], otherType: [], rules: none });
-    expect(plan.creates.map((c) => c.person)).toEqual(['Dora', 'Anna', 'Carl', 'Bert', 'Dora', 'Anna', 'Carl', 'Bert']);
+    const column = (slot: string) => plan.creates.filter((c) => c.slot === slot).map((c) => c.person);
+    expect(column('schiessabend')).toEqual(['Dora', 'Carl', 'Emil', 'Dora', 'Carl', 'Emil', 'Dora', 'Carl']);
+    expect(column('fruehschoppen')).toEqual(['Anna', 'Bert', 'Anna', 'Bert', 'Anna', 'Bert', 'Anna', 'Bert']);
   });
 
   it('teilt jeden nur für seine Dienste ein – wer übersprungen wird, kommt beim nächsten passenden Dienst dran', () => {
@@ -250,20 +253,39 @@ describe('Auto-Rotation', () => {
     ];
     const entries = rotationEntries('wirte', '2026-10-17', '2026-11-15', { includeSaturdays: true, includeSundays: true, includeHolidays: true }, none);
     const plan = planRotation({ type: 'wirte', entries, persons: team, existing: [], otherType: [], rules: none });
+    // Schießabend-Reihe: Benno, Carl, Dora, Emil – Frühschoppen-Reihe: Alex, Benno, Carl, Dora, Emil
     expect(plan.creates.map((c) => `${weekdayShort(c.date)} ${c.person}`)).toEqual([
-      'Sa Benno', // Alex macht keine Schießabende → Benno, Alex behält seinen Platz
+      'Sa Benno',
       'So Alex',
       'Sa Carl',
-      'So Dora',
-      'Sa Emil',
-      'So Alex', // zweite Runde
-      'Sa Benno',
-      'So Carl',
+      'So Dora', // Benno (Samstag davor) und Carl (gestern) übersprungen – sie behalten ihren Platz
+      'Sa Emil', // Dora hatte vorigen Sonntag Frühschoppen → Emil, Dora kommt beim nächsten Schießabend
+      'So Benno',
       'Sa Dora',
+      'So Carl',
+      'Sa Benno', // zweite Runde der Schießabende
       'So Emil',
     ]);
     expect(plan.creates.filter((c) => c.person === 'Alex').every((c) => c.slot === 'fruehschoppen')).toBe(true);
     expect(findStreaks(plan.creates.map((c, i) => ({ id: `r${i}`, ...c })), '2026-10-01')).toEqual([]);
+  });
+
+  it('weicht der Schießaufsicht nur am selben Wochenende aus – eine Woche davor bleibt die Reihenfolge', () => {
+    const plan = planRotation({
+      type: 'wirte',
+      entries: [
+        { date: '2026-10-17', slot: 'schiessabend' },
+        { date: '2026-10-24', slot: 'schiessabend' },
+        { date: '2026-10-25', slot: 'fruehschoppen' },
+      ],
+      persons,
+      existing: [],
+      otherType: [a('2026-10-10', 'Anna'), a('2026-10-24', 'Bert')],
+      rules: none,
+    });
+    // Anna hatte eine Woche vorher Aufsicht → trotzdem dran; Bert hat am 24.10. Aufsicht → weder Wirt am Abend noch am
+    // Sonntag danach. Am 25.10. bleibt nur Anna (Carl war am Vorabend dran) – mit drei Leuten geht es nicht anders.
+    expect(plan.creates.map((c) => `${c.date.slice(5)} ${c.person}`)).toEqual(['10-17 Anna', '10-24 Carl', '10-25 Anna']);
   });
 
   it('lässt Dienste stehen, die keine der ausgewählten Personen übernehmen kann', () => {
@@ -297,7 +319,6 @@ describe('Auto-Rotation', () => {
       { id: '8', name: 'Max', color: '', slots: ['schiessabend'] },
       { id: '9', name: 'Rob', color: '' },
     ];
-    const both = ['Ben', 'Hal', 'Rob'];
     const evenings = { includeSaturdays: true, includeSundays: false, includeHolidays: false };
     const mornings = { includeSaturdays: false, includeSundays: true, includeHolidays: true };
     const everything = { includeSaturdays: true, includeSundays: true, includeHolidays: true };
@@ -312,26 +333,40 @@ describe('Auto-Rotation', () => {
     }
     const count = (all: Assignment[], name: string, slot?: string) => all.filter((x) => x.person === name && (!slot || x.slot === slot)).length;
 
-    it('getrennte Läufe (erst Schießabende, dann Frühschoppen): Wer beides macht, kommt nicht doppelt so oft dran', () => {
-      // Fehlerfall aus dem Live-Betrieb: Benno, Hans und Roland standen in beiden Listen und hatten doppelt so viele Dienste,
-      // oft Schießabend am Samstag und Frühschoppen am Sonntag eine Woche später.
+    /** Plätze in der Reihe bis zum nächsten Dienst derselben Person (reihum mit n Personen: n). */
+    const distances = (names: string[]) =>
+      names.flatMap((name, i) => {
+        const next = names.indexOf(name, i + 1);
+        return next > 0 ? [next - i] : [];
+      });
+    const column = (all: Assignment[], slot: string) =>
+      all.filter((x) => x.slot === slot).sort((x, y) => x.date.localeCompare(y.date)).map((x) => x.person);
+
+    it('getrennte Läufe (erst Schießabende, dann Frühschoppen): jede Reihe läuft durch, nie zwei Wochenenden hintereinander', () => {
+      // Fehlerfall aus dem Live-Betrieb: Benno, Hans und Roland hatten Schießabend am Samstag und Frühschoppen am Sonntag
+      // eine Woche später; danach lief eine Reihe nur einmal sauber durch und wurde dann willkürlich.
       const all = rotate([
-        ['2026-10-17', '2027-03-31', evenings, team.filter((p) => canTake('wirte', p, 'schiessabend'))],
-        ['2026-10-17', '2027-03-31', mornings, team.filter((p) => canTake('wirte', p, 'fruehschoppen'))],
+        ['2026-10-17', '2027-12-31', evenings, team.filter((p) => canTake('wirte', p, 'schiessabend'))],
+        ['2026-10-17', '2027-12-31', mornings, team.filter((p) => canTake('wirte', p, 'fruehschoppen'))],
       ]);
-      const others = team.filter((p) => !both.includes(p.name)).map((p) => count(all, p.name));
-      expect(Math.max(...both.map((n) => count(all, n)))).toBeLessThanOrEqual(Math.max(...others) + 1);
+      const evening = column(all, 'schiessabend');
+      expect(evening.slice(0, 12)).toEqual(['Ben', 'Mia', 'Hal', 'Kai', 'Max', 'Rob', 'Ben', 'Mia', 'Hal', 'Kai', 'Max', 'Rob']);
+      expect(new Set(distances(evening))).toEqual(new Set([6])); // jede Runde exakt in der Reihenfolge
+      // Frühschoppen: Ben, Hal und Rob tauschen gelegentlich einen Platz, wenn sie am Wochenende davor/danach Schießabend haben
+      const morning = distances(column(all, 'fruehschoppen'));
+      expect(Math.min(...morning)).toBeGreaterThanOrEqual(4);
+      expect(morning.filter((d) => d === 6).length / morning.length).toBeGreaterThan(0.75);
       expect(findStreaks(all, '2026-01-01')).toEqual([]);
       expect(all.every((x) => canTake('wirte', team.find((p) => p.name === x.person)!, x.slot as Slot))).toBe(true);
     });
 
-    it('holt nach dem Sommer keine Runden nach – im Winter sind alle mit Schießabend reihum dabei', () => {
-      // Ohne Begrenzung hätten Mia, Kai und Max nach dem Sommer (keine Schießabende) alle Samstage des Winters bekommen.
-      const all = rotate([['2027-04-01', '2028-03-31', everything, team]]);
-      const winter = all.filter((x) => x.slot === 'schiessabend' && x.date >= '2027-10-01');
+    it('macht nach dem Sommer bei den Schießabenden dort weiter, wo sie aufgehört haben', () => {
+      const all = rotate([['2027-03-01', '2028-03-31', everything, team]]);
       expect(findStreaks(all, '2027-01-01')).toEqual([]);
-      expect(winter.filter((x) => both.includes(x.person)).length).toBeGreaterThanOrEqual(5);
-      for (const name of ['Mia', 'Kai', 'Max']) expect(count(winter, name)).toBeLessThanOrEqual(7);
+      // Sommer ohne Schießabende: die Reihe pausiert und läuft im Herbst einfach weiter
+      for (const d of distances(column(all, 'schiessabend'))) expect(d).toBeGreaterThanOrEqual(5);
+      for (const d of distances(column(all, 'schiessabend'))) expect(d).toBeLessThanOrEqual(7);
+      for (const name of ['Mia', 'Kai', 'Max']) expect(count(all.filter((x) => x.date >= '2027-10-01'), name)).toBeLessThanOrEqual(5);
       // im Sommer reihum nur die Frühschoppen-Leute, in fester Reihenfolge
       const summer = all.filter((x) => x.date >= '2027-05-01' && x.date <= '2027-08-31').map((x) => x.person);
       expect([...summer.slice(0, 6)].sort()).toEqual(['Ada', 'Ben', 'Cem', 'Fay', 'Hal', 'Rob']);

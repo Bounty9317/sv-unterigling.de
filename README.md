@@ -112,8 +112,26 @@ Die Testkonten stehen in `scripts/seed-emulator.mjs`, das Passwort in `scripts/e
   am Sonntag eine Woche später), erscheint im Kalender ein Hinweis. „Entzerren…“
   behält den ersten Dienst und schlägt für die weiteren jemanden vor, der am Wochenende davor und danach frei ist und
   in diesen Wochen wenig Dienste hat. Gibt es so jemanden nicht (z. B. an Weihnachten), steht der Eintrag auf
-  „nicht ändern“; knappere Kandidaten sind markiert. Die Auto-Rotation hält diesen Abstand von selbst ein –
-  auch zwischen Aufsicht und Wirt.
+  „nicht ändern“; knappere Kandidaten sind markiert. Die Auto-Rotation hält diesen Abstand von selbst ein.
+- **Auto-Rotation:** verteilt reihum in der festgelegten Reihenfolge – je Dienst eine eigene Reihe: Die
+  Schießabende laufen der Reihe nach durch alle, die Schießabend machen, die Frühschoppen durch alle, die
+  Frühschoppen machen (Nr. 1, Nr. 2, … und dann wieder von vorne). Bei jedem Wirt lässt sich festlegen, ob er
+  Schießabende und/oder Frühschoppen übernimmt (im Rotationsdialog oder unter „Helfer“, Feld `slots` der Person);
+  wer beides macht, steht in beiden Reihen und ist entsprechend öfter dran. Wer am selben Wochenende Schießaufsicht
+  hat oder am Wochenende davor/danach schon Wirt ist, wird übersprungen und behält seinen Platz: Er kommt beim
+  nächsten Dienst dieser Reihe dran, danach geht es in der Reihenfolge weiter (höchstens eine Runde Rückstand).
+  Im Sommer ohne Schießabende pausiert deren Reihe und läuft im Herbst weiter. Reihenfolge (`rotationOrder`) und
+  Auswahl werden beim Start gespeichert. „Beginnen mit“ wählt die erste Person, der Dialog schlägt vor, mit wem es
+  nach dem letzten Dienst vor dem Start weitergeht. Am wenigsten Platztausche gibt es, wenn Schießabende und
+  Frühschoppen in **einem** Lauf verteilt werden. Stehen nach dem End-Datum noch Einteilungen (z. B. ein älterer
+  Plan), zeigt der Dialog das an und bietet an, bis dorthin mit zu verteilen.
+- **Mehrere Dienste kurz hintereinander:** Hat jemand zwei Dienste an Wochenenden direkt hintereinander (höchstens
+  8 Tage Abstand: Samstag + Sonntag, zwei Samstage in Folge, Sonntag + folgender Samstag, Schießabend + Frühschoppen
+  am Sonntag eine Woche später), erscheint im Kalender ein Hinweis. „Entzerren…“
+  behält den ersten Dienst und schlägt für die weiteren jemanden vor, der am Wochenende davor und danach frei ist und
+  in diesen Wochen wenig Dienste hat. Gibt es so jemanden nicht (z. B. an Weihnachten), steht der Eintrag auf
+  „nicht ändern“; knappere Kandidaten sind markiert. Die Auto-Rotation hält diesen Abstand von selbst ein
+  (bei der Schießaufsicht: nicht am selben Wochenende).
 - **Auto-Rotation:** verteilt die Dienste reihum in der festgelegten Reihenfolge (Nr. 1, Nr. 2, … und dann
   wieder von vorne) – Schießabende und Frühschoppen in einer gemeinsamen Reihe. Bei jedem Wirt lässt sich
   festlegen, ob er Schießabende und/oder Frühschoppen übernimmt (im Rotationsdialog oder unter „Helfer“,
