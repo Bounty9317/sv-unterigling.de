@@ -2125,6 +2125,13 @@
     outline-offset: 1px;
   }
 
+  .hint--warning {
+    padding: 0.5rem 0.7rem;
+    border-radius: var(--radius-s);
+    background: var(--c-warning-soft);
+    color: var(--c-text);
+  }
+
   .link-btn {
     padding: 0;
     border: 0;

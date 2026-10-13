@@ -13,6 +13,7 @@ import {
   SLOT_LABEL,
   TYPE_LABEL,
   byRotationOrder,
+  canTake,
   isPlaceholder,
   type Person,
   type ScheduleType,
@@ -70,6 +71,15 @@ export function RotationDialog({ type, open, onClose }: { type: ScheduleType; op
   const ordered = [...activeRows.slice(firstIndex), ...activeRows.slice(0, firstIndex)];
   const active = ordered.map((r) => (type === 'wirte' ? { ...r.person, slots: r.slots } : r.person));
   const previous = start ? lastBeforeStart(schedule.assignments[type], activeRows.map((r) => r.person), start) : null;
+  // Einteilungen nach dem End-Datum bleiben unverändert – Hinweis, falls dort noch ein älterer Plan steht
+  const later = end ? schedule.assignments[type].filter((a) => a.date > end && !isPlaceholder(a.person)) : [];
+  const lastLater = later.reduce<string | null>((max, a) => (!max || a.date > max ? a.date : max), null);
+  const laterMismatched = later.filter((a) => {
+    const p = rows.find((r) => r.person.name === a.person);
+    return p && !canTake(type, { slots: p.slots }, effectiveSlot(type, a, schedule.dayRules));
+  }).length;
+  const partial = type === 'wirte' && !(options.includeSaturdays && options.includeSundays && options.includeHolidays);
+  const doesBoth = activeRows.filter((r) => SLOTS.every((s) => r.slots.includes(s)));
   const nextAfterPrevious = (() => {
     if (!previous) return null;
     const i = activeRows.findIndex((r) => r.person.name === previous.person);
@@ -211,6 +221,18 @@ export function RotationDialog({ type, open, onClose }: { type: ScheduleType; op
             <input id="rot-end" className="input" type="date" value={end} onChange={(e) => setEnd(e.target.value)} />
           </div>
         </div>
+        {later.length > 0 && lastLater && (
+          <p className="hint hint--warning" role="note">
+            Nach dem End-Datum sind bis {formatDate(lastLater)} noch {later.length === 1 ? '1 Dienst' : `${later.length} Dienste`}{' '}
+            eingeteilt – sie bleiben, wie sie sind
+            {laterMismatched > 0 &&
+              `, davon ${laterMismatched === 1 ? 'einer' : laterMismatched} bei Wirten, die diesen Dienst laut Auswahl nicht machen`}
+            .{' '}
+            <button type="button" className="link-btn" onClick={() => setEnd(lastLater)}>
+              Bis {formatDate(lastLater)} mit verteilen
+            </button>
+          </p>
+        )}
 
         <fieldset className="field">
           <legend className="label">Tage einbeziehen:</legend>
@@ -242,6 +264,14 @@ export function RotationDialog({ type, open, onClose }: { type: ScheduleType; op
               <span>{type === 'wirte' ? 'Feiertage/Sondertage (Frühschoppen)' : '26.12. (Weihnachtsschießen)'}</span>
             </label>
           </div>
+          {partial && doesBoth.length > 0 && (
+            <p className="hint" role="note">
+              Tipp: Schießabende und Frühschoppen am besten in einem Lauf verteilen – die Häkchen bei jedem Wirt sorgen
+              dafür, dass jeder nur seine Dienste bekommt. Bei getrennten Läufen zählen die Dienste aus der anderen Liste
+              mit, damit {doesBoth.map((r) => r.person.name.split(' ')[0]).join(', ')} nicht doppelt so oft dran{' '}
+              {doesBoth.length === 1 ? 'ist' : 'sind'}.
+            </p>
+          )}
         </fieldset>
 
         <fieldset className="field">

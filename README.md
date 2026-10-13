@@ -107,19 +107,25 @@ Die Testkonten stehen in `scripts/seed-emulator.mjs`, das Passwort in `scripts/e
   - Schießaufsicht: nur Samstage zwischen „Anfangsschießen“ und „Endschießen“ (Infos im Aufsicht-Kalender)
     sowie der 26.12. Ist für einen Winter noch keine Saison eingetragen, gilt Oktober bis März.
   - Ein Abend mit „Kein Schießen“ bei der Aufsicht (z. B. Generalversammlung) braucht trotzdem einen Wirt.
-- **Mehrere Dienste innerhalb einer Woche:** Hat jemand zwei Dienste mit höchstens 7 Tagen Abstand (Samstag +
-  Sonntag, zwei Samstage in Folge, Sonntag + folgender Samstag), erscheint im Kalender ein Hinweis. „Entzerren…“
-  behält den ersten Dienst und schlägt für die weiteren jemanden vor, der eine Woche davor und danach frei ist und
+- **Mehrere Dienste kurz hintereinander:** Hat jemand zwei Dienste an Wochenenden direkt hintereinander (höchstens
+  8 Tage Abstand: Samstag + Sonntag, zwei Samstage in Folge, Sonntag + folgender Samstag, Schießabend + Frühschoppen
+  am Sonntag eine Woche später), erscheint im Kalender ein Hinweis. „Entzerren…“
+  behält den ersten Dienst und schlägt für die weiteren jemanden vor, der am Wochenende davor und danach frei ist und
   in diesen Wochen wenig Dienste hat. Gibt es so jemanden nicht (z. B. an Weihnachten), steht der Eintrag auf
   „nicht ändern“; knappere Kandidaten sind markiert. Die Auto-Rotation hält diesen Abstand von selbst ein –
   auch zwischen Aufsicht und Wirt.
 - **Auto-Rotation:** verteilt die Dienste reihum in der festgelegten Reihenfolge (Nr. 1, Nr. 2, … und dann
   wieder von vorne) – Schießabende und Frühschoppen in einer gemeinsamen Reihe. Bei jedem Wirt lässt sich
   festlegen, ob er Schießabende und/oder Frühschoppen übernimmt (im Rotationsdialog oder unter „Helfer“,
-  Feld `slots` der Person). Wer einen Dienst nicht übernehmen kann, am selben Abend Aufsicht hat oder in
-  derselben Woche schon dran ist, wird übersprungen und kommt beim nächsten passenden Dienst als Erster dran.
-  Reihenfolge (`rotationOrder`) und Auswahl werden beim Start gespeichert. „Beginnen mit“ wählt die erste
-  Person, der Dialog schlägt vor, mit wem es nach dem letzten Dienst vor dem Start weitergeht.
+  Feld `slots` der Person). Wer einen Dienst nicht übernehmen kann, am selben Abend Aufsicht hat oder am
+  Wochenende davor/danach schon dran ist, wird übersprungen und kommt beim nächsten passenden Dienst als Erster
+  dran – höchstens eine Runde Rückstand, damit z. B. „nur Schießabend“-Wirte nach dem Sommer nicht alle Samstage
+  nachholen. Reihenfolge (`rotationOrder`) und Auswahl werden beim Start gespeichert. „Beginnen mit“ wählt die
+  erste Person, der Dialog schlägt vor, mit wem es nach dem letzten Dienst vor dem Start weitergeht.
+  Am gleichmäßigsten ist **ein** Lauf für Schießabende und Frühschoppen zusammen. Bei getrennten Läufen zählen
+  Dienste aus der anderen Liste im Zeitraum als „war in dieser Runde dran“ – sonst kämen Wirte, die beides machen,
+  doppelt so oft dran. Stehen nach dem End-Datum noch Einteilungen (z. B. ein älterer Plan), zeigt der Dialog das
+  an und bietet an, bis dorthin mit zu verteilen.
 - **Wirte-Tage:** Unter „Wirte-Tage“ lassen sich die bayerischen Feiertage eines Jahres mit einem Klick eintragen.
 - **Saison der Schießaufsicht:** Die Infos „Anfangsschießen“ und „Endschießen“ legen auch fest, welche
   Samstage in den PDF-Listen erscheinen.

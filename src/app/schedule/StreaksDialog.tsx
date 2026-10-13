@@ -12,7 +12,7 @@ import { TYPE_LABEL, type ScheduleType } from '../../lib/schedule/types';
 
 const shortDate = (date: string) => formatDateWithWeekday(date).replace(/\.\d{4}$/, '.');
 
-/** Hinweis über dem Kalender, wenn jemand mehrere Dienste innerhalb einer Woche hat. */
+/** Hinweis über dem Kalender, wenn jemand mehrere Dienste kurz hintereinander hat (zwei Wochenenden in Folge). */
 export function StreaksPanel({ type, onJump, onFix }: { type: ScheduleType; onJump(date: string): void; onFix(): void }) {
   const schedule = useSchedule();
   const today = todayISO();
@@ -24,9 +24,9 @@ export function StreaksPanel({ type, onJump, onFix }: { type: ScheduleType; onJu
       <CalendarClock aria-hidden="true" />
       <div>
         <h2 id={`streaks-${type}`} className="conflicts__title conflicts__title--warning">
-          Mehrere Dienste innerhalb einer Woche
+          Mehrere Dienste kurz hintereinander
         </h2>
-        <p className="muted">Diese Personen sind zu dicht hintereinander eingeteilt (z. B. Samstag und Sonntag oder zwei Samstage in Folge):</p>
+        <p className="muted">Diese Personen sind zu dicht hintereinander eingeteilt – an zwei Wochenenden in Folge (z. B. Samstag und Sonntag, zwei Samstage in Folge oder Schießabend und Frühschoppen am Wochenende danach):</p>
         <ul role="list" className="conflicts__list">
           {streaks.map((s) => (
             <li key={`${s.person}-${s.assignments[0]!.date}`}>
@@ -45,7 +45,7 @@ export function StreaksPanel({ type, onJump, onFix }: { type: ScheduleType; onJu
   );
 }
 
-/** Vorschläge zum Entzerren: weitere Dienste innerhalb einer Woche gehen an jemand anderen – vor dem Speichern anpassbar. */
+/** Vorschläge zum Entzerren: weitere Dienste kurz hintereinander gehen an jemand anderen – vor dem Speichern anpassbar. */
 export function StreaksDialog({ type, open, onClose }: { type: ScheduleType; open: boolean; onClose(): void }) {
   const schedule = useSchedule();
   const toast = useToast();
@@ -101,7 +101,7 @@ export function StreaksDialog({ type, open, onClose }: { type: ScheduleType; ope
       open={open}
       onClose={onClose}
       title={`Dienste entzerren – ${TYPE_LABEL[type]}`}
-      description="Der erste Dienst bleibt, weitere Dienste innerhalb einer Woche gehen an jemand anderen. Vorgeschlagen wird, wer eine Woche davor und danach frei ist und in diesen Wochen am wenigsten Dienste hat."
+      description="Der erste Dienst bleibt, weitere Dienste am Wochenende danach gehen an jemand anderen. Vorgeschlagen wird, wer am Wochenende davor und danach frei ist und in diesen Wochen am wenigsten Dienste hat."
       size="m"
       footer={
         changes.length ? (
@@ -124,7 +124,7 @@ export function StreaksDialog({ type, open, onClose }: { type: ScheduleType; ope
       {changes.length === 0 ? (
         <p className="alert alert--success">
           <CircleCheck aria-hidden="true" />
-          <span>✓ Niemand hat mehrere Dienste innerhalb einer Woche.</span>
+          <span>✓ Niemand hat mehrere Dienste kurz hintereinander.</span>
         </p>
       ) : (
         <ul role="list" className="dup-groups streak-list">

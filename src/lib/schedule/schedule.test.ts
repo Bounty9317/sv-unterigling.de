@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { buildMonth, countOpenSlots } from './model';
 import { dayRules, effectiveSlot, expectedSlots, isOpenSwap, isShootingDay, swapTarget } from './slots';
 import { eveningConflict, findConflicts } from './conflicts';
-import { lastBeforeStart, planRotation, rotationEntries } from './rotation';
+import { lastBeforeStart, planRotation, rotationEntries, type RotationDayOptions } from './rotation';
 import { findDuplicates } from './duplicates';
 import { daysApart, findStreaks, planStreakFix } from './streaks';
 import { currentOrNextSeason, seasonsFromNotes } from './season';
@@ -285,6 +285,70 @@ describe('Auto-Rotation', () => {
     expect(plan.deleteIds).not.toContain(evening.id);
   });
 
+  describe('Gruppen wie im Verein: nur Schießabend, nur Frühschoppen, beides', () => {
+    const team: Person[] = [
+      { id: '1', name: 'Ada', color: '', slots: ['fruehschoppen'] },
+      { id: '2', name: 'Ben', color: '' },
+      { id: '3', name: 'Mia', color: '', slots: ['schiessabend'] },
+      { id: '4', name: 'Cem', color: '', slots: ['fruehschoppen'] },
+      { id: '5', name: 'Fay', color: '', slots: ['fruehschoppen'] },
+      { id: '6', name: 'Hal', color: '' },
+      { id: '7', name: 'Kai', color: '', slots: ['schiessabend'] },
+      { id: '8', name: 'Max', color: '', slots: ['schiessabend'] },
+      { id: '9', name: 'Rob', color: '' },
+    ];
+    const both = ['Ben', 'Hal', 'Rob'];
+    const evenings = { includeSaturdays: true, includeSundays: false, includeHolidays: false };
+    const mornings = { includeSaturdays: false, includeSundays: true, includeHolidays: true };
+    const everything = { includeSaturdays: true, includeSundays: true, includeHolidays: true };
+    function rotate(runs: [string, string, RotationDayOptions, Person[]][]) {
+      let all: Assignment[] = [];
+      runs.forEach(([start, end, options, active], r) => {
+        const plan = planRotation({ type: 'wirte', entries: rotationEntries('wirte', start, end, options, none), persons: active, existing: all, otherType: [], rules: none });
+        const deleted = new Set(plan.deleteIds);
+        all = [...all.filter((x) => !deleted.has(x.id)), ...plan.creates.map((c, i) => ({ id: `r${r}-${i}`, ...c }))];
+      });
+      return all;
+    }
+    const count = (all: Assignment[], name: string, slot?: string) => all.filter((x) => x.person === name && (!slot || x.slot === slot)).length;
+
+    it('getrennte Läufe (erst Schießabende, dann Frühschoppen): Wer beides macht, kommt nicht doppelt so oft dran', () => {
+      // Fehlerfall aus dem Live-Betrieb: Benno, Hans und Roland standen in beiden Listen und hatten doppelt so viele Dienste,
+      // oft Schießabend am Samstag und Frühschoppen am Sonntag eine Woche später.
+      const all = rotate([
+        ['2026-10-17', '2027-03-31', evenings, team.filter((p) => canTake('wirte', p, 'schiessabend'))],
+        ['2026-10-17', '2027-03-31', mornings, team.filter((p) => canTake('wirte', p, 'fruehschoppen'))],
+      ]);
+      const others = team.filter((p) => !both.includes(p.name)).map((p) => count(all, p.name));
+      expect(Math.max(...both.map((n) => count(all, n)))).toBeLessThanOrEqual(Math.max(...others) + 1);
+      expect(findStreaks(all, '2026-01-01')).toEqual([]);
+      expect(all.every((x) => canTake('wirte', team.find((p) => p.name === x.person)!, x.slot as Slot))).toBe(true);
+    });
+
+    it('holt nach dem Sommer keine Runden nach – im Winter sind alle mit Schießabend reihum dabei', () => {
+      // Ohne Begrenzung hätten Mia, Kai und Max nach dem Sommer (keine Schießabende) alle Samstage des Winters bekommen.
+      const all = rotate([['2027-04-01', '2028-03-31', everything, team]]);
+      const winter = all.filter((x) => x.slot === 'schiessabend' && x.date >= '2027-10-01');
+      expect(findStreaks(all, '2027-01-01')).toEqual([]);
+      expect(winter.filter((x) => both.includes(x.person)).length).toBeGreaterThanOrEqual(5);
+      for (const name of ['Mia', 'Kai', 'Max']) expect(count(winter, name)).toBeLessThanOrEqual(7);
+      // im Sommer reihum nur die Frühschoppen-Leute, in fester Reihenfolge
+      const summer = all.filter((x) => x.date >= '2027-05-01' && x.date <= '2027-08-31').map((x) => x.person);
+      expect([...summer.slice(0, 6)].sort()).toEqual(['Ada', 'Ben', 'Cem', 'Fay', 'Hal', 'Rob']);
+      summer.slice(6).forEach((name, i) => expect(name).toBe(summer[i])); // alle 6 Dienste wieder dieselbe Reihe
+    });
+
+    it('ein gemeinsamer Lauf ergibt bei Wiederholung dasselbe', () => {
+      const once = rotate([['2026-10-17', '2027-12-31', everything, team]]);
+      const twice = rotate([
+        ['2026-10-17', '2027-12-31', everything, team],
+        ['2026-10-17', '2027-12-31', everything, team],
+      ]);
+      const key = (l: Assignment[]) => l.map((x) => `${x.date}|${x.slot}|${x.person}`).sort();
+      expect(key(twice)).toEqual(key(once));
+    });
+  });
+
   it('nennt die letzte Einteilung vor dem Start und beachtet die Dienstauswahl nur bei den Wirten', () => {
     const list = [a('2026-10-04', 'Anna'), a('2026-10-11', 'Bert'), a('2026-10-17', 'Carl'), a('2026-10-10', 'Fremd')];
     expect(lastBeforeStart(list, persons, '2026-10-13')?.person).toBe('Bert');
@@ -371,7 +435,7 @@ describe('Mehrere Dienste innerhalb einer Woche', () => {
     { id: '4', name: 'Alex', color: '#81c784' },
   ];
 
-  it('findet Samstag + Sonntag und zwei Samstage in Folge (ab heute)', () => {
+  it('findet Samstag + Sonntag, zwei Samstage in Folge und Dienste an zwei Wochenenden hintereinander (ab heute)', () => {
     const list = [
       a('2026-10-17', 'Hans', null),
       a('2026-10-18', 'Hans', null),
@@ -381,7 +445,9 @@ describe('Mehrere Dienste innerhalb einer Woche', () => {
       a('2026-11-07', 'Franz', null),
       a('2026-11-14', 'Franz', null), // zwei Samstage hintereinander
       a('2026-11-28', 'Alex', null),
-      a('2026-12-06', 'Alex', null), // 8 Tage Abstand – in Ordnung
+      a('2026-12-06', 'Alex', null), // Samstag + Sonntag am Wochenende danach (8 Tage) – zu dicht
+      a('2026-12-19', 'Hans', null),
+      a('2027-01-02', 'Hans', null), // ein Wochenende frei dazwischen – in Ordnung
       a('2026-10-03', 'Alex', null),
       a('2026-10-04', 'Alex', null), // Vergangenheit
       a('2027-01-30', 'Kein Schießen'),
@@ -392,6 +458,7 @@ describe('Mehrere Dienste innerhalb einer Woche', () => {
       'Hans:10-17+10-18',
       'Benno:10-24+10-25+10-31',
       'Franz:11-07+11-14',
+      'Alex:11-28+12-06',
     ]);
   });
 

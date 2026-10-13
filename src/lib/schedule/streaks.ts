@@ -4,12 +4,13 @@ import { effectiveSlot, type DayRules } from './slots';
 import { canTake, isPlaceholder, type Assignment, type Person, type ScheduleType, type Slot } from './types';
 
 /**
- * Mindestabstand zwischen zwei Diensten derselben Person: mehr als eine Woche.
- * Zu dicht sind also z. B. Samstag + Sonntag, zwei Samstage hintereinander oder Sonntag + folgender Samstag.
+ * Mindestabstand zwischen zwei Diensten derselben Person: nicht an zwei Wochenenden hintereinander.
+ * Zu dicht sind also z. B. Samstag + Sonntag, zwei Samstage hintereinander, Sonntag + folgender Samstag
+ * und Samstag (Schießabend) + Sonntag eine Woche später (8 Tage).
  */
-export const MAX_GAP_DAYS = 7;
+export const MAX_GAP_DAYS = 8;
 
-/** Eine Person hat mehrere Dienste innerhalb einer Woche. */
+/** Eine Person hat mehrere Dienste kurz hintereinander (höchstens MAX_GAP_DAYS Abstand). */
 export interface Streak {
   person: string;
   /** je Tag eine Einteilung, nach Datum sortiert */
@@ -24,7 +25,7 @@ export interface StreakChange {
   candidates: Person[];
   /** Diese Kandidaten hätten selbst weniger als eine Woche Abstand zu einem anderen Dienst */
   tight: ReadonlySet<string>;
-  /** Vorschlag (nur wenn jemand mit einer Woche Abstand frei ist) */
+  /** Vorschlag (nur wenn jemand mit genug Abstand frei ist) */
   suggestion: Person | null;
 }
 
@@ -32,7 +33,7 @@ export function daysApart(a: string, b: string): number {
   return Math.abs(Math.round((Date.parse(`${a}T12:00:00Z`) - Date.parse(`${b}T12:00:00Z`)) / 86_400_000));
 }
 
-/** Häufungen je Person (Dienste mit höchstens einer Woche Abstand), die heute oder später noch andauern. */
+/** Häufungen je Person (Dienste mit höchstens MAX_GAP_DAYS Abstand), die heute oder später noch andauern. */
 export function findStreaks(assignments: Assignment[], from: string): Streak[] {
   const byPerson = new Map<string, Map<string, Assignment>>();
   for (const a of [...assignments].sort(compareForKeep)) {
@@ -64,10 +65,10 @@ export function findStreaks(assignments: Assignment[], from: string): Streak[] {
 const LOAD_WINDOW_DAYS = 28;
 
 /**
- * Entzerren: Der erste Dienst einer Häufung bleibt; jeder weitere, der weniger als eine Woche nach dem zuletzt
+ * Entzerren: Der erste Dienst einer Häufung bleibt; jeder weitere, der höchstens MAX_GAP_DAYS nach dem zuletzt
  * behaltenen liegt, geht an jemand anderen. Vergangene und per Tausch übernommene Dienste bleiben.
- * Vorschlag: wer eine Woche davor und danach keinen Dienst hat (weder Wirt noch Aufsicht) und in diesen Wochen
- * am wenigsten Dienste hat; die Vorschläge werden auf mehrere Personen verteilt. Ist niemand mit einer Woche
+ * Vorschlag: wer MAX_GAP_DAYS davor und danach keinen Dienst hat (weder Wirt noch Aufsicht) und in diesen Wochen
+ * am wenigsten Dienste hat; die Vorschläge werden auf mehrere Personen verteilt. Ist niemand mit so viel
  * Abstand frei, gibt es keinen Vorschlag – zur Auswahl stehen dann alle, die wenigstens an den Nachbartagen frei sind.
  */
 export function planStreakFix(params: {

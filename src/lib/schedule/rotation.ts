@@ -57,9 +57,9 @@ export interface RotationPlan {
 /**
  * Rotation reihum in der festgelegten Reihenfolge: Nr. 1, Nr. 2, … bis zum Ende der Liste, dann wieder von vorne.
  * Wer einen Dienst nicht übernehmen kann (z. B. „nur Frühschoppen“ an einem Schießabend), am selben Abend
- * Schießaufsicht hat oder in derselben Woche schon dran ist, wird übersprungen und behält seinen Platz:
+ * Schießaufsicht hat oder am Wochenende davor/danach schon dran ist, wird übersprungen und behält seinen Platz:
  * Er kommt beim nächsten passenden Dienst als Erster dran. Jeder ist also einmal pro Runde dran.
- * Mehrere Dienste innerhalb einer Woche werden vermieden, solange genug Leute da sind.
+ * Dienste an zwei Wochenenden hintereinander werden vermieden, solange genug Leute da sind.
  * Dienste mit einem Platzhalter („Kein Schießen“) bleiben unverändert.
  */
 export function planRotation(params: {
@@ -97,15 +97,30 @@ export function planRotation(params: {
   );
 
   const creates: RotationPlan['creates'] = [];
-  // Wer ist an welchem Tag schon dran (bestehend + neu verteilt)? – gegen mehrere Dienste innerhalb einer Woche
+  // Wer ist an welchem Tag schon dran (bestehend + neu verteilt)? – gegen Dienste an zwei Wochenenden hintereinander
   const onDay = new Set(existing.filter((a) => !deleted.has(a.id)).map((a) => `${a.date}|${a.person}`));
   const otherOnDay = new Set(otherType.map((a) => `${a.date}|${a.person}`));
   const busy = (date: string, name: string) => onDay.has(`${date}|${name}`) || otherOnDay.has(`${date}|${name}`);
-  const sortedEntries = [...entries].sort(
-    (a, b) => a.date.localeCompare(b.date) || (a.slot === 'fruehschoppen' ? -1 : 1) - (b.slot === 'fruehschoppen' ? -1 : 1),
-  );
+  const chronological = (a: { date: string; slot: Slot }, b: { date: string; slot: Slot }) =>
+    a.date.localeCompare(b.date) || (a.slot === 'fruehschoppen' ? -1 : 1) - (b.slot === 'fruehschoppen' ? -1 : 1);
+  const sortedEntries = [...entries].sort(chronological);
 
-  for (const entry of sortedEntries) {
+  // Dienste der Ausgewählten, die im Zeitraum stehen bleiben (z. B. ihre Frühschoppen bei einem Lauf nur für
+  // Schießabende), zählen als „in dieser Runde dran gewesen“ – sonst kämen Wirte, die beides machen, in beiden
+  // Listen dran und damit doppelt so oft, oft Samstag und Sonntag kurz hintereinander.
+  const active = new Map(persons.map((p) => [p.name, p]));
+  const first = sortedEntries[0]?.date ?? '';
+  const last = sortedEntries.at(-1)?.date ?? '';
+  const kept = existing
+    .filter((a) => !deleted.has(a.id) && active.has(a.person) && a.date >= first && a.date <= last)
+    .map((a) => ({ date: a.date, slot: effectiveSlot(type, a, rules), keptBy: active.get(a.person)! }));
+  const timeline: ({ date: string; slot: Slot; keptBy?: Person })[] = [...sortedEntries, ...kept].sort(chronological);
+
+  for (const entry of timeline) {
+    if (entry.keptBy) {
+      turn.set(entry.keptBy.id, turn.get(entry.keptBy.id)! + persons.length);
+      continue;
+    }
     const ranked = persons
       .filter((p) => canTake(type, p, entry.slot))
       .sort((a, b) => turn.get(a.id)! - turn.get(b.id)!);
@@ -119,7 +134,7 @@ export function planRotation(params: {
       }
       return true;
     };
-    // Erst jemanden mit einer Woche Abstand suchen, dann wenigstens Vor- und Folgetag frei – nur notfalls lockern
+    // Erst jemanden suchen, der am Wochenende davor und danach frei ist, dann wenigstens Vor- und Folgetag frei – nur notfalls lockern
     const chosen =
       ranked.find((p) => isFree(p, MAX_GAP_DAYS)) ??
       ranked.find((p) => isFree(p, 1)) ??
@@ -129,7 +144,15 @@ export function planRotation(params: {
 
     creates.push({ date: entry.date, slot: entry.slot, person: chosen.name, color: chosen.color });
     onDay.add(`${entry.date}|${chosen.name}`);
-    turn.set(chosen.id, turn.get(chosen.id)! + persons.length);
+    const position = turn.get(chosen.id)!;
+    turn.set(chosen.id, position + persons.length);
+    // Kein Nachholen: Wer eine ganze Runde lang keinen passenden Dienst bekommen konnte (z. B. im Sommer ohne
+    // Schießabende), ist höchstens eine Runde im Rückstand – sonst bekäme er danach mehrere Dienste kurz hintereinander.
+    for (const p of persons) {
+      let t = turn.get(p.id)!;
+      while (t <= position - persons.length) t += persons.length;
+      turn.set(p.id, t);
+    }
   }
 
   return { deleteIds, creates, uniqueDays: new Set(entries.map((e) => e.date)).size, skipped, unfillable };
