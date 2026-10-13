@@ -89,14 +89,19 @@ describe('Diensttage', () => {
     expect(expectedSlots('wirte', '2026-10-03', custom('2026-10-03'))).toEqual(['fruehschoppen', 'schiessabend']);
   });
 
-  it('richtet die Schießaufsicht nach Anfangs- und Endschießen, die Wirte nach Oktober bis März', () => {
+  it('richtet Schießaufsicht und Wirte-Schießabende nach Anfangs- und Endschießen', () => {
     const rules = dayRules([], season2627);
     expect(expectedSlots('aufsicht', '2026-10-10', rules)).toEqual([]); // vor dem Anfangsschießen
     expect(expectedSlots('aufsicht', '2026-10-17', rules)).toEqual(['schiessabend']);
     expect(expectedSlots('aufsicht', '2027-01-30', rules)).toEqual(['schiessabend']);
     expect(expectedSlots('aufsicht', '2027-03-20', rules)).toEqual([]); // nach dem Endschießen
-    expect(expectedSlots('wirte', '2026-10-10', rules)).toEqual(['schiessabend']); // Wirt trotzdem
-    expect(expectedSlots('wirte', '2027-03-27', rules)).toEqual(['schiessabend']);
+    expect(expectedSlots('wirte', '2026-10-10', rules)).toEqual([]); // vor dem Anfangsschießen auch kein Wirt
+    expect(expectedSlots('wirte', '2026-10-17', rules)).toEqual(['schiessabend']);
+    expect(expectedSlots('wirte', '2027-03-13', rules)).toEqual(['schiessabend']); // Endschießen
+    expect(expectedSlots('wirte', '2027-03-20', rules)).toEqual([]); // nach dem Endschießen
+    expect(expectedSlots('wirte', '2027-03-21', rules)).toEqual(['fruehschoppen']); // Sonntag bleibt
+    // Feiertag an einem Samstag vor dem Anfangsschießen: nur Frühschoppen
+    expect(expectedSlots('wirte', '2026-10-03', dayRules(['2026-10-03'], season2627))).toEqual(['fruehschoppen']);
     // Anfangsschießen schon im September: dann auch Wirt und Aufsicht
     const early = dayRules([], [{ start: '2027-09-25', end: null }]);
     expect(expectedSlots('aufsicht', '2027-09-25', early)).toEqual(['schiessabend']);

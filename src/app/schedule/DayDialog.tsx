@@ -47,7 +47,7 @@ export function DayDialog({ type, date, mode, onClose }: Props) {
             <p className="muted">
               {type === 'aufsicht'
                 ? 'Schießaufsicht nur an Schießabenden: Samstage zwischen Anfangs- und Endschießen sowie am 26.12.'
-                : 'Wirte an Sonntagen, eingetragenen Wirte-Tagen und Samstagen von Oktober bis März. Ein Feiertag an einem Sommer-Samstag hat nur Frühschoppen.'}
+                : 'Wirte an Sonntagen, eingetragenen Wirte-Tagen und Schießabenden (Samstage zwischen Anfangs- und Endschießen sowie 26.12.). Ein Feiertag an einem Samstag außerhalb der Saison hat nur Frühschoppen.'}
             </p>
           )}
           {day.slots.map((cell) => (

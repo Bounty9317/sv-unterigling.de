@@ -105,10 +105,10 @@ export function WirteDaysPage() {
       <div className="alert alert--brand app-notice">
         <Info aria-hidden="true" />
         <span>
-          <strong>Hinweis:</strong> Standardmäßig werden Wirte sonntags (Frühschoppen) und samstags von Oktober bis März
-          (Schießabend) benötigt. Hier kannst du zusätzliche Tage (z.B. Feiertage, besondere Veranstaltungen) hinzufügen oder
-          entfernen. An diesen Tagen gibt es einen Frühschoppen-Dienst – fällt der Tag auf einen Samstag von Oktober bis März,
-          zusätzlich den Schießabend.
+          <strong>Hinweis:</strong> Standardmäßig werden Wirte sonntags (Frühschoppen) und an den Schießabenden zwischen
+          Anfangs- und Endschießen benötigt. Hier kannst du zusätzliche Tage (z.B. Feiertage, besondere Veranstaltungen) hinzufügen oder
+          entfernen. An diesen Tagen gibt es einen Frühschoppen-Dienst – fällt der Tag auf einen Samstag zwischen Anfangs- und
+          Endschießen, zusätzlich den Schießabend.
         </span>
       </div>
 

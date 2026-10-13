@@ -123,7 +123,7 @@ export function ScheduleView({ type, mode }: { type: ScheduleType; mode: 'admin'
       toast.error(
         type === 'aufsicht'
           ? 'Nur an Schießabenden möglich (Samstage in der Saison und 26.12.)'
-          : 'Nur an Sonn- und Feiertagen sowie an Samstagen von Oktober bis März möglich',
+          : 'Nur an Sonn- und Feiertagen sowie an Schießabenden (Samstage zwischen Anfangs- und Endschießen) möglich',
       );
       return;
     }

@@ -101,9 +101,10 @@ Die Testkonten stehen in `scripts/seed-emulator.mjs`, das Passwort in `scripts/e
   (nur Daten, keine Namen) im Dokument `settings/schiesstermine`, sobald jemand mit Vorstandsrecht
   den Vorstandsbereich öffnet. Bis dahin zählt die Startseite bis zur nächsten „…schießen“-Veranstaltung.
 - **Wann welcher Dienst gebraucht wird:**
-  - Wirte: Frühschoppen an Sonntagen und eingetragenen Wirte-Tagen, Schießabend an Samstagen von Oktober bis
-    März (Öffnungszeiten) und am 26.12. Sommer-Samstage haben keinen Dienst – ist ein Sommer-Samstag ein
-    Wirte-Tag (Feiertag), gibt es nur den Frühschoppen.
+  - Wirte: Frühschoppen an Sonntagen und eingetragenen Wirte-Tagen, Schießabend an Samstagen zwischen
+    „Anfangsschießen“ und „Endschießen“ und am 26.12. (dieselbe Saison wie bei der Schießaufsicht). Samstage
+    außerhalb der Saison haben keinen Dienst – ist so ein Samstag ein Wirte-Tag (Feiertag), gibt es nur den
+    Frühschoppen.
   - Schießaufsicht: nur Samstage zwischen „Anfangsschießen“ und „Endschießen“ (Infos im Aufsicht-Kalender)
     sowie der 26.12. Ist für einen Winter noch keine Saison eingetragen, gilt Oktober bis März.
   - Ein Abend mit „Kein Schießen“ bei der Aufsicht (z. B. Generalversammlung) braucht trotzdem einen Wirt.

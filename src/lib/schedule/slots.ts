@@ -1,5 +1,5 @@
 import { baseDate, weekday } from '../dates';
-import { isShootingSeason, isWinterMonth, type Season } from './season';
+import { isShootingSeason, type Season } from './season';
 import type { Assignment, ScheduleType, Slot, SwapRequest } from './types';
 
 /** Was für die Diensttage gilt: eingetragene Wirte-Tage und die Schießsaisons aus den Aufsicht-Infos. */
@@ -18,14 +18,11 @@ export function isShootingDay(date: string): boolean {
 }
 
 /**
- * Wird an diesem Abend ein Dienst gebraucht?
- * Aufsicht: nur innerhalb der Schießsaison. Wirte: Samstage von Oktober bis März (Öffnungszeiten)
- * sowie an Schießabenden außerhalb davon (z. B. Anfangsschießen schon im September).
+ * Wird an diesem Abend ein Dienst gebraucht? Wirte und Schießaufsicht nur an Schießabenden innerhalb der
+ * Schießsaison – vom Anfangsschießen bis zum Endschießen (Infos im Aufsicht-Kalender, sonst Oktober bis März).
  */
-function eveningNeeded(type: ScheduleType, date: string, rules: DayRules): boolean {
-  if (!isShootingDay(date)) return false;
-  const shooting = isShootingSeason(date, rules.seasons);
-  return type === 'aufsicht' ? shooting : shooting || isWinterMonth(date);
+function eveningNeeded(date: string, rules: DayRules): boolean {
+  return isShootingDay(date) && isShootingSeason(date, rules.seasons);
 }
 
 /**
@@ -35,7 +32,7 @@ function eveningNeeded(type: ScheduleType, date: string, rules: DayRules): boole
  * Aufsicht: nur an Schießabenden der Saison.
  */
 export function expectedSlots(type: ScheduleType, date: string, rules: DayRules): Slot[] {
-  const evening = eveningNeeded(type, date, rules);
+  const evening = eveningNeeded(date, rules);
   if (type === 'aufsicht') return evening ? ['schiessabend'] : [];
   const slots: Slot[] = [];
   if (weekday(date) === 0 || rules.customDays.has(date)) slots.push('fruehschoppen');
