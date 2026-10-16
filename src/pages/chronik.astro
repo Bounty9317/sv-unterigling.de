@@ -349,6 +349,9 @@ const icons: Record<ChronikIcon, typeof Landmark> = {
 
   .chronik-table {
     font-size: var(--step--1);
+    /* Namen nicht mitten im Wort trennen – lieber seitlich scrollen (.table-wrap) */
+    overflow-wrap: normal;
+    hyphens: manual;
   }
 
   .chronik-table th {
@@ -366,6 +369,7 @@ const icons: Record<ChronikIcon, typeof Landmark> = {
 
   .chronik-table td:first-child {
     width: 8rem;
+    white-space: nowrap;
     font-weight: 650;
     color: var(--c-primary);
     font-variant-numeric: tabular-nums;
@@ -421,6 +425,11 @@ const icons: Record<ChronikIcon, typeof Landmark> = {
 
     .chronik-table td:first-child {
       width: 6rem;
+    }
+
+    .chronik-table th,
+    .chronik-table td {
+      padding-inline: 0.65rem;
     }
   }
 </style>

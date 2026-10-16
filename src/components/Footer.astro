@@ -159,7 +159,7 @@ const year = new Date().getFullYear();
   .site-footer__heading {
     margin-bottom: var(--space-s);
     font-family: var(--font-body);
-    font-size: 0.72rem;
+    font-size: 0.75rem;
     font-weight: 700;
     letter-spacing: 0.14em;
     text-transform: uppercase;
@@ -196,6 +196,25 @@ const year = new Date().getFullYear();
   .site-footer__links {
     display: grid;
     gap: 0.45rem;
+  }
+
+  /* Touch-Geräte: Links im Seitenfuß leichter antippbar (mind. 36 px hoch) */
+  @media (pointer: coarse) {
+    .site-footer__links {
+      gap: 0;
+    }
+
+    .site-footer__links a,
+    .site-footer__legal a,
+    .site-footer__list a {
+      display: inline-flex;
+      align-items: center;
+      min-height: 2.25rem;
+    }
+
+    .site-footer__list a {
+      margin-block: -0.45rem;
+    }
   }
 
   .site-footer__wordmark {

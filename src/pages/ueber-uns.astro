@@ -924,4 +924,11 @@ const meilensteine = [
       font-size: var(--step-4);
     }
   }
+
+  /* Sehr schmale Handys: Kurzinfos untereinander, damit Wörter wie „Schützengesellschaft“ ganz bleiben */
+  @media (max-width: 22.5rem) {
+    .facts {
+      grid-template-columns: 1fr;
+    }
+  }
 </style>

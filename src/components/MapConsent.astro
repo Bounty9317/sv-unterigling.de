@@ -29,6 +29,8 @@ import { verein } from '../data/verein';
 <style>
   .map {
     position: relative;
+    /* feste Breite: sonst macht die Mindesthöhe über das Seitenverhältnis die Karte auf dem Handy breiter als den Bildschirm */
+    width: 100%;
     aspect-ratio: 4 / 3;
     min-height: 18rem;
     border-radius: var(--radius-l);

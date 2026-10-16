@@ -487,6 +487,28 @@ const isCurrent = (href: string) =>
     }
   }
 
+  /* Sehr schmale Handys: Vereinsname zweizeilig, damit das Menü-Symbol sichtbar bleibt */
+  @media (max-width: 360px) {
+    .site-header__bar {
+      gap: 0.5rem;
+      padding-inline-start: 0.7rem;
+    }
+
+    .brand {
+      flex: 0 1 auto;
+      gap: 0.5rem;
+    }
+
+    .brand__logo {
+      width: 2.4rem;
+    }
+
+    .brand__name {
+      white-space: normal;
+      font-size: 0.95rem;
+    }
+  }
+
   /* Mobiles Menü als Vollbild-Ebene */
   .mobile-menu {
     width: 100vw;

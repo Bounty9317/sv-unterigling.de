@@ -240,6 +240,7 @@
     line-height: 1.2;
     text-decoration: none;
     white-space: nowrap;
+    max-width: 100%;
     cursor: pointer;
     transition:
       background-color var(--duration) ease,
@@ -247,6 +248,14 @@
       color var(--duration) ease,
       transform var(--duration) var(--ease-out),
       box-shadow var(--duration) ease;
+  }
+
+  /* Schmale Bildschirme: lange Knopftexte umbrechen, statt die Seite zu verbreitern */
+  @media (max-width: 30rem) {
+    .btn {
+      white-space: normal;
+      text-align: center;
+    }
   }
 
   .btn:hover {
@@ -524,12 +533,41 @@
     color: var(--c-text-muted);
   }
 
+  /* Schmale Bildschirme: lange Wörter in Überschriften (z. B. „Schützengesellschaft“) trennen bzw. umbrechen,
+     statt die Seite breiter als den Bildschirm zu machen */
+  @media (max-width: 30rem) {
+    h1,
+    h2,
+    h3,
+    h4 {
+      hyphens: auto;
+      overflow-wrap: anywhere;
+    }
+
+    p,
+    li,
+    dd,
+    dt,
+    blockquote,
+    figcaption {
+      hyphens: auto;
+      overflow-wrap: anywhere;
+    }
+  }
+
   .link-arrow {
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
     font-weight: 650;
     text-decoration: none;
+  }
+
+  /* Touch-Geräte: Pfeil-Links leichter antippbar */
+  @media (pointer: coarse) {
+    .link-arrow {
+      min-height: 2.25rem;
+    }
   }
 
   .link-arrow svg {

@@ -29,7 +29,8 @@ export type ChronikAbschnitt = {
   bloecke: ChronikBlock[];
 };
 
-export const chronikTitel = 'Chronik der Schützengesellschaft Unterigling (1898–1998)';
+// ­ = weiche Trennstelle: auf schmalen Handys „Schützen-gesellschaft“ statt eines Umbruchs mitten im Wort
+export const chronikTitel = 'Chronik der Schützen­gesellschaft Unterigling (1898–1998)';
 export const chronikUntertitel = '100 Jahre Tradition, Gemeinschaft und Schießsport';
 
 export const chronik: ChronikAbschnitt[] = [
@@ -41,7 +42,7 @@ export const chronik: ChronikAbschnitt[] = [
     bloecke: [
       {
         typ: 'absatz',
-        html: 'Die Schützengesellschaft Unterigling wurde im <strong>Herbst 1898</strong> gegründet. Zu den frühen Mitgliedern gehörten u. a.:',
+        html: 'Die Schützen­gesellschaft Unterigling wurde im <strong>Herbst 1898</strong> gegründet. Zu den frühen Mitgliedern gehörten u. a.:',
       },
       {
         typ: 'liste',
@@ -152,7 +153,7 @@ export const chronik: ChronikAbschnitt[] = [
           '1968: Neubau eines Schießstandes im ehemaligen Kuhstall',
           '1968: Erste große Vereinsfahrt',
           '1971: Großes Primizfest im Dorf',
-          '1972: Offizielle Umbenennung in <strong>Schützengesellschaft Unterigling</strong>',
+          '1972: Offizielle Umbenennung in <strong>Schützen­gesellschaft Unterigling</strong>',
           '1973: 75-Jahr-Feier mit Jubiläumsscheibe',
         ],
       },
@@ -170,13 +171,13 @@ export const chronik: ChronikAbschnitt[] = [
     bloecke: [
       {
         typ: 'absatz',
-        html: 'Ab 1976 durfte die Schützengesellschaft das Gasthaus „Zum Weißen Lamm" zeitweise selbst betreiben. Mitglieder renovierten das Schützenheim in Eigenleistung.',
+        html: 'Ab 1976 durfte die Schützen­gesellschaft das Gasthaus „Zum Weißen Lamm" zeitweise selbst betreiben. Mitglieder renovierten das Schützenheim in Eigenleistung.',
       },
       { typ: 'absatz', html: '<strong>Wichtige Aktivitäten dieser Zeit:</strong>' },
       {
         typ: 'liste',
         punkte: [
-          'Radsportveranstaltungen',
+          'Radsport­veranstaltungen',
           'Dolomitenfahrt 1977 (legendär in der Vereinsgeschichte)',
           'zahlreiche Grillfeste, Ausflüge & Faschingswägen',
           '1983: 85-jähriges Jubiläum mit Waldmesse',
@@ -241,7 +242,7 @@ export const chronik: ChronikAbschnitt[] = [
   },
   {
     nummer: 9,
-    titel: 'Schützenkönige & Schützenköniginnen',
+    titel: 'Schützenkönige & Schützen­königinnen',
     zeitraum: 'ab 1951',
     icon: 'crown',
     bloecke: [
@@ -308,13 +309,13 @@ export const chronik: ChronikAbschnitt[] = [
     bloecke: [
       {
         typ: 'absatz',
-        html: 'Im Jahr 1998, dem 100-jährigen Jubiläum, blickt die Schützengesellschaft Unterigling auf eine bewegte und lebendige Vereinsgeschichte zurück:',
+        html: 'Im Jahr 1998, dem 100-jährigen Jubiläum, blickt die Schützen­gesellschaft Unterigling auf eine bewegte und lebendige Vereinsgeschichte zurück:',
       },
       {
         typ: 'liste',
         punkte: [
           'gewachsene Tradition',
-          'starkes Zusammengehörigkeitsgefühl',
+          'starkes Zusammengehörigkeits­gefühl',
           'engagierte Ehrenamtliche',
           'unzählige schöne Erinnerungen aus Festen, Fahrten und Fasching',
           'moderner Schießsport auf solider Basis',
@@ -323,7 +324,7 @@ export const chronik: ChronikAbschnitt[] = [
       {
         typ: 'hinweis',
         gross: true,
-        html: '<strong>Die Schützengesellschaft Unterigling verbindet bis heute Gemeinschaft, Heimatgefühl und sportlichen Ehrgeiz.</strong>',
+        html: '<strong>Die Schützen­gesellschaft Unterigling verbindet bis heute Gemeinschaft, Heimatgefühl und sportlichen Ehrgeiz.</strong>',
       },
     ],
   },
